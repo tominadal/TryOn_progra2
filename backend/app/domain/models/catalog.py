@@ -38,6 +38,7 @@ class Garment(Base):
     size = Column(String(20))
     color = Column(String(50))
     material = Column(String(100))
+    price = Column(Float, default=0.0)
     
     image_url = Column(String(255))
     is_processed = Column(Boolean, default=False)

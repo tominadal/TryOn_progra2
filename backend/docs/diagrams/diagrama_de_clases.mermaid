@@ -1,0 +1,53 @@
+classDiagram
+
+    %% PATRÓN STRATEGY
+    class VirtualTryOnStrategy {
+        <<interface>>
+        +process_garment(garment_data: dict) dict
+    }
+
+    class GeminiTryOnStrategy {
+        -client: GoogleGenAI
+        +process_garment(garment_data: dict) dict
+    }
+
+    class MockTryOnStrategy {
+        +process_garment(garment_data: dict) dict
+    }
+
+    VirtualTryOnStrategy <|-- GeminiTryOnStrategy
+    VirtualTryOnStrategy <|-- MockTryOnStrategy
+
+    %% PATRÓN REPOSITORY
+    class BaseRepository~ModelType, CreateSchemaType, UpdateSchemaType~ {
+        +get(db, id) ModelType
+        +get_multi(db, skip, limit) List~ModelType~
+        +create(db, obj_in) ModelType
+        +update(db, db_obj, obj_in) ModelType
+        +remove(db, id) ModelType
+    }
+
+    class UserRepository {
+        +get_by_email(db, email) User
+    }
+    
+    class BrandRepository {
+        +get_by_marketplace(db, marketplace_id) List~Brand~
+    }
+
+    BaseRepository <|-- UserRepository
+    BaseRepository <|-- BrandRepository
+
+    %% SERVICIOS QUE CONSUMEN
+    class TryOnRouter {
+        -strategy: VirtualTryOnStrategy
+        +preview_garment()
+    }
+    
+    class UserService {
+        -repo: UserRepository
+        +authenticate()
+    }
+
+    TryOnRouter --> VirtualTryOnStrategy : Usa (Dependency Injection)
+    UserService --> UserRepository : Usa

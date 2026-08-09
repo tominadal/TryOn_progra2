@@ -3,11 +3,11 @@ from fastapi.testclient import TestClient
 def test_tryon_without_avatar(client: TestClient):
     client.post(
         "/api/v1/users/",
-        json={"email": "noavatar@example.com", "password": "pwd", "full_name": "No Avatar", "role_id": 1}
+        json={"email": "noavatar@example.com", "password": "pwd123", "full_name": "No Avatar", "role_id": 1}
     )
     res = client.post(
         "/api/v1/auth/login",
-        data={"username": "noavatar@example.com", "password": "pwd"}
+        data={"username": "noavatar@example.com", "password": "pwd123"}
     )
     token = res.json()["access_token"]
     

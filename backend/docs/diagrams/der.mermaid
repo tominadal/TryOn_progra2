@@ -1,0 +1,125 @@
+erDiagram
+    USERS {
+        int id PK
+        string email
+        string full_name
+        string hashed_password
+        int role_id FK
+        int brand_id FK
+        int marketplace_id FK
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    ROLES {
+        int id PK
+        string name
+        string description
+    }
+
+    MARKETPLACES {
+        int id PK
+        string name
+        datetime created_at
+        datetime updated_at
+    }
+
+    BRANDS {
+        int id PK
+        string name
+        int marketplace_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    GARMENTS {
+        int id PK
+        string sku
+        string name
+        int brand_id FK
+        float price
+        boolean is_processed
+        datetime created_at
+        datetime updated_at
+    }
+
+    GARMENT_ASSETS {
+        int id PK
+        int garment_id FK
+        string asset_type
+        string file_path
+        string ai_generated_image_url
+        string metadata_json
+    }
+
+    AVATARS {
+        int id PK
+        int user_id FK
+        string image_url
+        string height
+        string body_type
+        string metadata_json
+        datetime created_at
+        datetime updated_at
+    }
+
+    CARTS {
+        int id PK
+        int user_id FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    CART_ITEMS {
+        int id PK
+        int cart_id FK
+        int garment_id FK
+        int quantity
+    }
+
+    ORDERS {
+        int id PK
+        int user_id FK
+        float total_amount
+        string status
+        datetime created_at
+    }
+
+    ORDER_ITEMS {
+        int id PK
+        int order_id FK
+        int garment_id FK
+        int quantity
+        float price_at_time
+    }
+
+    PROCESSING_JOBS {
+        int id PK
+        int brand_id FK
+        string status
+        int total_items
+        int processed_items
+        string error_log
+    }
+
+    %% Relationships
+    USERS }o--|| ROLES : "has"
+    USERS }o--o| BRANDS : "belongs to (optional)"
+    USERS }o--o| MARKETPLACES : "belongs to (optional)"
+    BRANDS }|--|| MARKETPLACES : "listed in"
+    
+    GARMENTS }|--|| BRANDS : "belongs to"
+    GARMENT_ASSETS }|--|| GARMENTS : "represents"
+    
+    AVATARS ||--|| USERS : "owned by"
+    
+    CARTS ||--|| USERS : "owned by"
+    CART_ITEMS }|--|| CARTS : "contained in"
+    CART_ITEMS }o--|| GARMENTS : "refers to"
+    
+    ORDERS }o--|| USERS : "placed by"
+    ORDER_ITEMS }|--|| ORDERS : "part of"
+    ORDER_ITEMS }o--|| GARMENTS : "refers to"
+
+    PROCESSING_JOBS }o--|| BRANDS : "initiated by"

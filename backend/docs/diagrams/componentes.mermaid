@@ -1,0 +1,39 @@
+flowchart TB
+    Client((Client Browser))
+
+    subgraph "Frontend Layer"
+        NextJS["Next.js (React)"]
+        UI["Tailwind CSS + Components"]
+    end
+
+    subgraph "Backend Layer"
+        FastAPI["FastAPI App"]
+        Routers["Routers (Auth, TryOn, Catalog)"]
+        Services["Business Logic Services"]
+        Repos["Repository Layer"]
+        Background["Background Tasks"]
+    end
+
+    subgraph "Data Storage"
+        DB[(PostgreSQL)]
+        FileStore[("Local / Cloud Storage")]
+    end
+
+    subgraph "External AI Service"
+        Gemini{"Google Gemini API"}
+    end
+
+    %% Flow connections
+    Client <-->|HTTP / JSON| NextJS
+    NextJS <-->|REST API| FastAPI
+
+    FastAPI --> Routers
+    Routers --> Services
+    Routers -.->|Triggers| Background
+    Services --> Repos
+    Repos <--> DB
+
+    Background -->|Calls SDK| Gemini
+    Services -->|Try-On Request| Gemini
+
+    Services -->|Uploads| FileStore
