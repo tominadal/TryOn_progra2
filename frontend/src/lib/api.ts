@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/api/v1";
+const API_URL = "http://localhost:8000/api/v1";
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -26,7 +26,8 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `Request failed with status ${response.status}`);
+    const detail = Array.isArray(errorData.detail) ? JSON.stringify(errorData.detail) : errorData.detail;
+    throw new Error(detail || `Request failed with status ${response.status}`);
   }
 
   return response.json();

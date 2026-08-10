@@ -58,7 +58,7 @@ export default function Home() {
           <div className="hidden md:flex gap-8 text-sm font-medium">
             {/* Fixed NavLinks */}
             <Link href="#marketplace" className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">Marketplace</Link>
-            <Link href={user ? `/tryon/1` : `/login`} className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">My Avatar</Link>
+            <Link href={user ? `/avatar` : `/login`} className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">My Avatar</Link>
             <Link href="/cart" className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">Cart</Link>
           </div>
           <div className="flex items-center gap-4">
@@ -96,7 +96,7 @@ export default function Home() {
             Create your digital twin in seconds. Experience hyper-realistic virtual try-ons for the world's best denim brands directly in your browser.
           </p>
           <div className="pt-4 flex justify-center gap-4">
-            <Link href={user ? `/tryon/1` : `/register`} className="px-8 py-4 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-400 transition-all active:scale-95 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)]">
+            <Link href={user ? `/avatar` : `/register`} className="px-8 py-4 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-400 transition-all active:scale-95 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)]">
               Create Avatar
             </Link>
             <Link href="#marketplace" className="px-8 py-4 bg-white dark:bg-neutral-800 text-black dark:text-white font-semibold rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all border border-neutral-200 dark:border-neutral-700 active:scale-95">

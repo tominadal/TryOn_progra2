@@ -53,7 +53,9 @@ class GarmentAsset(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     garment_id = Column(Integer, ForeignKey("garments.id"), nullable=False, unique=True)
-    ai_generated_image_url = Column(String(255), nullable=False)
+    status = Column(String(50), nullable=True) # COMPLETED, FAILED, PROCESSING
+    ai_generated_image_url = Column(String(500), nullable=True)
+    thumbnail_url = Column(String(500), nullable=True)
     metadata_json = Column(JSON, nullable=True) # E.g., confidence score from Gemini
     
     garment = relationship("Garment", back_populates="asset")

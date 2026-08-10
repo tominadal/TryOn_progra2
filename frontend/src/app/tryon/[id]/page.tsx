@@ -1,18 +1,157 @@
 "use client";
 
-import { useState, use, useEffect } from "react";
+import { useState, use, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { fetchApi } from "@/lib/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
 
 interface Garment {
   id: number;
   name: string;
   fit: string;
   price: string;
-  image: string;
+  image: string; // Now this is a .glb URL
+  model_3d_url?: string;
+}
+
+// 3D Model Component for the Garment
+function GarmentModel({ url }: { url: string }) {
+  // If the backend returned a PNG (mock/fallback), do not use useGLTF to avoid crashing
+  if (url.endsWith('.png') || url.endsWith('.jpg')) {
+    return (
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[0.5, 1, 0.3]} />
+        <meshStandardMaterial color="#4a70a8" wireframe={true} />
+      </mesh>
+    );
+  }
+  
+  try {
+    const { scene } = useGLTF(url);
+    // Garment is overlaid
+    return <primitive object={scene} scale={1.05} position={[0, -0.9, 0]} />;
+  } catch (e) {
+    return null;
+  }
+}
+
+// A parametric humanoid built with primitive meshes instead of a GLB
+function ParametricAvatarModel({ skinColor, shirtColor, shoesColor, hairStyle, hairColor, scaleY, scaleXZ }: { skinColor: string, shirtColor: string, shoesColor: string, hairStyle: string, hairColor: string, scaleY: number, scaleXZ: number }) {
+  return (
+    <group scale={[scaleXZ, scaleY, scaleXZ]} position={[0, -0.9, 0]}>
+      {/* Head */}
+      <group position={[0, 1.8, 0]}>
+        <mesh>
+          <sphereGeometry args={[0.15, 32, 32]} />
+          <meshStandardMaterial color={skinColor} roughness={0.4} />
+        </mesh>
+        
+        {/* Hair Styles */}
+        {hairStyle === "Short" && (
+          <mesh position={[0, 0.08, 0]}>
+            <boxGeometry args={[0.28, 0.15, 0.28]} />
+            <meshStandardMaterial color={hairColor} roughness={0.9} />
+          </mesh>
+        )}
+        
+        {hairStyle === "Long" && (
+          <group position={[0, 0.05, -0.05]}>
+            <mesh position={[0, 0, 0]}>
+              <boxGeometry args={[0.3, 0.15, 0.3]} />
+              <meshStandardMaterial color={hairColor} roughness={0.9} />
+            </mesh>
+            <mesh position={[0, -0.2, -0.1]}>
+              <boxGeometry args={[0.3, 0.4, 0.1]} />
+              <meshStandardMaterial color={hairColor} roughness={0.9} />
+            </mesh>
+          </group>
+        )}
+        
+        {hairStyle === "Bun" && (
+          <group position={[0, 0.08, 0]}>
+            <mesh position={[0, 0, 0]}>
+              <boxGeometry args={[0.28, 0.15, 0.28]} />
+              <meshStandardMaterial color={hairColor} roughness={0.9} />
+            </mesh>
+            <mesh position={[0, 0, -0.15]}>
+              <sphereGeometry args={[0.08, 16, 16]} />
+              <meshStandardMaterial color={hairColor} roughness={0.9} />
+            </mesh>
+          </group>
+        )}
+      </group>
+      
+      {/* Neck */}
+      <mesh position={[0, 1.6, 0]}>
+        <cylinderGeometry args={[0.05, 0.06, 0.2, 16]} />
+        <meshStandardMaterial color={skinColor} roughness={0.4} />
+      </mesh>
+      
+      {/* Torso (Shirt) */}
+      <mesh position={[0, 1.1, 0]}>
+        <boxGeometry args={[0.42, 0.82, 0.22]} />
+        <meshStandardMaterial color={shirtColor} roughness={0.7} />
+      </mesh>
+      
+      {/* Left Arm (Shirt Sleeves + Skin) */}
+      <group position={[-0.28, 1.1, 0]}>
+        {/* Sleeve */}
+        <mesh position={[0, 0.2, 0]}>
+          <cylinderGeometry args={[0.07, 0.065, 0.3, 16]} />
+          <meshStandardMaterial color={shirtColor} roughness={0.7} />
+        </mesh>
+        {/* Arm */}
+        <mesh position={[0, -0.2, 0]}>
+          <cylinderGeometry args={[0.055, 0.05, 0.4, 16]} />
+          <meshStandardMaterial color={skinColor} roughness={0.4} />
+        </mesh>
+      </group>
+      
+      {/* Right Arm (Shirt Sleeves + Skin) */}
+      <group position={[0.28, 1.1, 0]}>
+        {/* Sleeve */}
+        <mesh position={[0, 0.2, 0]}>
+          <cylinderGeometry args={[0.07, 0.065, 0.3, 16]} />
+          <meshStandardMaterial color={shirtColor} roughness={0.7} />
+        </mesh>
+        {/* Arm */}
+        <mesh position={[0, -0.2, 0]}>
+          <cylinderGeometry args={[0.055, 0.05, 0.4, 16]} />
+          <meshStandardMaterial color={skinColor} roughness={0.4} />
+        </mesh>
+      </group>
+      
+      {/* Left Leg (Skin + Shoe) */}
+      <group position={[-0.12, 0.35, 0]}>
+        <mesh>
+          <cylinderGeometry args={[0.08, 0.06, 0.8, 16]} />
+          <meshStandardMaterial color={skinColor} roughness={0.4} />
+        </mesh>
+        {/* Shoe */}
+        <mesh position={[0, -0.45, 0.05]}>
+          <boxGeometry args={[0.12, 0.1, 0.25]} />
+          <meshStandardMaterial color={shoesColor} roughness={0.6} />
+        </mesh>
+      </group>
+      
+      {/* Right Leg (Skin + Shoe) */}
+      <group position={[0.12, 0.35, 0]}>
+        <mesh>
+          <cylinderGeometry args={[0.08, 0.06, 0.8, 16]} />
+          <meshStandardMaterial color={skinColor} roughness={0.4} />
+        </mesh>
+        {/* Shoe */}
+        <mesh position={[0, -0.45, 0.05]}>
+          <boxGeometry args={[0.12, 0.1, 0.25]} />
+          <meshStandardMaterial color={shoesColor} roughness={0.6} />
+        </mesh>
+      </group>
+    </group>
+  );
 }
 
 export default function TryOnPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,18 +162,16 @@ export default function TryOnPage({ params }: { params: Promise<{ id: string }> 
   
   const [product, setProduct] = useState<Garment | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const [step, setStep] = useState<"avatar" | "processing" | "result">("avatar");
-  const [shirtColor, setShirtColor] = useState("white");
-  const [avatarImage, setAvatarImage] = useState<string | null>(null);
-  const [resultImage, setResultImage] = useState<string | null>(null);
-
-  const colors = [
-    { name: "white", class: "bg-neutral-100" },
-    { name: "black", class: "bg-neutral-900 border border-neutral-700" },
-    { name: "navy", class: "bg-blue-900" },
-    { name: "olive", class: "bg-green-900" },
-  ];
+  const [hasAvatar, setHasAvatar] = useState(false);
+  
+  // Avatar Parameters
+  const [avatarSkinColor, setAvatarSkinColor] = useState<string>("#f1c27d");
+  const [avatarHeight, setAvatarHeight] = useState<number>(170);
+  const [avatarWeight, setAvatarWeight] = useState<number>(70);
+  const [avatarShirtColor, setAvatarShirtColor] = useState<string>("#ffffff");
+  const [avatarShoesColor, setAvatarShoesColor] = useState<string>("#000000");
+  const [avatarHairStyle, setAvatarHairStyle] = useState<string>("Short");
+  const [avatarHairColor, setAvatarHairColor] = useState<string>("#000000");
 
   useEffect(() => {
     if (!user) {
@@ -48,10 +185,19 @@ export default function TryOnPage({ params }: { params: Promise<{ id: string }> 
     ]).then(([garmentData, avatarData]) => {
       setProduct({
         ...garmentData,
-        image: garmentData.image || "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=800"
       });
-      if (avatarData && avatarData.base_photo_url) {
-        setAvatarImage(avatarData.base_photo_url);
+      
+      if (avatarData) {
+        setHasAvatar(true);
+        if (avatarData.skin_color) setAvatarSkinColor(avatarData.skin_color);
+        if (avatarData.height_cm) setAvatarHeight(avatarData.height_cm);
+        if (avatarData.weight_kg) setAvatarWeight(avatarData.weight_kg);
+        if (avatarData.shirt_color) setAvatarShirtColor(avatarData.shirt_color);
+        if (avatarData.shoes_color) setAvatarShoesColor(avatarData.shoes_color);
+        if (avatarData.hair_style) setAvatarHairStyle(avatarData.hair_style);
+        if (avatarData.hair_color) setAvatarHairColor(avatarData.hair_color);
+      } else {
+        setHasAvatar(false);
       }
       setLoading(false);
     }).catch(err => {
@@ -59,50 +205,6 @@ export default function TryOnPage({ params }: { params: Promise<{ id: string }> 
       setLoading(false);
     });
   }, [productId, user, router]);
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const url = URL.createObjectURL(file);
-      setAvatarImage(url);
-      
-      try {
-        const formData = new FormData();
-        formData.append("height_cm", "170.0");
-        formData.append("weight_kg", "70.0");
-        formData.append("body_type", "athletic");
-        formData.append("file", file);
-
-        await fetchApi("/tryon/avatar", {
-          method: "POST",
-          body: formData
-        });
-      } catch (err) {
-        console.error("Failed to save avatar configuration", err);
-      }
-    }
-  };
-
-  const handleTryOn = async () => {
-    if (!avatarImage) return;
-    setStep("processing");
-    try {
-      const result = await fetchApi(`/tryon/preview/${productId}`, {
-        method: "POST"
-      });
-      
-      // Simulate rendering time
-      setTimeout(() => {
-        setResultImage(result.preview_url || product?.image);
-        setStep("result");
-      }, 2000);
-      
-    } catch (err) {
-      console.error("Try on failed", err);
-      alert("Try-On generation failed. Please try again.");
-      setStep("avatar");
-    }
-  };
 
   const handleAddToCart = async () => {
     try {
@@ -124,6 +226,9 @@ export default function TryOnPage({ params }: { params: Promise<{ id: string }> 
   if (loading || !product) {
     return <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center text-neutral-900 dark:text-white transition-colors duration-300">Loading Virtual Studio...</div>;
   }
+
+  const scaleY = avatarHeight / 170.0;
+  const scaleXZ = Math.pow(avatarWeight / 70.0, 0.5);
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50 font-sans selection:bg-blue-500/30 transition-colors duration-300">
@@ -149,67 +254,59 @@ export default function TryOnPage({ params }: { params: Promise<{ id: string }> 
         <div className="flex-1 bg-white dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800 rounded-3xl overflow-hidden relative flex flex-col min-h-[600px] shadow-sm dark:shadow-2xl transition-colors duration-300">
           <div className="absolute top-4 left-4 z-10 bg-white/80 dark:bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-medium border border-neutral-200 dark:border-white/10 flex items-center gap-2 text-black dark:text-white">
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-            Virtual Studio
+            Virtual Studio 3D
           </div>
 
-          <div className="flex-1 flex items-center justify-center p-8 relative">
-            {step === "avatar" && (
-              <div className="text-center w-full max-w-md">
-                {!avatarImage ? (
-                  <label className="border-2 border-dashed border-neutral-300 dark:border-neutral-700 hover:border-blue-500 hover:bg-blue-500/5 transition-all rounded-2xl p-12 flex flex-col items-center justify-center cursor-pointer group">
-                    <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <svg className="w-8 h-8 text-neutral-500 dark:text-neutral-400 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">Upload your photo</h3>
-                    <p className="text-neutral-500 text-sm mb-6">For best results, use a full-body photo with good lighting.</p>
-                    <span className="px-6 py-2.5 bg-neutral-200 dark:bg-neutral-100 text-black text-sm font-medium rounded-full hover:bg-neutral-300 dark:hover:bg-white transition-colors">Browse Files</span>
-                    <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
-                  </label>
-                ) : (
-                  <div className="relative group flex justify-center">
-                    <div className="relative w-64 aspect-[3/4] rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-700">
-                      <img src={avatarImage} alt="Avatar" className="w-full h-full object-cover" />
-                    </div>
-                    <button 
-                      onClick={() => setAvatarImage(null)}
-                      className="absolute top-4 right-4 bg-white/80 dark:bg-black/70 text-black dark:text-white backdrop-blur p-2 rounded-full hover:bg-red-500 hover:text-white transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {step === "processing" && (
-              <div className="text-center flex flex-col items-center">
-                <div className="relative w-32 h-32 mb-8">
-                  <div className="absolute inset-0 border-4 border-neutral-200 dark:border-neutral-800 rounded-full"></div>
-                  <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-blue-500 font-bold">AI</span>
-                  </div>
+          <div className="flex-1 flex flex-col items-center justify-center relative w-full h-full">
+            {!hasAvatar ? (
+              <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-neutral-100 dark:bg-neutral-900/50">
+                <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mb-6">
+                  <svg className="w-10 h-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
-                <h3 className="text-2xl font-bold mb-2 animate-pulse">Generating your fit...</h3>
-                <p className="text-neutral-600 dark:text-neutral-500">Combining {product.name} with your digital twin.</p>
+                <h3 className="text-3xl font-bold mb-4">No Digital Twin Found</h3>
+                <p className="text-neutral-500 max-w-md mb-8 text-lg">You need to create your 3D avatar before you can use the Virtual Try-On studio.</p>
+                <Link href="/avatar" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                  Create My Avatar
+                </Link>
               </div>
-            )}
-
-            {step === "result" && (
-              <div className="relative w-full h-full flex items-center justify-center">
-                <div className="relative w-full max-w-sm aspect-[3/4] rounded-2xl overflow-hidden border border-neutral-700 shadow-2xl group">
-                  {/* Real composed image returned by backend (Pillow processing) */}
-                  <img src={resultImage || ""} alt="Virtual Try-On Result" className="absolute inset-0 w-full h-full object-cover" />
+            ) : (
+              <div className="relative w-full h-full min-h-[600px] cursor-grab active:cursor-grabbing">
+                <Canvas camera={{ position: [0, 1, 3], fov: 45 }}>
+                  <ambientLight intensity={0.5} />
+                  <directionalLight position={[10, 10, 5]} intensity={1} />
+                  <Environment preset="city" />
                   
-                  <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20">
-                    <span className="px-4 py-2 bg-black/60 backdrop-blur-md rounded-full text-xs font-medium border border-white/10 flex items-center gap-2">
-                      <svg className="w-3 h-3 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                      Try-On Successful
-                    </span>
-                  </div>
+                  <Suspense fallback={null}>
+                    <ParametricAvatarModel 
+                      skinColor={avatarSkinColor} 
+                      shirtColor={avatarShirtColor}
+                      shoesColor={avatarShoesColor}
+                      hairStyle={avatarHairStyle}
+                      hairColor={avatarHairColor}
+                      scaleY={scaleY} 
+                      scaleXZ={scaleXZ} 
+                    />
+                    {product.model_3d_url && <GarmentModel url={product.model_3d_url} />}
+                  </Suspense>
+                  
+                  <OrbitControls 
+                    enablePan={false} 
+                    minPolarAngle={Math.PI / 4} 
+                    maxPolarAngle={Math.PI / 1.5} 
+                    minDistance={2} 
+                    maxDistance={5} 
+                    target={[0, 0, 0]}
+                  />
+                </Canvas>
+                <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pointer-events-none">
+                  <span className="px-4 py-2 bg-black/60 backdrop-blur-md rounded-full text-xs font-medium border border-white/10 flex items-center gap-2 text-white shadow-xl">
+                    <svg className="w-4 h-4 text-white animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Drag to rotate 360&deg;
+                  </span>
                 </div>
               </div>
             )}
@@ -220,46 +317,28 @@ export default function TryOnPage({ params }: { params: Promise<{ id: string }> 
         <div className="w-full md:w-96 flex flex-col gap-6">
           <div className="bg-white dark:bg-neutral-900/40 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-800 transition-colors duration-300 shadow-sm dark:shadow-none">
             <h1 className="text-2xl font-bold mb-1">{product.name}</h1>
-            <p className="text-xl font-medium text-neutral-600 dark:text-neutral-400 mb-6">{product.price}</p>
+            <p className="text-xl font-medium text-neutral-600 dark:text-neutral-400 mb-6">${product.price}</p>
             
             <div className="flex gap-2 mb-6">
               <span className="px-3 py-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300">{product.fit || "Regular"} Fit</span>
-              <span className="px-3 py-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300">New Collection</span>
+              <span className="px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-medium">Native 3D Engine</span>
             </div>
 
             <hr className="border-neutral-200 dark:border-neutral-800 mb-6" />
 
-            {step === "avatar" && (
-              <div className="space-y-4">
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">Ready to see how it looks on you?</p>
-                <button 
-                  onClick={handleTryOn}
-                  disabled={!avatarImage}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-neutral-200 dark:disabled:bg-neutral-800 disabled:text-neutral-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed text-white font-semibold rounded-2xl transition-all shadow-lg shadow-blue-500/20"
-                >
-                  Generate Virtual Try-On
-                </button>
-              </div>
-            )}
-
-            {(step === "result" || step === "processing") && (
+            {hasAvatar && (
               <div className="space-y-6">
-                <hr className="border-neutral-200 dark:border-neutral-800" />
-
                 <button 
                   onClick={handleAddToCart}
-                  disabled={step === "processing"}
-                  className="w-full py-4 bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-neutral-200 text-white dark:text-black font-bold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-blue-500/20 dark:shadow-white/10"
+                  className="w-full py-4 bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-neutral-200 text-white dark:text-black font-bold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 dark:shadow-white/10"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                   Add to Cart
                 </button>
                 
-                {step === "result" && (
-                  <button onClick={() => setStep("avatar")} className="w-full py-3 text-sm text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">
-                    Try another photo
-                  </button>
-                )}
+                <Link href="/avatar" className="block text-center w-full py-3 text-sm text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">
+                  Edit Avatar Style
+                </Link>
               </div>
             )}
           </div>

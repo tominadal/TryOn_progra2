@@ -191,7 +191,8 @@ def list_garments(db: Session = Depends(get_db)):
                 "size": g.size,
                 "color": g.color,
                 "price": round(g.price, 2),
-                "image": asset.ai_generated_image_url if asset else None,
+                "image": asset.thumbnail_url if asset else None,
+                "model_3d_url": asset.ai_generated_image_url if asset else None,
             }
         )
     return result
@@ -213,5 +214,6 @@ def get_garment(garment_id: int, db: Session = Depends(get_db)):
         "size": g.size,
         "color": g.color,
         "price": round(g.price, 2),
-        "image": asset.ai_generated_image_url if asset else None,
+        "image": asset.thumbnail_url if asset else None,
+        "model_3d_url": asset.ai_generated_image_url if asset else None,
     }

@@ -34,70 +34,50 @@ def _safe_filename(original_filename: str) -> str:
     return f"{uuid.uuid4().hex}_{safe_base}"
 
 
+from pydantic import BaseModel
+
+class AvatarCreate(BaseModel):
+    avatar_3d_url: str
+    skin_color: str | None = None
+    hair_color: str | None = None
+    hair_style: str | None = None
+    height_cm: float | None = None
+    weight_kg: float | None = None
+    body_type: str | None = None
+    shirt_color: str | None = None
+    shoes_color: str | None = None
+
 @router.post("/avatar")
 async def create_avatar(
-    height_cm: float = Form(...),
-    weight_kg: float = Form(...),
-    body_type: str = Form("regular"),
-    file: UploadFile = File(...),
+    data: AvatarCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """Create or update the avatar for the current user."""
-    # --- Validate extension ---
-    ext = os.path.splitext(file.filename or "")[-1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid image format. Allowed: {', '.join(ALLOWED_EXTENSIONS)}",
-        )
-
-    content = await file.read()
-
-    # --- Validate file size ---
-    max_bytes = MAX_AVATAR_SIZE_MB * 1024 * 1024
-    if len(content) > max_bytes:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Image too large. Maximum allowed size is {MAX_AVATAR_SIZE_MB} MB",
-        )
-
-    # --- Validate physical measurements ---
-    if not (50 <= height_cm <= 250):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="height_cm must be between 50 and 250 cm",
-        )
-    if not (20 <= weight_kg <= 300):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="weight_kg must be between 20 and 300 kg",
-        )
-
-    # --- Save with sanitized filename ---
-    filename = _safe_filename(file.filename or "avatar.jpg")
-    uploads_dir = os.path.join("static", "uploads")
-    os.makedirs(uploads_dir, exist_ok=True)
-    filepath = os.path.join(uploads_dir, filename)
-
-    with open(filepath, "wb") as buffer:
-        buffer.write(content)
-
-    photo_url = f"{settings.BASE_URL}/static/uploads/{filename}"
-
+    """Create or update the 3D avatar for the current user."""
+    
     avatar = db.query(Avatar).filter(Avatar.user_id == current_user.id).first()
     if avatar:
-        avatar.height_cm = height_cm
-        avatar.weight_kg = weight_kg
-        avatar.body_type = body_type
-        avatar.base_photo_url = photo_url
+        avatar.avatar_3d_url = data.avatar_3d_url
+        avatar.skin_color = data.skin_color
+        avatar.hair_color = data.hair_color
+        avatar.hair_style = data.hair_style
+        avatar.height_cm = data.height_cm
+        avatar.weight_kg = data.weight_kg
+        avatar.body_type = data.body_type
+        avatar.shirt_color = data.shirt_color
+        avatar.shoes_color = data.shoes_color
     else:
         avatar = Avatar(
             user_id=current_user.id,
-            height_cm=height_cm,
-            weight_kg=weight_kg,
-            body_type=body_type,
-            base_photo_url=photo_url,
+            avatar_3d_url=data.avatar_3d_url,
+            skin_color=data.skin_color,
+            hair_color=data.hair_color,
+            hair_style=data.hair_style,
+            height_cm=data.height_cm,
+            weight_kg=data.weight_kg,
+            body_type=data.body_type,
+            shirt_color=data.shirt_color,
+            shoes_color=data.shoes_color,
         )
         db.add(avatar)
 
@@ -105,10 +85,8 @@ async def create_avatar(
     db.refresh(avatar)
     return {
         "id": avatar.id,
-        "height_cm": avatar.height_cm,
-        "weight_kg": avatar.weight_kg,
-        "body_type": avatar.body_type,
-        "base_photo_url": avatar.base_photo_url,
+        "avatar_3d_url": avatar.avatar_3d_url,
+        "skin_color": avatar.skin_color,
     }
 
 
