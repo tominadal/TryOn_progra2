@@ -1,6 +1,6 @@
 """
 Seed script for TryOnHub database.
-Populates initial roles, users, marketplace, brand, and sample garments.
+Populates initial roles, users, marketplace, brand, and realistic sample garments.
 
 Usage:
     cd backend
@@ -34,7 +34,7 @@ def seed():
 
     # Create tables
     Base.metadata.create_all(bind=engine)
-    print("✅ Tables created.")
+    print("Tables created.")
 
     db = SessionLocal()
 
@@ -51,9 +51,9 @@ def seed():
             db.commit()
             for r in roles_data:
                 db.refresh(r)
-            print(f"✅ {len(roles_data)} roles created.")
+            print(f"{len(roles_data)} roles created.")
         else:
-            print("⚠️  Roles already exist — skipping.")
+            print("Roles already exist — skipping.")
 
         roles = db.query(Role).all()
         role_map = {r.name: r.id for r in roles}
@@ -69,9 +69,9 @@ def seed():
             db.add(marketplace)
             db.commit()
             db.refresh(marketplace)
-            print("✅ Marketplace created.")
+            print("Marketplace created.")
         else:
-            print("⚠️  Marketplace already exists — skipping.")
+            print("Marketplace already exists — skipping.")
 
         # ── 3. Brand ───────────────────────────────────────────────────────────
         brand = db.query(Brand).filter(Brand.name == "Acme Denim").first()
@@ -85,9 +85,9 @@ def seed():
             db.add(brand)
             db.commit()
             db.refresh(brand)
-            print("✅ Brand 'Acme Denim' created.")
+            print("Brand 'Acme Denim' created.")
         else:
-            print("⚠️  Brand already exists — skipping.")
+            print("Brand already exists — skipping.")
 
         # ── 4. Users ───────────────────────────────────────────────────────────
         hashed_pw = pwd_context.hash("123456")
@@ -118,54 +118,63 @@ def seed():
             if not exists:
                 user = User(hashed_password=hashed_pw, **u_data)
                 db.add(user)
-                print(f"✅ User '{u_data['email']}' created.")
+                print(f"User '{u_data['email']}' created.")
             else:
-                print(f"⚠️  User '{u_data['email']}' already exists — skipping.")
+                print(f"User '{u_data['email']}' already exists — skipping.")
         db.commit()
 
         # ── 5. Sample Garments ─────────────────────────────────────────────────
         sample_garments = [
             {
-                "sku": "ACME-001",
-                "name": "Classic Blue Jeans",
-                "fit": "Regular",
+                "sku": "ACME-501-ORG",
+                "name": "501® Original Fit Jeans",
+                "fit": "Straight",
                 "size": "M",
-                "color": "Blue",
-                "price": 89.99,
+                "color": "Azul Clásico",
+                "price": 109.99,
                 "is_processed": True,
-                "image_url": "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=800",
+                "image_url": "/products/jean_classic.png",
             },
             {
-                "sku": "ACME-002",
-                "name": "Slim Fit Black",
-                "fit": "Slim",
+                "sku": "ACME-711-SKN",
+                "name": "711 Skinny Fit Jeans",
+                "fit": "Skinny",
                 "size": "S",
-                "color": "Black",
+                "color": "Negro Profundo",
                 "price": 95.50,
                 "is_processed": True,
-                "image_url": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&q=80&w=800",
+                "image_url": "/products/jean_black.png",
             },
             {
-                "sku": "ACME-003",
-                "name": "Skinny Ripped",
-                "fit": "Skinny",
+                "sku": "ACME-90S-VNT",
+                "name": "90s Vintage Relaxed",
+                "fit": "Mom Fit",
                 "size": "L",
-                "color": "Light Blue",
-                "price": 79.00,
+                "color": "Celeste Desgastado",
+                "price": 129.00,
                 "is_processed": True,
-                "image_url": "https://images.unsplash.com/photo-1555689502-c4b22d76c56f?auto=format&fit=crop&q=80&w=800",
+                "image_url": "/products/jean_vintage.png",
             },
         ]
 
         for g_data in sample_garments:
-            exists = db.query(Garment).filter(Garment.sku == g_data["sku"]).first()
-            if not exists:
-                garment = Garment(brand_id=brand.id, **g_data)
+            # Eliminar prendas con sku viejo para actualizar o si se encuentra actualizarlo
+            garment = db.query(Garment).filter(Garment.sku == g_data["sku"]).first()
+            if not garment:
+                garment = Garment(
+                    brand_id=brand.id,
+                    sku=g_data["sku"],
+                    name=g_data["name"],
+                    fit=g_data["fit"],
+                    size=g_data["size"],
+                    color=g_data["color"],
+                    price=g_data["price"],
+                    is_processed=g_data["is_processed"]
+                )
                 db.add(garment)
                 db.commit()
                 db.refresh(garment)
 
-                # Create associated GarmentAsset
                 asset = GarmentAsset(
                     garment_id=garment.id,
                     ai_generated_image_url=g_data["image_url"],
@@ -173,21 +182,31 @@ def seed():
                 )
                 db.add(asset)
                 db.commit()
-                print(f"✅ Garment '{g_data['name']}' created.")
+                print(f"Garment '{g_data['name']}' created.")
             else:
-                print(f"⚠️  Garment SKU '{g_data['sku']}' already exists — skipping.")
+                # Actualizamos datos para asegurar realismo si ya existían
+                garment.name = g_data["name"]
+                garment.price = g_data["price"]
+                garment.fit = g_data["fit"]
+                garment.color = g_data["color"]
+                db.commit()
+                
+                # Actualizar Asset si existía
+                asset = db.query(GarmentAsset).filter(GarmentAsset.garment_id == garment.id).first()
+                if asset:
+                    asset.ai_generated_image_url = g_data["image_url"]
+                    db.commit()
+                    
+                print(f"Garment SKU '{g_data['sku']}' updated with realistic data.")
 
     except Exception as e:
         db.rollback()
-        print(f"❌ Seed failed: {e}")
+        print(f"Seed failed: {e}")
         raise
     finally:
         db.close()
 
-    print("\n🎉 Database seeded successfully!")
-    print("   Credentials: admin@tryon.com / 123456")
-    print("               brand@tryon.com / 123456")
-    print("               cliente@tryon.com / 123456")
+    print("\nDatabase seeded successfully!")
 
 
 if __name__ == "__main__":

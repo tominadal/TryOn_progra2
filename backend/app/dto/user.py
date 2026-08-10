@@ -18,6 +18,7 @@ class UserCreate(UserBase):
         max_length=128,
         description="Password must be at least 6 characters",
     )
+    brand_name: str | None = Field(None, description="Name of the brand if registering as a brand manager")
 
 
 class UserResponse(UserBase):

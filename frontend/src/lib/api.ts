@@ -18,6 +18,7 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
+    cache: "no-store",
     headers: {
       ...headers,
       ...options.headers,

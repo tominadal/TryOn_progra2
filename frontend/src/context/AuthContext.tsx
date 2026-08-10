@@ -7,12 +7,13 @@ interface User {
   id: number;
   email: string;
   full_name: string;
+  role_id: number;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (token: string) => Promise<void>;
+  login: (token: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
 }
 
@@ -28,7 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    // Check both storages
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
     if (token) {
       fetchUser();
     } else {
@@ -40,21 +42,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userData = await fetchApi("/users/me");
       setUser(userData);
-    } catch (error) {
-      console.error("Failed to fetch user:", error);
+    } catch (error: any) {
+      if (error.message !== "Could not validate credentials") {
+        console.error("Failed to fetch user:", error);
+      }
       localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (token: string) => {
-    localStorage.setItem("token", token);
+  const login = async (token: string, rememberMe = true) => {
+    if (rememberMe) {
+      localStorage.setItem("token", token);
+      sessionStorage.removeItem("token");
+    } else {
+      sessionStorage.setItem("token", token);
+      localStorage.removeItem("token");
+    }
     await fetchUser();
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     setUser(null);
   };
 

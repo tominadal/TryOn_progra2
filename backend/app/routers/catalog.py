@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks, status
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from app.domain.database import get_db, SessionLocal
 from app.domain.models.catalog import ProcessingJob, JobStatus, Garment, GarmentAsset
 from app.domain.models.user import User
@@ -13,7 +14,6 @@ router = APIRouter(prefix="/catalog", tags=["catalog"])
 
 # Required columns in the uploaded Excel file
 REQUIRED_COLUMNS = {"SKU", "Name", "Fit", "Size", "Color", "Price"}
-
 
 def _validate_excel_columns(df: pd.DataFrame) -> None:
     """Raises ValueError if required columns are missing from the DataFrame."""
@@ -191,7 +191,8 @@ def list_garments(db: Session = Depends(get_db)):
                 "size": g.size,
                 "color": g.color,
                 "price": round(g.price, 2),
-                "image": asset.thumbnail_url if asset else None,
+                "brand_id": g.brand_id,
+                "image": asset.ai_generated_image_url if asset else None,
                 "model_3d_url": asset.ai_generated_image_url if asset else None,
             }
         )
@@ -214,6 +215,64 @@ def get_garment(garment_id: int, db: Session = Depends(get_db)):
         "size": g.size,
         "color": g.color,
         "price": round(g.price, 2),
-        "image": asset.thumbnail_url if asset else None,
+        "brand_id": g.brand_id,
+        "image": asset.ai_generated_image_url if asset else None,
         "model_3d_url": asset.ai_generated_image_url if asset else None,
     }
+
+# --- NEW ENDPOINTS FOR BRAND DASHBOARD ---
+
+class GarmentCreate(BaseModel):
+    name: str
+    price: float
+    image_url: str = "/products/jean_classic.png"
+
+@router.get("/brand")
+def get_brand_catalog(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """Get all garments for the current authenticated brand."""
+    if current_user.role_id != 2 or not current_user.brand_id:
+        raise HTTPException(status_code=403, detail="Not authorized as brand")
+    
+    garments = db.query(Garment).filter(Garment.brand_id == current_user.brand_id).all()
+    result = []
+    for g in garments:
+        asset = db.query(GarmentAsset).filter(GarmentAsset.garment_id == g.id).first()
+        result.append({
+            "id": g.id,
+            "sku": g.sku,
+            "name": g.name,
+            "price": round(g.price, 2),
+            "is_processed": g.is_processed,
+            "image": asset.ai_generated_image_url if asset else None,
+        })
+    return result
+
+@router.post("/garment")
+def create_garment(garment_in: GarmentCreate, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """Upload a single garment manually via dashboard."""
+    if current_user.role_id != 2 or not current_user.brand_id:
+        raise HTTPException(status_code=403, detail="Not authorized as brand")
+    
+    new_garment = Garment(
+        brand_id=current_user.brand_id,
+        sku=f"BRAND-{current_user.brand_id}-{db.query(Garment).count() + 1}",
+        name=garment_in.name,
+        fit="Regular",
+        size="M",
+        color="Variado",
+        price=garment_in.price,
+        is_processed=True,
+    )
+    db.add(new_garment)
+    db.commit()
+    db.refresh(new_garment)
+
+    asset = GarmentAsset(
+        garment_id=new_garment.id,
+        ai_generated_image_url=garment_in.image_url,
+        metadata_json={"source": "dashboard_upload"}
+    )
+    db.add(asset)
+    db.commit()
+
+    return {"id": new_garment.id, "name": new_garment.name, "price": new_garment.price}

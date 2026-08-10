@@ -16,9 +16,11 @@ Desarrollado en **Python (FastAPI)**, actúa no solo como API transaccional sino
 ### 2. Frontend (Motor 3D de Cliente y SPA)
 Desarrollado en **React (Next.js)**, proporcionando una Single Page Application de alto rendimiento y una interfaz de usuario inmersiva.
 
-- **Creador de Avatares Nativo (Paramétrico)**: Ante la obsolescencia de plataformas de terceros, se desarrolló un motor 3D propietario utilizando `@react-three/fiber` y `@react-three/drei`. Este módulo genera un humanoide base (compuesto de primitivas geométricas) y aplica transformaciones espaciales en tiempo real (escala y color de material) basadas en parámetros antropométricos ingresados por el usuario (altura, peso, color de piel).
-- **Composición 3D (Virtual Studio)**: El lienzo interactivo carga asincrónicamente el archivo binario glTF (`.glb`) proveído por el servidor y lo superpone sobre el modelo paramétrico del usuario, instanciando luces y cámara orbital (OrbitControls) nativas al cliente.
-- **Flujo de Comercio Electrónico**: Implementación transversal que abarca desde la exploración del catálogo hasta el carrito de compras (`/cart`), manteniendo la sesión del usuario mediante persistencia local y tokens JWT (contexto de autenticación simulado).
+- **Creador de Avatares Nativo (Paramétrico)**: Se desarrolló un motor 3D propietario utilizando `@react-three/fiber` y `@react-three/drei`. El módulo genera un avatar jerárquico que asegura la correcta articulación (ej. brazos y codos conectados), adapta proporciones anatómicas según género (masculino/femenino), y aplica transformaciones espaciales en tiempo real (escala y color) basadas en parámetros ingresados por el usuario.
+- **Composición 3D Integrada (Fitting Room)**: El lienzo interactivo (Virtual Try-On) está completamente inmerso en la página del producto. Cuenta con un entorno simulado de vestidor (suelo ajustado geométricamente, paredes, reflejos) donde la geometría paramétrica de la prenda (Skinny, Mom Fit, Straight, etc.) se moldea dinámicamente sobre las piernas del avatar en tiempo real.
+- **Catálogo Dinámico e IA**: Interfaz de Marketplace 100% funcional con filtrado en vivo por precios y calces. Cada producto cuenta con su propia galería de imágenes de alta fidelidad con vistas laterales y traseras autogeneradas e independizadas mediante rutinas de Inteligencia Artificial para evitar contenido duplicado.
+- **Interfaz Premium (UI/UX)**: Diseño inmersivo que utiliza Glassmorphism, animaciones fluidas, paletas de colores vibrantes y navegación responsiva.
+- **Flujo de Comercio Electrónico**: Implementación transversal desde el catálogo hasta el carrito de compras (`/cart`), manteniendo la sesión del usuario intacta (incluso entre reinicios) mediante persistencia local y tokens JWT simulados.
 
 ## Requisitos de Entorno
 

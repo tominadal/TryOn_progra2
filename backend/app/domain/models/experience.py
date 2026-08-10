@@ -20,6 +20,9 @@ class Avatar(Base):
     hair_style = Column(String(50), nullable=True)
     shirt_color = Column(String(50), nullable=True)
     shoes_color = Column(String(50), nullable=True)
+    gender = Column(String(50), nullable=True, default="Hombre")
+    glasses = Column(Integer, nullable=True, default=0)  # 0 for false, 1 for true
+
     
     # Stored assets
     base_photo_url = Column(String(500), nullable=True)

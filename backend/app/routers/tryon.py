@@ -46,6 +46,8 @@ class AvatarCreate(BaseModel):
     body_type: str | None = None
     shirt_color: str | None = None
     shoes_color: str | None = None
+    gender: str | None = None
+    glasses: bool | None = None
 
 @router.post("/avatar")
 async def create_avatar(
@@ -66,6 +68,10 @@ async def create_avatar(
         avatar.body_type = data.body_type
         avatar.shirt_color = data.shirt_color
         avatar.shoes_color = data.shoes_color
+        if data.gender is not None:
+            avatar.gender = data.gender
+        if data.glasses is not None:
+            avatar.glasses = 1 if data.glasses else 0
     else:
         avatar = Avatar(
             user_id=current_user.id,
@@ -78,6 +84,8 @@ async def create_avatar(
             body_type=data.body_type,
             shirt_color=data.shirt_color,
             shoes_color=data.shoes_color,
+            gender=data.gender if data.gender is not None else "Hombre",
+            glasses=1 if data.glasses else 0,
         )
         db.add(avatar)
 
@@ -87,6 +95,8 @@ async def create_avatar(
         "id": avatar.id,
         "avatar_3d_url": avatar.avatar_3d_url,
         "skin_color": avatar.skin_color,
+        "gender": avatar.gender,
+        "glasses": bool(avatar.glasses),
     }
 
 
