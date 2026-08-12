@@ -8,20 +8,7 @@ from fastapi.testclient import TestClient
 
 def test_upload_catalog(client: TestClient, db_session):
     """Brand user can upload a valid Excel file and receive a job_id."""
-    from app.domain.models.organization import Brand, Marketplace
-
-    # 1. Create Marketplace and Brand in test DB
-    mk = Marketplace(name="Test Catalog MK")
-    db_session.add(mk)
-    db_session.commit()
-    db_session.refresh(mk)
-
-    brand = Brand(name="Catalog Brand", marketplace_id=mk.id)
-    db_session.add(brand)
-    db_session.commit()
-    db_session.refresh(brand)
-
-    # 2. Create User with brand_id
+    # Create user with brand_name — router auto-creates the Brand and marketplace
     res = client.post(
         "/api/v1/users/",
         json={
@@ -29,12 +16,12 @@ def test_upload_catalog(client: TestClient, db_session):
             "password": "testpassword",
             "full_name": "Brand User",
             "role_id": 2,
-            "brand_id": brand.id,
+            "brand_name": "Acme Test Brand",
         },
     )
     assert res.status_code == 200, f"User creation failed: {res.json()}"
 
-    # 3. Login
+    # Login
     login_res = client.post(
         "/api/v1/auth/login",
         data={"username": "brand@example.com", "password": "testpassword"},
@@ -42,7 +29,7 @@ def test_upload_catalog(client: TestClient, db_session):
     assert login_res.status_code == 200, f"Login failed: {login_res.json()}"
     token = login_res.json()["access_token"]
 
-    # 4. Create a valid Excel file with all required columns
+    # Create a valid Excel file with all required columns
     df = pd.DataFrame(
         [
             {
@@ -60,7 +47,7 @@ def test_upload_catalog(client: TestClient, db_session):
         df.to_excel(writer, index=False)
     output.seek(0)
 
-    # 5. Upload
+    # Upload
     response = client.post(
         "/api/v1/catalog/upload",
         headers={"Authorization": f"Bearer {token}"},

@@ -8,11 +8,27 @@ import { fetchApi } from "@/lib/api";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
-import { ShoppingCart, Shirt, CheckCircle2, Ruler, Palette } from "lucide-react";
+import { ShoppingCart, Ruler, Palette, CheckCircle2, Info } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Box } from "@react-three/drei";
 import { ParametricMannequin } from "@/components/AvatarCreatorNative";
-import * as THREE from "three";
+
+// ── Talle → 3D scale modifier ────────────────────────────────────────────────
+const SIZE_SCALE: Record<string, number> = {
+  "26": 0.88, "28": 0.93, "30": 0.97, "32": 1.00,
+  "34": 1.05, "36": 1.10, "38": 1.16,
+  "S": 0.93, "M": 1.00, "L": 1.07, "XL": 1.15,
+};
+
+interface GarmentImage {
+  url: string;
+  type: string; // FRONT | SIDE | BACK
+}
+
+interface ColorOption {
+  name: string;
+  hex: string;
+}
 
 interface Garment {
   id: number;
@@ -20,9 +36,14 @@ interface Garment {
   fit: string;
   price: number;
   image: string;
+  images: GarmentImage[];
   model_3d_url?: string;
   color: string;
   size: string;
+  description?: string;
+  material?: string;
+  available_sizes: string[];
+  available_colors: ColorOption[];
 }
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -30,82 +51,41 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const productId = parseInt(resolvedParams.id);
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const [product, setProduct] = useState<Garment | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Try-On State
+
+  // Try-On state
   const [isTryOnActive, setIsTryOnActive] = useState(false);
   const [avatarData, setAvatarData] = useState<any>(null);
 
-  // Customization State
-  const [selectedColor, setSelectedColor] = useState<string>("#1e3a8a"); // Default denim color
-  const [selectedSize, setSelectedSize] = useState<string>("M");
-  
-  // Gallery State
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  // Selection state
+  const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string>("");
 
-  const colors = [
-    { name: "Azul Clásico", hex: "#1e3a8a" },
-    { name: "Negro Profundo", hex: "#111827" },
-    { name: "Celeste Vintage", hex: "#60a5fa" }
-  ];
-  const sizes = ["S", "M", "L", "XL"];
+  // Gallery
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
-    // Fetch product
     fetchApi(`/catalog/garments/${productId}`)
-      .then((garmentData) => {
-        setProduct(garmentData);
-        setSelectedSize(garmentData.size || "M");
-        // Set gallery based on SKU or fit
-        const ident = ((garmentData.sku || "") + " " + (garmentData.name || "")).toUpperCase();
-        
-        // Determine if it's the V2 (older) product version
-        const isV2 = ident.includes("RECTOS CLÁSICOS") || ident.includes("AJUSTADOS NEGROS") || ident.includes("VINTAGE RASGADOS");
-        const suffix = isV2 ? "_v2" : "";
-
-        let sideImg = `/products/jean_side${suffix}.png?v=5`;
-        let backImg = `/products/jean_back${suffix}.png?v=5`;
-
-        if (ident.includes("SKN") || ident.includes("SKINNY") || ident.includes("NEGRO") || ident.includes("BLACK")) {
-          sideImg = `/products/jean_black_side${suffix}.png?v=5`;
-          backImg = `/products/jean_black_back${suffix}.png?v=5`;
-        } else if (ident.includes("VNT") || ident.includes("VINTAGE") || ident.includes("RELAXED") || ident.includes("RASGADO")) {
-          sideImg = `/products/jean_vintage_side${suffix}.png?v=5`;
-          backImg = `/products/jean_vintage_back${suffix}.png?v=5`;
-        }
-
-        setGalleryImages([
-          (garmentData.image || "/products/jean_classic.png") + "?v=5",
-          sideImg,
-          backImg
-        ]);
+      .then((g: Garment) => {
+        setProduct(g);
+        // Default to first available color and size
+        if (g.available_colors?.length) setSelectedColor(g.available_colors[0]);
+        if (g.available_sizes?.length) setSelectedSize(g.available_sizes[1] ?? g.available_sizes[0]);
       })
-      .catch((err) => {
-        console.error(err);
-      })
+      .catch(console.error)
       .finally(() => setLoading(false));
 
-    // Fetch avatar if logged in
     if (user) {
       fetchApi("/tryon/avatar")
-        .then((data) => {
-          if (data) setAvatarData(data);
-        })
-        .catch(() => {
-          // No avatar, we'll use defaults
-        });
+        .then((d) => { if (d) setAvatarData(d); })
+        .catch(() => {});
     }
   }, [productId, user]);
 
   const handleAddToCart = async () => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-    
+    if (!user) { router.push("/login"); return; }
     try {
       await fetchApi("/commerce/cart", {
         method: "POST",
@@ -113,129 +93,153 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           garment_id: productId,
           quantity: 1,
           size: selectedSize,
-          color: selectedColor
-        })
+          color: selectedColor?.name,
+        }),
       });
       toast.success("¡Añadido al carrito!");
     } catch (err: any) {
-      console.error(err);
       toast.error(err.message || "Error al añadir al carrito");
     }
   };
 
   const handleTryOnToggle = () => {
-    if (!user) {
-      toast.error("Por favor inicia sesión para usar el Probador Virtual");
-      router.push("/login");
-      return;
-    }
-    if (!avatarData) {
-      toast.error("¡Primero debes crear tu Avatar 3D!");
-      router.push("/avatar");
-      return;
-    }
-    setIsTryOnActive(!isTryOnActive);
+    if (!user) { toast.error("Por favor inicia sesión para usar el Probador Virtual"); router.push("/login"); return; }
+    if (!avatarData) { toast.error("¡Primero debes crear tu Avatar 3D!"); router.push("/avatar"); return; }
+    setIsTryOnActive((v) => !v);
   };
 
   if (loading || !product) {
     return (
-      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center text-neutral-900 dark:text-white transition-colors duration-300">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  // Parse avatar data if available
+  // ── Avatar values for Try-On ─────────────────────────────────────────────
   const avatarSkinColor = avatarData?.skin_color || "#f1c27d";
   const avatarHeight = avatarData?.height_cm || 170;
   const avatarWeight = avatarData?.weight_kg || 70;
   const avatarHairStyle = avatarData?.hair_style || "Corto";
-  const avatarHairColor = avatarData?.hair_color || "#000000";
-  const avatarShoesColor = avatarData?.shoes_color || "#000000";
+  const avatarHairColor = avatarData?.hair_color || "#1a0a00";
+  const avatarShoesColor = avatarData?.shoes_color || "#0f0f0f";
   const avatarGender = avatarData?.gender || "Hombre";
-  const avatarGlasses = avatarData?.glasses || false;
-  
-  const tryOnPantsColor = selectedColor;
-  const tryOnPantsFit = product.fit || "Regular";
+  const avatarGlasses = Boolean(avatarData?.glasses);
+  const avatarBodyType = avatarData?.body_type || "Normal";
+  const avatarMuscle = avatarData?.muscle_definition ?? 0.3;
+  const avatarBeardStyle = avatarData?.beard_style || "Ninguna";
+  const avatarBeardColor = avatarData?.beard_color || "#2d1a0e";
+  const avatarEyebrow = avatarData?.eyebrow_style || "Normal";
+  const avatarHat = avatarData?.hat_style || "Ninguno";
+  const avatarShirtStyle = avatarData?.shirt_style || "Basic";
+  const avatarTattoo = Boolean(avatarData?.tattoo_left_arm);
+
+  // ── Selected color drives TryOn pants color ──────────────────────────────
+  const tryOnPantsColor = selectedColor?.hex || product.available_colors?.[0]?.hex || "#1e3a8a";
+
+  // ── Size drives pants scale in 3D ────────────────────────────────────────
+  const sizeScaleMod = SIZE_SCALE[selectedSize] ?? 1.0;
+  const tryOnScaleXZ = Math.pow(avatarWeight / 70.0, 0.5) * sizeScaleMod;
+
+  // ── Gallery images (from backend GarmentImage records) ───────────────────
+  const galleryImages: string[] = product.images?.length
+    ? product.images.map((img) => img.url)
+    : [product.image || "/products/jean_classic.png"];
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50 font-sans selection:bg-blue-500/30 transition-colors duration-300 flex flex-col">
       <Navbar />
 
       <main className="pt-24 pb-12 px-6 max-w-7xl mx-auto flex-1 w-full">
-        <Link href="/marketplace" className="inline-flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white mb-8 transition-colors">
-          &larr; Volver al Catálogo
+        <Link
+          href="/marketplace"
+          className="inline-flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white mb-8 transition-colors"
+        >
+          ← Volver al Catálogo
         </Link>
-        
+
         <div className="flex flex-col lg:flex-row gap-12">
-          
-          {/* Left: Image Gallery or 3D TryOn */}
+
+          {/* ── LEFT: Gallery / Try-On ─────────────────────────────────── */}
           <div className="w-full lg:w-1/2">
-            <div className={`w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-900 rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 relative transition-all duration-500 ${isTryOnActive ? 'shadow-2xl ring-4 ring-blue-500/20' : ''}`}>
-              
+            <div
+              className={`w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-900 rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 relative transition-all duration-500 ${
+                isTryOnActive ? "shadow-2xl ring-4 ring-blue-500/20" : ""
+              }`}
+            >
               {isTryOnActive ? (
-                <div className="w-full h-full relative cursor-grab active:cursor-grabbing bg-neutral-200 dark:bg-neutral-800">
-                  <Canvas camera={{ position: [0, 1.2, 3.5], fov: 45 }}>
-                    <ambientLight intensity={0.6} />
-                    <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
-                    <directionalLight position={[-5, 5, -5]} intensity={0.5} />
+                <div className="w-full h-full cursor-grab active:cursor-grabbing">
+                  <Canvas camera={{ position: [0, 1.2, 3.5], fov: 44 }} shadows>
+                    <ambientLight intensity={0.55} />
+                    <directionalLight position={[5, 10, 5]} intensity={1.6} castShadow />
+                    <directionalLight position={[-4, 4, -4]} intensity={0.5} />
+                    <pointLight position={[0, 2.5, -2.5]} intensity={0.4} color="#b0d0ff" />
                     <Environment preset="studio" />
-                    
-                    {/* Fitting Room Environment Simulation */}
-                    <group position={[0, -0.965, 0]}> {/* Floor matched perfectly to avatar feet */}
-                      {/* Back Wall */}
+
+                    {/* Fitting room */}
+                    <group position={[0, -0.965, 0]}>
                       <Box args={[6, 4, 0.1]} position={[0, 2, -1.5]} receiveShadow>
-                        <meshStandardMaterial color="#f0f0f0" />
+                        <meshStandardMaterial color="#f5f5f0" />
                       </Box>
-                      {/* Left Wall */}
                       <Box args={[0.1, 4, 3]} position={[-2, 2, 0]} receiveShadow>
-                        <meshStandardMaterial color="#e5e7eb" roughness={0.8} />
+                        <meshStandardMaterial color="#eaeae5" roughness={0.85} />
                       </Box>
-                      {/* Right Wall */}
                       <Box args={[0.1, 4, 3]} position={[2, 2, 0]} receiveShadow>
-                        <meshStandardMaterial color="#e5e7eb" roughness={0.8} />
+                        <meshStandardMaterial color="#eaeae5" roughness={0.85} />
                       </Box>
-                      {/* Floor (Wood color) */}
                       <Box args={[6, 0.05, 4]} position={[0, 0, 0]} receiveShadow>
                         <meshStandardMaterial color="#8b5a2b" roughness={0.9} />
                       </Box>
-                      {/* Mirror effect plane */}
-                      <Box args={[2.5, 3, 0.1]} position={[0, 1.5, -1.4]}>
-                        <meshStandardMaterial color="#ffffff" metalness={0.9} roughness={0.05} />
+                      {/* Mirror */}
+                      <Box args={[2.5, 3.2, 0.08]} position={[0, 1.6, -1.42]}>
+                        <meshStandardMaterial color="#cce4ff" metalness={0.92} roughness={0.04} />
                       </Box>
                     </group>
 
-                    <ParametricMannequin 
-                      skinColor={avatarSkinColor} 
-                      shirtColor="#ffffff"
+                    <ParametricMannequin
+                      skinColor={avatarSkinColor}
+                      shirtColor={avatarData?.shirt_color || "#f8f8f8"}
                       pantsColor={tryOnPantsColor}
-                      pantsFit={tryOnPantsFit}
+                      pantsFit={product.fit || "Regular"}
                       shoesColor={avatarShoesColor}
                       hairStyle={avatarHairStyle}
                       hairColor={avatarHairColor}
                       gender={avatarGender}
                       glasses={avatarGlasses}
-                      scaleY={avatarHeight / 170.0} 
-                      scaleXZ={Math.pow(avatarWeight / 70.0, 0.5)} 
+                      scaleY={avatarHeight / 170.0}
+                      scaleXZ={tryOnScaleXZ}
+                      bodyType={avatarBodyType}
+                      muscleDefinition={avatarMuscle}
+                      beardStyle={avatarBeardStyle}
+                      beardColor={avatarBeardColor}
+                      eyebrowStyle={avatarEyebrow}
+                      hatStyle={avatarHat}
+                      shirtStyle={avatarShirtStyle}
+                      tattooLeftArm={avatarTattoo}
                     />
-                    <ContactShadows position={[0, -0.89, 0]} opacity={0.6} scale={5} blur={1.5} far={4} />
-                    
-                    <OrbitControls 
-                      enablePan={false} 
-                      minPolarAngle={Math.PI / 4} 
-                      maxPolarAngle={Math.PI / 1.5} 
-                      minDistance={2.5} 
-                      maxDistance={6} 
+                    <ContactShadows position={[0, -0.89, 0]} opacity={0.6} scale={5} blur={1.8} far={4} />
+                    <OrbitControls
+                      enablePan={false}
+                      minPolarAngle={Math.PI / 4}
+                      maxPolarAngle={Math.PI / 1.5}
+                      minDistance={2.5}
+                      maxDistance={6}
                       target={[0, 0.5, 0]}
                     />
                   </Canvas>
-                  
-                  <div className="absolute top-4 left-4 flex items-center gap-2 text-xs font-semibold text-blue-700 bg-blue-100/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-blue-200 shadow-sm animate-fade-in">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+
+                  <div className="absolute top-4 left-4 flex items-center gap-2 text-xs font-semibold text-blue-700 bg-blue-100/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-blue-200 shadow-sm">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                     Probador 3D en Vivo
                   </div>
-                  
-                  <button onClick={handleTryOnToggle} className="absolute top-4 right-4 bg-white/90 dark:bg-black/90 backdrop-blur-md p-2 rounded-full shadow-sm hover:scale-110 transition-transform">
+                  {/* Size indicator in TryOn */}
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-bold text-white bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full">
+                    Talle {selectedSize} · {selectedColor?.name}
+                  </div>
+                  <button
+                    onClick={handleTryOnToggle}
+                    className="absolute top-4 right-4 bg-white/90 dark:bg-black/90 backdrop-blur-md p-2 rounded-full shadow-sm hover:scale-110 transition-transform"
+                  >
                     <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -243,139 +247,188 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               ) : (
                 <>
-                  <img 
-                    src={galleryImages[activeImageIndex]} 
-                    alt={product.name} 
-                    className="w-full h-full object-cover animate-fade-in"
+                  <img
+                    src={galleryImages[activeImageIndex]}
+                    alt={product.name}
+                    className="w-full h-full object-cover animate-in fade-in duration-300"
+                    key={galleryImages[activeImageIndex]}
                   />
                   {product.model_3d_url && (
                     <div className="absolute top-4 left-4 flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-green-200 shadow-sm">
-                      <CheckCircle2 className="w-4 h-4" />
-                      Gemelo Digital 3D Disponible
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Try-On 3D disponible
+                    </div>
+                  )}
+                  {/* Photo type label */}
+                  {product.images?.[activeImageIndex]?.type && (
+                    <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full backdrop-blur font-semibold">
+                      {{ FRONT: "Vista Frontal", SIDE: "Vista Lateral", BACK: "Vista Posterior" }[product.images[activeImageIndex].type] ?? ""}
                     </div>
                   )}
                 </>
               )}
             </div>
-            
+
+            {/* Thumbnails */}
             {!isTryOnActive && (
-              <div className="flex gap-4 mt-4 overflow-x-auto pb-2">
+              <div className="flex gap-3 mt-4 overflow-x-auto pb-1">
                 {galleryImages.map((imgSrc, idx) => (
-                  <button 
+                  <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`shrink-0 w-20 h-24 bg-neutral-200 dark:bg-neutral-800 rounded-xl overflow-hidden border-2 transition-colors ${activeImageIndex === idx ? 'border-blue-500' : 'border-transparent hover:border-neutral-400'}`}
+                    className={`shrink-0 w-20 h-24 bg-neutral-200 dark:bg-neutral-800 rounded-2xl overflow-hidden border-2 transition-all ${
+                      activeImageIndex === idx
+                        ? "border-blue-500 shadow-md scale-105"
+                        : "border-transparent hover:border-neutral-400 hover:scale-105"
+                    }`}
                   >
-                    <img src={imgSrc} alt={`Miniatura ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={imgSrc} alt={`Vista ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Right: Details and CTAs */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-start">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-4 tracking-tight">{product.name}</h1>
-            <p className="text-3xl font-medium text-blue-600 dark:text-blue-400 mb-6">${product.price}</p>
-            
-            <div className="prose prose-neutral dark:prose-invert mb-8 text-neutral-600 dark:text-neutral-400">
-              <p>
-                Experimenta la nueva generación de compras en línea. Esta prenda ha sido meticulosamente digitalizada
-                para ofrecer una vista de alta fidelidad, permitiéndote probarla en tu propio gemelo digital antes de comprar.
-              </p>
+          {/* ── RIGHT: Product details ─────────────────────────────────── */}
+          <div className="w-full lg:w-1/2 flex flex-col">
+
+            {/* Header */}
+            <div className="mb-2">
+              <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mb-1">Acme Denim · {product.fit} Fit</p>
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2">{product.name}</h1>
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">${product.price.toFixed(2)}</p>
             </div>
 
+            {/* Description */}
+            {product.description && (
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 border-l-2 border-blue-200 dark:border-blue-800 pl-4">
+                {product.description}
+              </p>
+            )}
+
+            {/* Material badge */}
+            {product.material && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-6">
+                <Info className="w-3.5 h-3.5" />
+                {product.material}
+              </div>
+            )}
+
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-10 border-b border-neutral-200 dark:border-neutral-800 pb-8">
+            <div className="flex flex-col sm:flex-row gap-3 mb-8 pb-8 border-b border-neutral-200 dark:border-neutral-800">
               {product.model_3d_url ? (
-                <button 
+                <button
                   onClick={handleTryOnToggle}
-                  className={`flex-1 py-4 px-6 font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 ${isTryOnActive ? 'bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white border-2 border-transparent' : 'bg-black dark:bg-white text-white dark:text-black border-2 border-transparent'}`}
+                  className={`flex-1 py-4 px-6 font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 text-sm ${
+                    isTryOnActive
+                      ? "bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white"
+                      : "bg-black dark:bg-white text-white dark:text-black shadow-black/20"
+                  }`}
                 >
                   {isTryOnActive ? (
-                    <>Cerrar Probador Virtual</>
+                    "Cerrar Probador Virtual"
                   ) : (
                     <>
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                      Activar Probador 3D
+                      Probarse en 3D
                     </>
                   )}
                 </button>
               ) : (
-                <button disabled className="flex-1 py-4 px-6 bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-bold rounded-2xl cursor-not-allowed flex items-center justify-center gap-2">
+                <button disabled className="flex-1 py-4 px-6 bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-bold rounded-2xl cursor-not-allowed text-sm">
                   Probador No Disponible
                 </button>
               )}
-              
-              <button 
+
+              <button
                 onClick={handleAddToCart}
-                className="flex-1 py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+                className="flex-1 py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm"
               >
-                <ShoppingCart className="w-5 h-5" />
+                <ShoppingCart className="w-4 h-4" />
                 Añadir al Carrito
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl flex items-center gap-3">
-                <div className="w-10 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center shrink-0">
-                  <Ruler className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
+            {/* Color Selector */}
+            {product.available_colors?.length > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Palette className="w-4 h-4 text-neutral-500" />
+                  <h3 className="font-semibold text-sm">Color</h3>
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400 ml-auto font-medium">{selectedColor?.name}</span>
                 </div>
-                <div>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Perfil de Calce</p>
-                  <p className="font-semibold text-sm">Corte {product.fit || "Regular"}</p>
-                </div>
-              </div>
-              <div className="p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl flex items-center gap-3">
-                <div className="w-10 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center shrink-0">
-                  <Shirt className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Material</p>
-                  <p className="font-semibold text-sm">Denim Premium</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Options: Color and Size */}
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-semibold flex items-center gap-2 mb-3"><Palette className="w-4 h-4" /> Color</h3>
-                <div className="flex gap-3">
-                  {colors.map(c => (
+                <div className="flex gap-3 flex-wrap">
+                  {product.available_colors.map((c) => (
                     <button
                       key={c.hex}
-                      onClick={() => setSelectedColor(c.hex)}
-                      className={`w-12 h-12 rounded-full border-2 transition-all ${selectedColor === c.hex ? 'border-blue-500 scale-110 shadow-md ring-4 ring-blue-500/20' : 'border-transparent hover:scale-105 shadow-sm'}`}
+                      onClick={() => setSelectedColor(c)}
+                      className={`w-12 h-12 rounded-full border-2 transition-all shadow-sm ${
+                        selectedColor?.hex === c.hex
+                          ? "border-blue-500 scale-110 shadow-md ring-4 ring-blue-500/20"
+                          : "border-transparent hover:scale-105 hover:shadow-md"
+                      }`}
                       style={{ backgroundColor: c.hex }}
                       title={c.name}
                     />
                   ))}
                 </div>
+                {isTryOnActive && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2 animate-in fade-in duration-300">
+                    ✨ El color se aplica en tiempo real en el Probador 3D
+                  </p>
+                )}
               </div>
-              
-              <div>
-                <div className="flex justify-between mb-3">
-                  <h3 className="font-semibold">Talle</h3>
-                  <button className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">Guía de Talles</button>
+            )}
+
+            {/* Size Selector */}
+            {product.available_sizes?.length > 0 && (
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-center gap-2">
+                    <Ruler className="w-4 h-4 text-neutral-500" />
+                    <h3 className="font-semibold text-sm">Talle</h3>
+                  </div>
+                  <button className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                    Guía de Talles
+                  </button>
                 </div>
-                <div className="flex gap-3">
-                  {sizes.map(s => (
+                <div className="flex gap-2 flex-wrap">
+                  {product.available_sizes.map((s) => (
                     <button
                       key={s}
                       onClick={() => setSelectedSize(s)}
-                      className={`w-14 h-12 rounded-xl font-bold transition-all border-2 ${selectedSize === s ? 'bg-black text-white dark:bg-white dark:text-black border-transparent shadow-md' : 'bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                      className={`min-w-[3rem] h-11 px-3 rounded-xl font-bold text-sm transition-all border-2 ${
+                        selectedSize === s
+                          ? "bg-black text-white dark:bg-white dark:text-black border-transparent shadow-md"
+                          : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                      }`}
                     >
                       {s}
                     </button>
                   ))}
                 </div>
+                {isTryOnActive && (
+                  <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mt-2 animate-in fade-in duration-300">
+                    📏 El talle ajusta el ancho del pantalón en el Probador 3D
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Specs mini-grid */}
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <div className="p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl">
+                <p className="text-xs text-neutral-400 mb-1">Corte</p>
+                <p className="font-bold text-sm">{product.fit || "Regular"} Fit</p>
+              </div>
+              <div className="p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl">
+                <p className="text-xs text-neutral-400 mb-1">Talle seleccionado</p>
+                <p className="font-bold text-sm">{selectedSize || "—"}</p>
               </div>
             </div>
-            
           </div>
         </div>
       </main>

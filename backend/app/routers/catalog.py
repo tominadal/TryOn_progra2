@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from typing import Optional, List
 from app.domain.database import get_db, SessionLocal
-from app.domain.models.catalog import ProcessingJob, JobStatus, Garment, GarmentAsset
+from app.domain.models.catalog import ProcessingJob, JobStatus, Garment, GarmentAsset, GarmentImage
 from app.domain.models.user import User
+from app.domain.repositories import garment_repo, garment_image_repo
 from app.services.auth_service import get_current_active_user
 from app.services.ai_strategy import GeminiTryOnStrategy
 from app.config.settings import settings
@@ -15,11 +17,49 @@ router = APIRouter(prefix="/catalog", tags=["catalog"])
 # Required columns in the uploaded Excel file
 REQUIRED_COLUMNS = {"SKU", "Name", "Fit", "Size", "Color", "Price"}
 
+
 def _validate_excel_columns(df: pd.DataFrame) -> None:
     """Raises ValueError if required columns are missing from the DataFrame."""
     missing = REQUIRED_COLUMNS - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns: {', '.join(sorted(missing))}")
+
+
+def _garment_to_dict(g: Garment) -> dict:
+    """Serialize a Garment + its asset and images to a response dict."""
+    asset = g.asset
+    images = g.images if g.images else []
+
+    # Build gallery from GarmentImage records if available, else fall back to asset url
+    gallery = [
+        {"url": img.image_url, "type": img.image_type, "sort_order": img.sort_order}
+        for img in images
+    ]
+
+    primary_image = (
+        gallery[0]["url"]
+        if gallery
+        else (asset.ai_generated_image_url if asset else None)
+    )
+
+    return {
+        "id": g.id,
+        "sku": g.sku,
+        "name": g.name,
+        "description": g.description,
+        "fit": g.fit,
+        "material": g.material,
+        "size": g.size,
+        "color": g.color,
+        "price": round(g.price, 2),
+        "brand_id": g.brand_id,
+        "is_processed": g.is_processed,
+        "available_sizes": g.available_sizes or ["S", "M", "L", "XL"],
+        "available_colors": g.available_colors or [],
+        "image": primary_image,
+        "images": gallery,
+        "model_3d_url": asset.ai_generated_image_url if asset else None,
+    }
 
 
 def process_catalog_background(job_id: int, file_content: bytes):
@@ -60,6 +100,8 @@ def process_catalog_background(job_id: int, file_content: bytes):
                 size=str(garment_data.get("Size", ""))[:20],
                 color=str(garment_data.get("Color", ""))[:50],
                 price=price,
+                available_sizes=["S", "M", "L", "XL"],
+                available_colors=[],
             )
             db.add(garment)
             db.commit()
@@ -176,92 +218,80 @@ def get_job_status(
 
 
 @router.get("/garments")
-def list_garments(db: Session = Depends(get_db)):
-    """List all processed garments available for try-on."""
-    garments = db.query(Garment).filter(Garment.is_processed.is_(True)).all()
-    result = []
-    for g in garments:
-        asset = db.query(GarmentAsset).filter(GarmentAsset.garment_id == g.id).first()
-        result.append(
-            {
-                "id": g.id,
-                "sku": g.sku,
-                "name": g.name,
-                "fit": g.fit,
-                "size": g.size,
-                "color": g.color,
-                "price": round(g.price, 2),
-                "brand_id": g.brand_id,
-                "image": asset.ai_generated_image_url if asset else None,
-                "model_3d_url": asset.ai_generated_image_url if asset else None,
-            }
-        )
-    return result
+def list_garments(
+    fit: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    """List all processed garments available for try-on. Supports optional ?fit= filter."""
+    if fit:
+        garments = garment_repo.get_by_fit(db, fit)
+    else:
+        garments = garment_repo.get_processed(db, limit=50)
+    return [_garment_to_dict(g) for g in garments]
 
 
 @router.get("/garments/{garment_id}")
 def get_garment(garment_id: int, db: Session = Depends(get_db)):
     """Retrieve details of a specific garment."""
-    g = db.query(Garment).filter(Garment.id == garment_id).first()
+    g = garment_repo.get(db, garment_id)
     if not g:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Garment not found")
+    return _garment_to_dict(g)
 
-    asset = db.query(GarmentAsset).filter(GarmentAsset.garment_id == g.id).first()
-    return {
-        "id": g.id,
-        "sku": g.sku,
-        "name": g.name,
-        "fit": g.fit,
-        "size": g.size,
-        "color": g.color,
-        "price": round(g.price, 2),
-        "brand_id": g.brand_id,
-        "image": asset.ai_generated_image_url if asset else None,
-        "model_3d_url": asset.ai_generated_image_url if asset else None,
-    }
 
-# --- NEW ENDPOINTS FOR BRAND DASHBOARD ---
+# --- BRAND DASHBOARD ENDPOINTS ---
 
 class GarmentCreate(BaseModel):
     name: str
     price: float
     image_url: str = "/products/jean_classic.png"
 
+
 @router.get("/brand")
-def get_brand_catalog(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+def get_brand_catalog(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
     """Get all garments for the current authenticated brand."""
     if current_user.role_id != 2 or not current_user.brand_id:
         raise HTTPException(status_code=403, detail="Not authorized as brand")
-    
-    garments = db.query(Garment).filter(Garment.brand_id == current_user.brand_id).all()
-    result = []
-    for g in garments:
-        asset = db.query(GarmentAsset).filter(GarmentAsset.garment_id == g.id).first()
-        result.append({
+
+    garments = garment_repo.get_by_brand(db, current_user.brand_id)
+    return [
+        {
             "id": g.id,
             "sku": g.sku,
             "name": g.name,
             "price": round(g.price, 2),
             "is_processed": g.is_processed,
-            "image": asset.ai_generated_image_url if asset else None,
-        })
-    return result
+            "image": g.asset.ai_generated_image_url if g.asset else None,
+        }
+        for g in garments
+    ]
+
 
 @router.post("/garment")
-def create_garment(garment_in: GarmentCreate, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+def create_garment(
+    garment_in: GarmentCreate,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
     """Upload a single garment manually via dashboard."""
     if current_user.role_id != 2 or not current_user.brand_id:
         raise HTTPException(status_code=403, detail="Not authorized as brand")
-    
+
+    count = db.query(Garment).count()
     new_garment = Garment(
         brand_id=current_user.brand_id,
-        sku=f"BRAND-{current_user.brand_id}-{db.query(Garment).count() + 1}",
+        sku=f"BRAND-{current_user.brand_id}-{count + 1}",
         name=garment_in.name,
         fit="Regular",
         size="M",
         color="Variado",
         price=garment_in.price,
         is_processed=True,
+        available_sizes=["S", "M", "L", "XL"],
+        available_colors=[],
     )
     db.add(new_garment)
     db.commit()
@@ -270,7 +300,7 @@ def create_garment(garment_in: GarmentCreate, current_user: User = Depends(get_c
     asset = GarmentAsset(
         garment_id=new_garment.id,
         ai_generated_image_url=garment_in.image_url,
-        metadata_json={"source": "dashboard_upload"}
+        metadata_json={"source": "dashboard_upload"},
     )
     db.add(asset)
     db.commit()

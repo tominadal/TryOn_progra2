@@ -13,14 +13,15 @@ from app.services.ai_strategy import MockTryOnStrategy, VirtualTryOnStrategy
 # ─── Helper ────────────────────────────────────────────────────────────────────
 
 def _register_and_login(client, email, password="testpwd123", role_id=1):
-    client.post(
-        "/api/v1/users/",
-        json={"email": email, "password": password, "full_name": "Test", "role_id": role_id},
-    )
+    body: dict = {"email": email, "password": password, "full_name": "Test", "role_id": role_id}
+    # Brand Manager accounts require a brand_name
+    if role_id == 2:
+        body["brand_name"] = f"TestBrand-{email}"
+    client.post("/api/v1/users/", json=body)
     res = client.post(
         "/api/v1/auth/login", data={"username": email, "password": password}
     )
-    return res.json()["access_token"]
+    return res.json().get("access_token", "")
 
 
 # ─── Test: Health endpoint ──────────────────────────────────────────────────────
@@ -52,24 +53,9 @@ def test_upload_catalog_invalid_file_type(client: TestClient):
 
 def test_upload_catalog_missing_columns(client: TestClient, db_session):
     """Excel without required columns is rejected with 400."""
-    from app.domain.models.organization import Brand, Marketplace
-
-    mk = Marketplace(name="MK Missing Cols")
-    db_session.add(mk)
-    db_session.commit()
-    db_session.refresh(mk)
-
-    brand = Brand(name="Brand MC", marketplace_id=mk.id)
-    db_session.add(brand)
-    db_session.commit()
-    db_session.refresh(brand)
-
+    # Register a brand user (brand_name is auto-created by the router)
     token = _register_and_login(client, "misscols@example.com", role_id=2)
-    # Give this user brand_id
-    from app.domain.models.user import User
-    user = db_session.query(User).filter(User.email == "misscols@example.com").first()
-    user.brand_id = brand.id
-    db_session.commit()
+    assert token, "Login failed — brand user could not be created"
 
     # Create Excel WITHOUT required columns
     df = pd.DataFrame([{"WrongCol": "data"}])
