@@ -98,7 +98,7 @@ export default function CartPage() {
                   <div className="flex-1 flex flex-col justify-center">
                     <h3 className="font-semibold text-lg">{item.garment_details?.name || `Prenda #${item.garment_id}`}</h3>
                     <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-2">Cant: {item.quantity}</p>
-                    <p className="font-medium">${(item.unit_price || 0).toFixed(2)}</p>
+                    <p className="font-medium">${(item.price || 0).toFixed(2)}</p>
                   </div>
                 </div>
               ))}

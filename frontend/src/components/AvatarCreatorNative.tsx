@@ -47,7 +47,7 @@ interface AvatarCreatorNativeProps {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-//  FACE COMPONENT — Detailed realistic face
+//  FACE COMPONENT — Oval, realistic head
 // ──────────────────────────────────────────────────────────────────────────────
 function RealisticFace({ skinColor, isFemale, beardStyle, beardColor, eyebrowStyle }: {
   skinColor: string;
@@ -58,135 +58,140 @@ function RealisticFace({ skinColor, isFemale, beardStyle, beardColor, eyebrowSty
 }) {
   const skinMat = { color: skinColor, roughness: 0.5, metalness: 0.05 };
   const beardMat = { color: beardColor, roughness: 0.9, metalness: 0.0 };
-  const eyebrowThick = eyebrowStyle === "Grueso" ? 0.012 : eyebrowStyle === "Fino" ? 0.006 : 0.009;
-  const headR = isFemale ? 0.125 : 0.13;
+  const eyebrowThick = eyebrowStyle === "Grueso" ? 0.013 : eyebrowStyle === "Fino" ? 0.006 : 0.009;
+  // Base sphere radius — the OVAL is achieved via scale on the parent group
+  const headR = isFemale ? 0.128 : 0.134;
+  // Oval scale: narrower X (0.86), taller Y (1.0), slightly shallow Z (0.93)
+  const headScaleX = isFemale ? 0.84 : 0.86;
+  const headScaleZ = isFemale ? 0.91 : 0.93;
 
   return (
-    <group>
-      {/* Main head */}
+    // The outer scale makes the whole head oval (taller than wide)
+    <group scale={[headScaleX, 1.0, headScaleZ]}>
+
+      {/* ── SKULL BASE ── */}
       <mesh>
         <sphereGeometry args={[headR, 48, 48]} />
         <meshStandardMaterial {...skinMat} />
       </mesh>
 
-      {/* Jawline / Chin — slight protrusion */}
-      <mesh position={[0, -headR * 0.7, headR * 0.15]} scale={[0.9, 0.5, 0.8]}>
-        <sphereGeometry args={[headR * 0.55, 32, 24]} />
+      {/* ── JAW / CHIN — tapers downward ── */}
+      <mesh position={[0, -headR * 0.72, headR * 0.12]} scale={[0.85, 0.52, 0.78]}>
+        <sphereGeometry args={[headR * 0.58, 32, 24]} />
         <meshStandardMaterial {...skinMat} />
       </mesh>
 
-      {/* Cheeks */}
-      <mesh position={[-headR * 0.7, -headR * 0.1, headR * 0.4]} scale={[0.7, 0.6, 0.5]}>
-        <sphereGeometry args={[headR * 0.45, 24, 24]} />
-        <meshStandardMaterial {...skinMat} />
-      </mesh>
-      <mesh position={[headR * 0.7, -headR * 0.1, headR * 0.4]} scale={[0.7, 0.6, 0.5]}>
-        <sphereGeometry args={[headR * 0.45, 24, 24]} />
-        <meshStandardMaterial {...skinMat} />
-      </mesh>
 
-      {/* Nose */}
-      <group position={[0, -headR * 0.15, headR * 0.9]}>
-        <mesh scale={[1, 1.4, 1]}>
-          <sphereGeometry args={[isFemale ? 0.018 : 0.022, 16, 16]} />
+      {/* ── EARS — single flat ellipsoid, close to skull ── */}
+      {[-1, 1].map((side) => (
+        // position: pushed to the side of the skull; scale makes it a flat oval disc
+        <mesh
+          key={side}
+          position={[side * headR * 0.96, -headR * 0.05, 0]}
+          scale={[0.18, 0.38, 0.28]}
+        >
+          <sphereGeometry args={[headR * 0.78, 24, 20]} />
+          <meshStandardMaterial {...skinMat} />
+        </mesh>
+      ))}
+
+      {/* ── NOSE ── */}
+      <group position={[0, -headR * 0.13, headR * 0.94]}>
+        {/* Tip */}
+        <mesh scale={[1.0, 1.3, 0.9]}>
+          <sphereGeometry args={[isFemale ? 0.017 : 0.021, 16, 16]} />
+          <meshStandardMaterial {...skinMat} />
+        </mesh>
+        {/* Nasal bridge — runs up toward forehead */}
+        <mesh position={[0, 0.028, -0.006]}>
+          <capsuleGeometry args={[isFemale ? 0.0075 : 0.009, 0.036, 8, 16]} />
           <meshStandardMaterial {...skinMat} />
         </mesh>
         {/* Nostrils */}
-        <mesh position={[-0.016, -0.008, 0.005]}>
-          <sphereGeometry args={[0.010, 12, 12]} />
-          <meshStandardMaterial {...skinMat} />
-        </mesh>
-        <mesh position={[0.016, -0.008, 0.005]}>
-          <sphereGeometry args={[0.010, 12, 12]} />
-          <meshStandardMaterial {...skinMat} />
-        </mesh>
-        {/* Nasal bridge */}
-        <mesh position={[0, 0.025, -0.005]}>
-          <capsuleGeometry args={[0.008, 0.035, 8, 16]} />
-          <meshStandardMaterial {...skinMat} />
-        </mesh>
+        {[-1, 1].map((side) => (
+          <mesh key={side} position={[side * 0.015, -0.008, 0.004]} scale={[0.9, 0.7, 0.7]}>
+            <sphereGeometry args={[0.009, 12, 12]} />
+            <meshStandardMaterial {...skinMat} />
+          </mesh>
+        ))}
       </group>
 
-      {/* Eyes — whites + iris */}
+      {/* ── EYES — whites + iris + pupil + upper lid ── */}
       {[-1, 1].map((side) => (
-        <group key={side} position={[side * headR * 0.38, headR * 0.08, headR * 0.88]}>
+        <group key={side} position={[side * headR * 0.36, headR * 0.07, headR * 0.90]}>
           {/* Eye white */}
-          <mesh scale={[1.4, 0.9, 0.5]}>
-            <sphereGeometry args={[0.022, 24, 24]} />
-            <meshStandardMaterial color="#f5f0eb" roughness={0.3} />
+          <mesh scale={[1.35, 0.85, 0.45]}>
+            <sphereGeometry args={[0.021, 24, 24]} />
+            <meshStandardMaterial color="#f4ede8" roughness={0.25} />
           </mesh>
           {/* Iris */}
-          <mesh position={[0, 0, 0.012]} scale={[1.1, 1.0, 0.3]}>
+          <mesh position={[0, 0, 0.011]} scale={[1.05, 1.0, 0.28]}>
             <sphereGeometry args={[0.013, 20, 20]} />
             <meshStandardMaterial color="#3b2507" roughness={0.2} />
           </mesh>
           {/* Pupil */}
-          <mesh position={[0, 0, 0.015]} scale={[1.1, 1.0, 0.2]}>
+          <mesh position={[0, 0, 0.014]} scale={[1.05, 1.0, 0.18]}>
             <sphereGeometry args={[0.007, 16, 16]} />
-            <meshStandardMaterial color="#000000" roughness={0.1} />
+            <meshStandardMaterial color="#060606" roughness={0.1} />
           </mesh>
-          {/* Eyelid top */}
-          <mesh position={[0, 0.015, 0.01]} scale={[1.6, 0.5, 0.5]} rotation={[0.3, 0, 0]}>
+          {/* Upper eyelid crease */}
+          <mesh position={[0, 0.013, 0.009]} scale={[1.55, 0.42, 0.42]} rotation={[0.28, 0, 0]}>
             <sphereGeometry args={[0.020, 16, 8]} />
             <meshStandardMaterial {...skinMat} />
           </mesh>
         </group>
       ))}
 
-      {/* Eyebrows */}
+      {/* ── EYEBROWS ── */}
       {[-1, 1].map((side) => (
         <mesh
           key={side}
-          position={[side * headR * 0.37, headR * 0.27, headR * 0.86]}
-          rotation={[0, 0, side * -0.15]}
-          scale={[1, 1, 1]}
+          position={[side * headR * 0.355, headR * 0.26, headR * 0.88]}
+          rotation={[0, 0, side * -0.18]}
         >
-          <boxGeometry args={[0.038, eyebrowThick, 0.006]} />
+          <boxGeometry args={[0.036, eyebrowThick, 0.007]} />
           <meshStandardMaterial color={beardColor} roughness={0.9} />
         </mesh>
       ))}
 
-      {/* Mouth */}
-      <group position={[0, -headR * 0.38, headR * 0.90]}>
+      {/* ── MOUTH ── */}
+      <group position={[0, -headR * 0.40, headR * 0.92]}>
         {/* Upper lip */}
-        <mesh position={[0, 0.006, 0]} scale={[1.8, 0.5, 0.5]}>
-          <sphereGeometry args={[0.018, 20, 10]} />
-          <meshStandardMaterial color="#c27d6e" roughness={0.6} />
+        <mesh position={[0, 0.007, 0]} scale={[1.7, 0.48, 0.48]}>
+          <sphereGeometry args={[0.017, 20, 10]} />
+          <meshStandardMaterial color={isFemale ? "#c46e6e" : "#b06050"} roughness={0.65} />
         </mesh>
-        {/* Lower lip */}
-        <mesh position={[0, -0.009, 0]} scale={[2.0, 0.7, 0.7]}>
+        {/* Lower lip — slightly fuller */}
+        <mesh position={[0, -0.01, 0.001]} scale={[1.9, 0.65, 0.62]}>
           <sphereGeometry args={[0.015, 20, 10]} />
-          <meshStandardMaterial color="#c27d6e" roughness={0.6} />
+          <meshStandardMaterial color={isFemale ? "#c46e6e" : "#b06050"} roughness={0.65} />
+        </mesh>
+        {/* Mouth line separator */}
+        <mesh position={[0, -0.001, 0.005]} scale={[1.5, 0.18, 0.3]}>
+          <sphereGeometry args={[0.012, 12, 8]} />
+          <meshStandardMaterial color="#7a3a30" roughness={0.9} />
         </mesh>
       </group>
 
-      {/* Ears */}
-      {[-1, 1].map((side) => (
-        <mesh key={side} position={[side * headR * 0.98, 0, 0]} scale={[0.25, 0.45, 0.35]}>
-          <sphereGeometry args={[headR * 0.6, 20, 20]} />
-          <meshStandardMaterial {...skinMat} />
-        </mesh>
-      ))}
-
-      {/* Beard */}
+      {/* ── BEARD ── */}
       {beardStyle !== "Ninguna" && !isFemale && (
         <group>
-          {/* Stubble / short beard base */}
-          <mesh position={[0, -headR * 0.55, headR * 0.72]} scale={[0.9, 0.6, 0.6]}>
-            <sphereGeometry args={[headR * 0.65, 24, 24]} />
-            <meshStandardMaterial {...beardMat} opacity={beardStyle === "Esbozo" ? 0.5 : 1} transparent={beardStyle === "Esbozo"} />
+          {/* Stubble / short beard base — covers chin and jaw */}
+          <mesh position={[0, -headR * 0.57, headR * 0.70]} scale={[0.88, 0.58, 0.62]}>
+            <sphereGeometry args={[headR * 0.67, 24, 24]} />
+            <meshStandardMaterial {...beardMat} opacity={beardStyle === "Esbozo" ? 0.45 : 0.92} transparent />
           </mesh>
-          {/* Long beard addition */}
-          {(beardStyle === "Larga") && (
-            <mesh position={[0, -headR * 1.1, headR * 0.4]}>
-              <capsuleGeometry args={[headR * 0.25, headR * 0.6, 12, 24]} />
+          {/* Moustache area */}
+          {(beardStyle === "Corta" || beardStyle === "Larga") && (
+            <mesh position={[0, -headR * 0.27, headR * 0.97]} scale={[1.85, 0.55, 0.38]}>
+              <sphereGeometry args={[0.024, 20, 10]} />
               <meshStandardMaterial {...beardMat} />
             </mesh>
           )}
-          {/* Moustache */}
-          {(beardStyle === "Corta" || beardStyle === "Larga") && (
-            <mesh position={[0, -headR * 0.28, headR * 0.98]} scale={[1.9, 0.6, 0.4]}>
-              <sphereGeometry args={[0.025, 20, 10]} />
+          {/* Long beard drop */}
+          {beardStyle === "Larga" && (
+            <mesh position={[0, -headR * 1.15, headR * 0.35]}>
+              <capsuleGeometry args={[headR * 0.24, headR * 0.65, 12, 24]} />
               <meshStandardMaterial {...beardMat} />
             </mesh>
           )}
@@ -197,75 +202,113 @@ function RealisticFace({ skinColor, isFemale, beardStyle, beardColor, eyebrowSty
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-//  HAIR COMPONENT
+//  HAIR COMPONENT — single-shell approach, face always open
 // ──────────────────────────────────────────────────────────────────────────────
 function HairComponent({ hairStyle, hairColor, isFemale }: {
   hairStyle: string; hairColor: string; isFemale: boolean;
 }) {
-  const mat = { color: hairColor, roughness: 0.85, metalness: 0.05 };
-  const r = isFemale ? 0.125 : 0.13;
+  const mat = { color: hairColor, roughness: 0.82, metalness: 0.06 };
+  const headR  = isFemale ? 0.128 : 0.134;
+  // Same oval scale as the face so hair matches the skull exactly
+  const hsx = isFemale ? 0.84 : 0.86;
+  const hsz = isFemale ? 0.91 : 0.93;
 
   if (hairStyle === "Calvo") return null;
 
+  // The key trick: shift every hair cap slightly BACK (-Z) so it never
+  // drapes in front of the face. The sphere's leading edge sits roughly
+  // at the hairline without covering the forehead.
+  const backZ = -headR * 0.08; // small backward offset in pre-scale space
+
+  // ── CORTO — tight close crop, covers crown + sides + nape ──
   if (hairStyle === "Corto") return (
-    <group position={[0, 0.04, -0.01]}>
-      <mesh scale={[1.06, 0.85, 1.06]}>
-        <sphereGeometry args={[r * 1.05, 32, 16, 0, Math.PI * 2, 0, Math.PI / 1.75]} />
-        <meshStandardMaterial {...mat} />
-      </mesh>
-      {/* Side detail */}
-      <mesh position={[-r * 0.95, -r * 0.2, 0]} scale={[0.3, 0.6, 0.7]}>
-        <sphereGeometry args={[r * 0.7, 16, 16]} />
-        <meshStandardMaterial {...mat} />
-      </mesh>
-      <mesh position={[r * 0.95, -r * 0.2, 0]} scale={[0.3, 0.6, 0.7]}>
-        <sphereGeometry args={[r * 0.7, 16, 16]} />
+    <group scale={[hsx, 1.0, hsz]}>
+      {/* Single shell: from crown down 108° (just past ear level) */}
+      <mesh position={[0, headR * 0.04, backZ]}>
+        <sphereGeometry args={[headR * 1.055, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.62]} />
         <meshStandardMaterial {...mat} />
       </mesh>
     </group>
   );
 
+  // ── LARGO — long hair: shell cap + back curtain, face completely open ──
   if (hairStyle === "Largo") return (
-    <group position={[0, 0.04, -0.01]}>
-      {/* Cap */}
-      <mesh scale={[1.08, 0.9, 1.08]}>
-        <sphereGeometry args={[r * 1.05, 32, 16, 0, Math.PI * 2, 0, Math.PI / 1.5]} />
+    <group scale={[hsx, 1.0, hsz]}>
+      {/* Crown shell */}
+      <mesh position={[0, headR * 0.04, backZ]}>
+        <sphereGeometry args={[headR * 1.058, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.62]} />
         <meshStandardMaterial {...mat} />
       </mesh>
-      {/* Long sides + back */}
-      <mesh position={[-r * 0.65, -r * 0.9, -r * 0.2]} scale={[0.38, 1, 0.5]}>
-        <capsuleGeometry args={[r * 0.8, r * 1.2, 12, 20]} />
+      {/* Back curtain — hangs down from the nape */}
+      <mesh position={[0, -headR * 0.72, -headR * 0.48]} scale={[0.82, 1.0, 0.58]}>
+        <capsuleGeometry args={[headR * 0.72, headR * 0.90, 12, 20]} />
         <meshStandardMaterial {...mat} />
       </mesh>
-      <mesh position={[r * 0.65, -r * 0.9, -r * 0.2]} scale={[0.38, 1, 0.5]}>
-        <capsuleGeometry args={[r * 0.8, r * 1.2, 12, 20]} />
+      {/* Side curtains — behind ear-line, fall downward */}
+      {[-1, 1].map((side) => (
+        <mesh key={side}
+          position={[side * headR * 0.74, -headR * 0.58, -headR * 0.22]}
+          scale={[0.28, 1.0, 0.50]}
+        >
+          <capsuleGeometry args={[headR * 0.68, headR * 0.70, 10, 16]} />
+          <meshStandardMaterial {...mat} />
+        </mesh>
+      ))}
+    </group>
+  );
+
+  // ── RECOGIDO — updo bun, smooth sides, face open ──
+  if (hairStyle === "Recogido") return (
+    <group scale={[hsx, 1.0, hsz]}>
+      {/* Tight cap */}
+      <mesh position={[0, headR * 0.04, backZ]}>
+        <sphereGeometry args={[headR * 1.042, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.60]} />
         <meshStandardMaterial {...mat} />
       </mesh>
-      <mesh position={[0, -r * 1.1, -r * 0.5]} scale={[0.7, 1, 0.6]}>
-        <capsuleGeometry args={[r * 0.65, r * 1.0, 12, 20]} />
+      {/* Bun at top-back crown */}
+      <mesh position={[0, headR * 1.10, -headR * 0.20]} scale={[1.0, 0.88, 0.88]}>
+        <sphereGeometry args={[headR * 0.29, 24, 24]} />
         <meshStandardMaterial {...mat} />
+      </mesh>
+      {/* Hair tie */}
+      <mesh position={[0, headR * 0.90, -headR * 0.20]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[headR * 0.25, 0.007, 8, 24]} />
+        <meshStandardMaterial color="#111111" roughness={0.8} />
       </mesh>
     </group>
   );
 
-  if (hairStyle === "Recogido") return (
-    <group position={[0, 0.04, -0.01]}>
-      <mesh scale={[1.06, 0.85, 1.06]}>
-        <sphereGeometry args={[r * 1.05, 32, 16, 0, Math.PI * 2, 0, Math.PI / 1.75]} />
-        <meshStandardMaterial {...mat} />
-      </mesh>
-      {/* Bun */}
-      <mesh position={[0, r * 1.05, -r * 0.35]}>
-        <sphereGeometry args={[r * 0.32, 24, 24]} />
-        <meshStandardMaterial {...mat} />
-      </mesh>
-      {/* Hair band */}
-      <mesh position={[0, r * 0.95, -r * 0.35]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[r * 0.3, 0.007, 8, 20]} />
-        <meshStandardMaterial color="#222222" roughness={0.8} />
-      </mesh>
-    </group>
-  );
+  // ── RIZADO — curly/afro: volumetric blob halo, face open ──
+  if (hairStyle === "Rizado") {
+    const curls: [number, number, number, number][] = [
+      [-headR*0.50,  headR*0.84,  headR*0.20,  0.038],
+      [ headR*0.50,  headR*0.84,  headR*0.20,  0.038],
+      [ 0,           headR*1.08,  0,            0.042],
+      [-headR*0.82,  headR*0.55,  0,            0.034],
+      [ headR*0.82,  headR*0.55,  0,            0.034],
+      [-headR*0.75,  headR*0.70, -headR*0.40,  0.035],
+      [ headR*0.75,  headR*0.70, -headR*0.40,  0.035],
+      [ 0,           headR*0.88, -headR*0.65,  0.040],
+      [-headR*0.52,  headR*0.45,  headR*0.40,  0.030],
+      [ headR*0.52,  headR*0.45,  headR*0.40,  0.030],
+      [ 0,           headR*0.48, -headR*0.88,  0.032],
+    ];
+    return (
+      <group scale={[hsx, 1.0, hsz]}>
+        {/* Base cap */}
+        <mesh position={[0, headR * 0.06, backZ]}>
+          <sphereGeometry args={[headR * 1.06, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.58]} />
+          <meshStandardMaterial {...mat} />
+        </mesh>
+        {curls.map(([x, y, z, cr], i) => (
+          <mesh key={i} position={[x, y, z]}>
+            <sphereGeometry args={[cr, 12, 12]} />
+            <meshStandardMaterial {...mat} />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
 
   return null;
 }
@@ -341,15 +384,7 @@ function ShirtCollars({ shirtStyle, shirtColor, isFemale }: {
   shirtStyle: string; shirtColor: string; isFemale: boolean;
 }) {
   const mat = { color: shirtColor, roughness: 0.85 };
-  if (shirtStyle === "Polo") return (
-    <group position={[0, 0.07, 0.12]}>
-      {/* Polo collar */}
-      <mesh rotation={[0.4, 0, 0]}>
-        <boxGeometry args={[0.14, 0.04, 0.04]} />
-        <meshStandardMaterial {...mat} />
-      </mesh>
-    </group>
-  );
+  if (shirtStyle === "Polo") return null;
   if (shirtStyle === "V-Neck") return (
     <group position={[0, 0.16, 0.14]}>
       <mesh rotation={[0.4, 0, 0]}>
@@ -433,18 +468,38 @@ export function ParametricMannequin({
 
   const isFemale = gender === "Mujer";
 
-  // ── Body type modifiers ──────────────────────────────────────────────────
-  const muscFactor = 1 + muscleDefinition * 0.25; // up to 25% bigger muscles
-  const bodyFat = bodyType === "Robusto" ? 1.18 : bodyType === "Atlético" ? 1.05 : bodyType === "Delgado" ? 0.88 : 1.0;
+  // -- Body type modifiers (split: chest / belly / arms) --
+  const muscFactor = 1 + muscleDefinition * 0.22;
+  const chestFat = bodyType === "Robusto" ? 1.05 : bodyType === "Atlético" ? 1.04 : bodyType === "Delgado" ? 0.88 : 1.0;
+  const bellyFat = bodyType === "Robusto" ? 1.38 : bodyType === "Atlético" ? 0.93 : bodyType === "Delgado" ? 0.85 : 1.0;
+  const armMod   = bodyType === "Atlético" ? 1.14 : bodyType === "Robusto" ? 1.06 : bodyType === "Delgado" ? 0.88 : 1.0;
+  const hipFat   = bodyType === "Robusto"  ? 1.10 : bodyType === "Atlético" ? 1.02 : bodyType === "Delgado" ? 0.90 : 1.0;
 
-  // ── Chest / torso dims ───────────────────────────────────────────────────
-  const chestR = isFemale
-    ? 0.145 * bodyFat
-    : 0.175 * bodyFat * muscFactor;
-  const waistR = isFemale ? 0.12 * bodyFat : 0.148 * bodyFat;
-  const hipR_base = isFemale ? 0.175 * bodyFat : 0.155 * bodyFat;
-  const shoulderX = isFemale ? 0.155 * bodyFat : 0.175 * bodyFat * muscFactor;
-  const breastR = isFemale ? 0.07 * bodyFat : 0;
+  // -- Chest / torso dims (slimmer) --
+  const chestR    = isFemale ? 0.112 * chestFat : 0.115 * chestFat * muscFactor;
+  const waistR    = isFemale ? 0.092 * bellyFat : 0.098; // Base waist for men, scaled via group
+
+  let bellyScaleX = 1.0;
+  let bellyScaleZ = 1.0;
+  if (!isFemale) {
+    if (bodyType === "Robusto") {
+      bellyScaleX = 1.35; // Cintura más ancha
+      bellyScaleZ = 1.8;  // Panza mucho más pronunciada hacia adelante
+    } else if (bodyType === "Atlético" || bodyType === "Normal") {
+      bellyScaleX = 1.25; // Cintura como el viejo robusto
+      bellyScaleZ = 1.38; // Panza como el viejo robusto
+    } else {
+      bellyScaleX = 0.85;
+      bellyScaleZ = 0.85;
+    }
+  }
+  const hipR_base = isFemale ? 0.145 * hipFat   : 0.125 * hipFat;
+  const shoulderX = isFemale ? 0.115 * chestFat : 0.128 * chestFat * muscFactor;
+  const breastR   = isFemale ? 0.060 * chestFat : 0;
+
+  // -- Arm segment dims --
+  const upperArmR = isFemale ? 0.034 : 0.038 * muscFactor * armMod;
+  const foreArmR  = isFemale ? 0.030 : 0.036 * armMod;
 
   // ── Pants fit modifiers ──────────────────────────────────────────────────
   let thighMod = 0, calfMod = 0, hipMod = 0, inseamOffset = 0;
@@ -479,9 +534,6 @@ export function ParametricMannequin({
   const kneeMat = isSkirt || isBermuda ? skinMat : deniMat;
   const lowerLegMat = isSkirt || isBermuda ? skinMat : deniMat;
 
-  // ── Arm segment dims ─────────────────────────────────────────────────────
-  const upperArmR = isFemale ? 0.038 : 0.048 * muscFactor;
-  const foreArmR = isFemale ? 0.033 : 0.042;
 
   // The lowest point of the character's geometry (the bottom of the soles) is at Y = -0.111 in local space.
   // We offset the whole model up by 0.111 * scaleY so that the bottom rests exactly at the global -0.9 floor.
@@ -541,21 +593,31 @@ export function ParametricMannequin({
         )}
       </group>
 
-      {/* ── NECK ── */}
-      <mesh position={[0, 1.59, 0]}>
-        <cylinderGeometry args={[
-          isFemale ? 0.038 : 0.048,
-          isFemale ? 0.045 : 0.055,
-          0.14, 32
-        ]} />
-        <meshStandardMaterial {...skinMat} />
-      </mesh>
+      {/* ── NECK — realistic tapered cylinder with sternocleidomastoid suggestion ── */}
+      <group position={[0, 1.585, 0]}>
+        {/* Main neck column — slightly wider at base */}
+        <mesh>
+          <cylinderGeometry args={[
+            isFemale ? 0.036 : 0.045,
+            isFemale ? 0.044 : 0.056,
+            0.13, 32
+          ]} />
+          <meshStandardMaterial {...skinMat} />
+        </mesh>
+        {/* Adam's apple suggestion (male only) */}
+        {!isFemale && (
+          <mesh position={[0, 0.012, 0.038]} scale={[0.55, 0.45, 0.30]}>
+            <sphereGeometry args={[0.032, 16, 12]} />
+            <meshStandardMaterial {...skinMat} />
+          </mesh>
+        )}
+      </group>
 
       {/* ── TORSO ── */}
       <group position={[0, 1.20, 0]}>
-        {/* Chest */}
-        <mesh position={[0, 0.16, 0]}>
-          <capsuleGeometry args={[chestR, 0.18, 32, 32]} />
+        {/* Chest — slimmer capsule, taller to look more natural */}
+        <mesh position={[0, 0.10, 0]}>
+          <capsuleGeometry args={[chestR, 0.22, 32, 32]} />
           <meshStandardMaterial {...shirtMat} />
         </mesh>
 
@@ -564,7 +626,7 @@ export function ParametricMannequin({
 
         {/* Female bust */}
         {isFemale && breastR > 0 && (
-          <group position={[0, 0.15, 0.12]}>
+          <group position={[0, 0.10, 0.12]}>
             <mesh position={[-0.065, 0, 0]} rotation={[0.25, -0.12, 0]}>
               <sphereGeometry args={[breastR, 32, 32]} />
               <meshStandardMaterial {...shirtMat} />
@@ -576,41 +638,30 @@ export function ParametricMannequin({
           </group>
         )}
 
-        {/* Male pecs (subtle) */}
-        {!isFemale && muscleDefinition > 0.2 && (
-          <group position={[0, 0.20, chestR * 0.85]}>
-            <mesh position={[-0.07, 0, 0]} scale={[1.2, 0.65, 0.15]}>
-              <sphereGeometry args={[chestR * 0.42, 20, 20]} />
-              <meshStandardMaterial {...shirtMat} />
-            </mesh>
-            <mesh position={[0.07, 0, 0]} scale={[1.2, 0.65, 0.15]}>
-              <sphereGeometry args={[chestR * 0.42, 20, 20]} />
-              <meshStandardMaterial {...shirtMat} />
-            </mesh>
-          </group>
-        )}
 
-        {/* Abdomen */}
-        <mesh position={[0, -0.1, 0]}>
-          <capsuleGeometry args={[waistR, 0.18, 32, 32]} />
-          <meshStandardMaterial {...shirtMat} />
-        </mesh>
+        {/* Abdomen/belly — bigger for Robusto thanks to bellyFat */}
+        <group scale={[isFemale ? 1 : bellyScaleX, 1, isFemale ? 1 : bellyScaleZ]}>
+          <mesh position={[0, -0.10, 0]}>
+            <capsuleGeometry args={[waistR, 0.20, 32, 32]} />
+            <meshStandardMaterial {...shirtMat} />
+          </mesh>
 
-        {/* Shirt hem at bottom (slight overhang) */}
-        <mesh position={[0, -0.22, 0]}>
-          <cylinderGeometry args={[waistR * 1.06, waistR * 1.1, 0.04, 32]} />
-          <meshStandardMaterial {...shirtMat} />
-        </mesh>
+          {/* Shirt hem */}
+          <mesh position={[0, -0.28, 0]}>
+            <cylinderGeometry args={[waistR * 1.06, waistR * 1.10, 0.04, 32]} />
+            <meshStandardMaterial {...shirtMat} />
+          </mesh>
+        </group>
       </group>
 
       {/* ── LEFT SHOULDER + ARM ── */}
-      <group position={[-shoulderX, 1.42, 0]}>
-        {/* Shoulder sphere */}
+      <group position={[-shoulderX, 1.50, 0]}>
+        {/* Shoulder sphere — smaller, natural */}
         <mesh>
-          <sphereGeometry args={[isFemale ? 0.042 : 0.054 * muscFactor, 32, 32]} />
+          <sphereGeometry args={[isFemale ? 0.038 : 0.042 * muscFactor * armMod, 32, 32]} />
           <meshStandardMaterial {...shirtMat} />
         </mesh>
-        <group rotation={[0, 0, -0.28]}>
+        <group rotation={[0, 0, -0.14]}>
           {/* Upper arm */}
           <mesh position={[0, -0.13, 0]}>
             <capsuleGeometry args={[upperArmR, 0.20, 16, 32]} />
@@ -629,34 +680,22 @@ export function ParametricMannequin({
             </mesh>
             {/* Tattoo sleeve */}
             {tattooLeftArm && <TattooSleeve isFemale={isFemale} />}
-            {/* Wrist */}
-            <mesh position={[0, -0.265, 0]}>
-              <sphereGeometry args={[foreArmR * 0.88, 20, 20]} />
+            {/* Wrist and Hand (single oval) */}
+            <mesh position={[0, -0.29, 0]} scale={[1.0, 1.3, 1.0]}>
+              <sphereGeometry args={[foreArmR * 1.05, 24, 24]} />
               <meshStandardMaterial {...skinMat} />
             </mesh>
-            {/* Hand (simplified palm + finger blob) */}
-            <group position={[0, -0.32, 0]}>
-              <mesh scale={[1.1, 0.8, 0.4]}>
-                <sphereGeometry args={[foreArmR * 1.2, 20, 20]} />
-                <meshStandardMaterial {...skinMat} />
-              </mesh>
-              {/* Thumb */}
-              <mesh position={[foreArmR * 0.9, 0.02, foreArmR * 0.2]} rotation={[0, 0, -0.5]}>
-                <capsuleGeometry args={[foreArmR * 0.25, 0.04, 8, 12]} />
-                <meshStandardMaterial {...skinMat} />
-              </mesh>
-            </group>
           </group>
         </group>
       </group>
 
       {/* ── RIGHT SHOULDER + ARM ── */}
-      <group position={[shoulderX, 1.42, 0]}>
+      <group position={[shoulderX, 1.50, 0]}>
         <mesh>
-          <sphereGeometry args={[isFemale ? 0.042 : 0.054 * muscFactor, 32, 32]} />
+          <sphereGeometry args={[isFemale ? 0.038 : 0.042 * muscFactor * armMod, 32, 32]} />
           <meshStandardMaterial {...shirtMat} />
         </mesh>
-        <group rotation={[0, 0, 0.28]}>
+        <group rotation={[0, 0, 0.14]}>
           <mesh position={[0, -0.13, 0]}>
             <capsuleGeometry args={[upperArmR, 0.20, 16, 32]} />
             <meshStandardMaterial {...shirtMat} />
@@ -670,20 +709,11 @@ export function ParametricMannequin({
               <capsuleGeometry args={[foreArmR, 0.23, 16, 32]} />
               <meshStandardMaterial {...skinMat} />
             </mesh>
-            <mesh position={[0, -0.265, 0]}>
-              <sphereGeometry args={[foreArmR * 0.88, 20, 20]} />
+            {/* Wrist and Hand (single oval) */}
+            <mesh position={[0, -0.29, 0]} scale={[1.0, 1.3, 1.0]}>
+              <sphereGeometry args={[foreArmR * 1.05, 24, 24]} />
               <meshStandardMaterial {...skinMat} />
             </mesh>
-            <group position={[0, -0.32, 0]}>
-              <mesh scale={[1.1, 0.8, 0.4]}>
-                <sphereGeometry args={[foreArmR * 1.2, 20, 20]} />
-                <meshStandardMaterial {...skinMat} />
-              </mesh>
-              <mesh position={[-foreArmR * 0.9, 0.02, foreArmR * 0.2]} rotation={[0, 0, 0.5]}>
-                <capsuleGeometry args={[foreArmR * 0.25, 0.04, 8, 12]} />
-                <meshStandardMaterial {...skinMat} />
-              </mesh>
-            </group>
           </group>
         </group>
       </group>
@@ -922,7 +952,7 @@ export function AvatarCreatorNative({
     { name: "Rojo", hex: "#a52a2a" },
     { name: "Gris Urbano", hex: "#606060" },
   ];
-  const hairStyles = ["Calvo", "Corto", "Largo", "Recogido"];
+  const hairStyles = ["Calvo", "Corto", "Largo", "Recogido", "Rizado"];
   const beardStyles = ["Ninguna", "Esbozo", "Corta", "Larga"];
   const bodyTypes = ["Delgado", "Normal", "Atlético", "Robusto"];
   const eyebrowStyles = ["Fino", "Normal", "Grueso"];

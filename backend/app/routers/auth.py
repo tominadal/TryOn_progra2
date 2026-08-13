@@ -1,5 +1,5 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -13,7 +13,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/login", response_model=Token)
 def login_access_token(
-    db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
+    db: Session = Depends(get_db), 
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    remember_me: bool = Form(False)
 ):
     """OAuth2 compatible token login, get an access token for future requests"""
     user = user_repo.get_by_email(db, email=form_data.username)
@@ -26,7 +28,11 @@ def login_access_token(
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
         
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    if remember_me:
+        access_token_expires = timedelta(days=30)
+    else:
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )

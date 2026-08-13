@@ -25,6 +25,9 @@ export default function LoginPage() {
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
+      if (rememberMe) {
+        formData.append("remember_me", "true");
+      }
 
       const data = await fetch("http://localhost:8000/api/v1/auth/login", {
         method: "POST",
