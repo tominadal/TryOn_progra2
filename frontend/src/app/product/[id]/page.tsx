@@ -11,14 +11,34 @@ import { toast } from "sonner";
 import { ShoppingCart, Ruler, Palette, CheckCircle2, Info } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Box } from "@react-three/drei";
-import { ParametricMannequin } from "@/components/AvatarCreatorNative";
+import { ParametricMannequin, ParametricPants } from "@/components/AvatarCreatorNative";
 
-// ── Talle → 3D scale modifier ────────────────────────────────────────────────
-const SIZE_SCALE: Record<string, number> = {
-  "26": 0.88, "28": 0.93, "30": 0.97, "32": 1.00,
-  "34": 1.05, "36": 1.10, "38": 1.16,
-  "S": 0.93, "M": 1.00, "L": 1.07, "XL": 1.15,
-};
+// ── Size Parsing Logic ───────────────────────────────────────────────────────
+function calculateSizeScale(size: string): number {
+  if (!size) return 1.0;
+  
+  const upperSize = size.toUpperCase().trim();
+  
+  // Standard letter sizes
+  const letterMap: Record<string, number> = {
+    "XXS": 0.85, "XS": 0.90, "S": 0.95, "M": 1.00, "L": 1.05, "XL": 1.10, "XXL": 1.15, "3XL": 1.20
+  };
+  if (letterMap[upperSize] !== undefined) {
+    return letterMap[upperSize];
+  }
+  
+  // Try to parse numeric size
+  const numMatch = upperSize.match(/\d+/);
+  if (numMatch) {
+    const numSize = parseInt(numMatch[0]);
+    // Standard jeans sizing base is often 32 for M.
+    // Each step is approx 2.5% scale difference.
+    return 1.0 + (numSize - 32) * 0.025;
+  }
+  
+  // Fallback for custom strings like "Único"
+  return 1.0;
+}
 
 interface GarmentImage {
   url: string;
@@ -44,6 +64,7 @@ interface Garment {
   material?: string;
   available_sizes: string[];
   available_colors: ColorOption[];
+  metadata_json?: any;
 }
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -137,9 +158,20 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   // ── Selected color drives TryOn pants color ──────────────────────────────
   const tryOnPantsColor = selectedColor?.hex || product.available_colors?.[0]?.hex || "#1e3a8a";
 
+  // ── Avatar scale ─────────────────────────────────────────────────────────
+  const avatarScaleY = avatarHeight / 170.0;
+  const avatarScaleXZ = Math.pow(avatarWeight / 70.0, 0.5);
+
   // ── Size drives pants scale in 3D ────────────────────────────────────────
-  const sizeScaleMod = SIZE_SCALE[selectedSize] ?? 1.0;
-  const tryOnScaleXZ = Math.pow(avatarWeight / 70.0, 0.5) * sizeScaleMod;
+  const sizeScaleMod = calculateSizeScale(selectedSize);
+
+  // ── AI Parameters ────────────────────────────────────────────────────────
+  const aiScaleX = product.metadata_json?.scale_x ?? 1.0;
+  const aiScaleY = product.metadata_json?.scale_y ?? 1.0;
+  
+  // Combine AI scale with Avatar size and weight
+  const finalPantsScaleX = aiScaleX * sizeScaleMod * avatarScaleXZ;
+  const finalPantsScaleY = aiScaleY * avatarScaleY;
 
   // ── Gallery images (from backend GarmentImage records) ───────────────────
   const galleryImages: string[] = product.images?.length
@@ -174,7 +206,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <directionalLight position={[5, 10, 5]} intensity={1.6} castShadow />
                     <directionalLight position={[-4, 4, -4]} intensity={0.5} />
                     <pointLight position={[0, 2.5, -2.5]} intensity={0.4} color="#b0d0ff" />
-                    <Environment preset="studio" />
+                    <Environment preset="city" />
 
                     {/* Fitting room */}
                     <group position={[0, -0.965, 0]}>
@@ -196,27 +228,34 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       </Box>
                     </group>
 
-                    <ParametricMannequin
-                      skinColor={avatarSkinColor}
-                      shirtColor={avatarData?.shirt_color || "#f8f8f8"}
-                      pantsColor={tryOnPantsColor}
-                      pantsFit={product.fit || "Regular"}
-                      shoesColor={avatarShoesColor}
-                      hairStyle={avatarHairStyle}
-                      hairColor={avatarHairColor}
-                      gender={avatarGender}
-                      glasses={avatarGlasses}
-                      scaleY={avatarHeight / 170.0}
-                      scaleXZ={tryOnScaleXZ}
-                      bodyType={avatarBodyType}
-                      muscleDefinition={avatarMuscle}
-                      beardStyle={avatarBeardStyle}
-                      beardColor={avatarBeardColor}
-                      eyebrowStyle={avatarEyebrow}
-                      hatStyle={avatarHat}
-                      shirtStyle={avatarShirtStyle}
-                      tattooLeftArm={avatarTattoo}
-                    />
+                    <group>
+                      <ParametricMannequin
+                        skinColor={avatarSkinColor}
+                        shirtColor={avatarData?.shirt_color || "#f8f8f8"}
+                        shoesColor={avatarShoesColor}
+                        hairStyle={avatarHairStyle}
+                        hairColor={avatarHairColor}
+                        gender={avatarGender}
+                        glasses={avatarGlasses}
+                        scaleY={avatarScaleY}
+                        scaleXZ={avatarScaleXZ}
+                        bodyType={avatarBodyType}
+                        muscleDefinition={avatarMuscle}
+                        beardStyle={avatarBeardStyle}
+                        beardColor={avatarBeardColor}
+                        eyebrowStyle={avatarEyebrow}
+                        hatStyle={avatarHat}
+                        shirtStyle={avatarShirtStyle}
+                        tattooLeftArm={avatarTattoo}
+                      />
+                      <ParametricPants
+                        color={tryOnPantsColor}
+                        scaleX={finalPantsScaleX}
+                        scaleY={finalPantsScaleY}
+                        pantsFit={product.fit || "Regular"}
+                        isFemale={avatarGender === "Mujer"}
+                      />
+                    </group>
                     <ContactShadows position={[0, -0.89, 0]} opacity={0.6} scale={5} blur={1.8} far={4} />
                     <OrbitControls
                       enablePan={false}
@@ -253,7 +292,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     className="w-full h-full object-cover animate-in fade-in duration-300"
                     key={galleryImages[activeImageIndex]}
                   />
-                  {product.model_3d_url && (
+                  {(product.model_3d_url || product.metadata_json?.scale_x) && (
                     <div className="absolute top-4 left-4 flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-green-200 shadow-sm">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Try-On 3D disponible
@@ -316,7 +355,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 mb-8 pb-8 border-b border-neutral-200 dark:border-neutral-800">
-              {product.model_3d_url ? (
+              {(product.model_3d_url || product.metadata_json?.scale_x) ? (
                 <button
                   onClick={handleTryOnToggle}
                   className={`flex-1 py-4 px-6 font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 text-sm ${

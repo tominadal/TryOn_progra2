@@ -49,16 +49,13 @@ interface AvatarCreatorNativeProps {
 // ──────────────────────────────────────────────────────────────────────────────
 //  FACE COMPONENT — Oval, realistic head
 // ──────────────────────────────────────────────────────────────────────────────
-function RealisticFace({ skinColor, isFemale, beardStyle, beardColor, eyebrowStyle }: {
+function RealisticFace({ skinColor, isFemale, eyebrowStyle }: {
   skinColor: string;
   isFemale: boolean;
-  beardStyle: string;
-  beardColor: string;
   eyebrowStyle: string;
 }) {
   const skinMat = { color: skinColor, roughness: 0.5, metalness: 0.05 };
-  const beardMat = { color: beardColor, roughness: 0.9, metalness: 0.0 };
-  const eyebrowThick = eyebrowStyle === "Grueso" ? 0.013 : eyebrowStyle === "Fino" ? 0.006 : 0.009;
+  const eyebrowThick = eyebrowStyle === "Grueso" ? 0.025 : eyebrowStyle === "Fino" ? 0.003 : 0.009;
   // Base sphere radius — the OVAL is achieved via scale on the parent group
   const headR = isFemale ? 0.128 : 0.134;
   // Oval scale: narrower X (0.86), taller Y (1.0), slightly shallow Z (0.93)
@@ -150,7 +147,7 @@ function RealisticFace({ skinColor, isFemale, beardStyle, beardColor, eyebrowSty
           rotation={[0, 0, side * -0.18]}
         >
           <boxGeometry args={[0.036, eyebrowThick, 0.007]} />
-          <meshStandardMaterial color={beardColor} roughness={0.9} />
+          <meshStandardMaterial color="#2d1a0e" roughness={0.9} />
         </mesh>
       ))}
 
@@ -172,31 +169,6 @@ function RealisticFace({ skinColor, isFemale, beardStyle, beardColor, eyebrowSty
           <meshStandardMaterial color="#7a3a30" roughness={0.9} />
         </mesh>
       </group>
-
-      {/* ── BEARD ── */}
-      {beardStyle !== "Ninguna" && !isFemale && (
-        <group>
-          {/* Stubble / short beard base — covers chin and jaw */}
-          <mesh position={[0, -headR * 0.57, headR * 0.70]} scale={[0.88, 0.58, 0.62]}>
-            <sphereGeometry args={[headR * 0.67, 24, 24]} />
-            <meshStandardMaterial {...beardMat} opacity={beardStyle === "Esbozo" ? 0.45 : 0.92} transparent />
-          </mesh>
-          {/* Moustache area */}
-          {(beardStyle === "Corta" || beardStyle === "Larga") && (
-            <mesh position={[0, -headR * 0.27, headR * 0.97]} scale={[1.85, 0.55, 0.38]}>
-              <sphereGeometry args={[0.024, 20, 10]} />
-              <meshStandardMaterial {...beardMat} />
-            </mesh>
-          )}
-          {/* Long beard drop */}
-          {beardStyle === "Larga" && (
-            <mesh position={[0, -headR * 1.15, headR * 0.35]}>
-              <capsuleGeometry args={[headR * 0.24, headR * 0.65, 12, 24]} />
-              <meshStandardMaterial {...beardMat} />
-            </mesh>
-          )}
-        </group>
-      )}
     </group>
   );
 }
@@ -265,136 +237,23 @@ function HairComponent({ hairStyle, hairColor, isFemale }: {
         <sphereGeometry args={[headR * 1.042, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.60]} />
         <meshStandardMaterial {...mat} />
       </mesh>
-      {/* Bun at top-back crown */}
-      <mesh position={[0, headR * 1.10, -headR * 0.20]} scale={[1.0, 0.88, 0.88]}>
-        <sphereGeometry args={[headR * 0.29, 24, 24]} />
+      {/* Bun at nape (back of neck) */}
+      <mesh position={[0, -headR * 0.35, -headR * 0.85]} scale={[1.2, 0.95, 0.95]}>
+        <sphereGeometry args={[headR * 0.35, 24, 24]} />
         <meshStandardMaterial {...mat} />
       </mesh>
       {/* Hair tie */}
-      <mesh position={[0, headR * 0.90, -headR * 0.20]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[headR * 0.25, 0.007, 8, 24]} />
+      <mesh position={[0, -headR * 0.25, -headR * 0.70]} rotation={[0.4, 0, 0]}>
+        <torusGeometry args={[headR * 0.25, 0.012, 8, 24]} />
         <meshStandardMaterial color="#111111" roughness={0.8} />
       </mesh>
     </group>
   );
 
-  // ── RIZADO — curly/afro: volumetric blob halo, face open ──
-  if (hairStyle === "Rizado") {
-    const curls: [number, number, number, number][] = [
-      [-headR*0.50,  headR*0.84,  headR*0.20,  0.038],
-      [ headR*0.50,  headR*0.84,  headR*0.20,  0.038],
-      [ 0,           headR*1.08,  0,            0.042],
-      [-headR*0.82,  headR*0.55,  0,            0.034],
-      [ headR*0.82,  headR*0.55,  0,            0.034],
-      [-headR*0.75,  headR*0.70, -headR*0.40,  0.035],
-      [ headR*0.75,  headR*0.70, -headR*0.40,  0.035],
-      [ 0,           headR*0.88, -headR*0.65,  0.040],
-      [-headR*0.52,  headR*0.45,  headR*0.40,  0.030],
-      [ headR*0.52,  headR*0.45,  headR*0.40,  0.030],
-      [ 0,           headR*0.48, -headR*0.88,  0.032],
-    ];
-    return (
-      <group scale={[hsx, 1.0, hsz]}>
-        {/* Base cap */}
-        <mesh position={[0, headR * 0.06, backZ]}>
-          <sphereGeometry args={[headR * 1.06, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.58]} />
-          <meshStandardMaterial {...mat} />
-        </mesh>
-        {curls.map(([x, y, z, cr], i) => (
-          <mesh key={i} position={[x, y, z]}>
-            <sphereGeometry args={[cr, 12, 12]} />
-            <meshStandardMaterial {...mat} />
-          </mesh>
-        ))}
-      </group>
-    );
-  }
-
   return null;
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-//  HAT COMPONENT
-// ──────────────────────────────────────────────────────────────────────────────
-function HatComponent({ hatStyle, isFemale }: { hatStyle: string; isFemale: boolean }) {
-  const r = isFemale ? 0.125 : 0.13;
-  if (hatStyle === "Ninguno") return null;
-
-  if (hatStyle === "Gorra") return (
-    <group position={[0, r * 0.85, 0]}>
-      {/* Cap dome */}
-      <mesh scale={[1.12, 0.7, 1.12]}>
-        <sphereGeometry args={[r * 1.1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial color="#1a1a1a" roughness={0.8} />
-      </mesh>
-      {/* Visor / brim */}
-      <mesh position={[0, -r * 0.35, r * 1.0]} rotation={[-0.3, 0, 0]} scale={[1, 0.12, 0.7]}>
-        <cylinderGeometry args={[r * 1.1, r * 1.2, 0.08, 20, 1, false, -Math.PI / 2, Math.PI]} />
-        <meshStandardMaterial color="#1a1a1a" roughness={0.7} />
-      </mesh>
-    </group>
-  );
-
-  if (hatStyle === "Sombrero") return (
-    <group position={[0, r * 0.8, 0]}>
-      <mesh scale={[1.15, 1.1, 1.15]}>
-        <sphereGeometry args={[r * 1.1, 32, 24, 0, Math.PI * 2, 0, Math.PI / 2.2]} />
-        <meshStandardMaterial color="#5c3d11" roughness={0.9} />
-      </mesh>
-      {/* Wide brim */}
-      <mesh position={[0, -r * 0.5, 0]} rotation={[0, 0, 0]}>
-        <cylinderGeometry args={[r * 2.0, r * 2.0, 0.04, 32]} />
-        <meshStandardMaterial color="#5c3d11" roughness={0.9} />
-      </mesh>
-    </group>
-  );
-
-  if (hatStyle === "Headband") return (
-    <mesh position={[0, r * 0.3, 0]} rotation={[0.1, 0, 0]}>
-      <torusGeometry args={[r * 1.08, 0.025, 12, 40, Math.PI * 1.6]} />
-      <meshStandardMaterial color="#e11d48" roughness={0.7} />
-    </mesh>
-  );
-
-  return null;
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-//  TATTOO SLEEVE
-// ──────────────────────────────────────────────────────────────────────────────
-function TattooSleeve({ isFemale }: { isFemale: boolean }) {
-  const r = isFemale ? 0.035 : 0.045;
-  return (
-    <group>
-      {/* Decorative tattoo rings on forearm */}
-      {[0, 0.05, 0.10, 0.15].map((offset, i) => (
-        <mesh key={i} position={[0, -0.11 - offset, 0]}>
-          <torusGeometry args={[r * 1.15, 0.005, 6, 20]} />
-          <meshStandardMaterial color={i % 2 === 0 ? "#1a1a2e" : "#4a0e8f"} roughness={0.5} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-//  SHIRT COMPONENT — Collar/neckline varies by style
-// ──────────────────────────────────────────────────────────────────────────────
-function ShirtCollars({ shirtStyle, shirtColor, isFemale }: {
-  shirtStyle: string; shirtColor: string; isFemale: boolean;
-}) {
-  const mat = { color: shirtColor, roughness: 0.85 };
-  if (shirtStyle === "Polo") return null;
-  if (shirtStyle === "V-Neck") return (
-    <group position={[0, 0.16, 0.14]}>
-      <mesh rotation={[0.4, 0, 0]}>
-        <torusGeometry args={[0.08, 0.015, 8, 3, Math.PI]} />
-        <meshStandardMaterial {...mat} />
-      </mesh>
-    </group>
-  );
-  return null; // Basic — no collar
-}
+// Removed HatComponent, TattooSleeve and ShirtCollars
 
 // ──────────────────────────────────────────────────────────────────────────────
 //  MAIN PARAMETRIC MANNEQUIN — High-realism humanoid
@@ -409,16 +268,11 @@ export function ParametricMannequin({
   scaleY,
   scaleXZ,
   gender,
-  glasses = false,
   pantsFit = "Regular",
   bodyType = "Normal",
   muscleDefinition = 0.3,
-  beardStyle = "Ninguna",
-  beardColor = "#2d1a0e",
   eyebrowStyle = "Normal",
-  hatStyle = "Ninguno",
-  shirtStyle = "Basic",
-  tattooLeftArm = false,
+  tattooArm = "Ninguno",
 }: {
   skinColor: string;
   shirtColor: string;
@@ -429,24 +283,20 @@ export function ParametricMannequin({
   scaleY: number;
   scaleXZ: number;
   gender: string;
-  glasses?: boolean;
   pantsFit?: string;
   bodyType?: string;
   muscleDefinition?: number;
-  beardStyle?: string;
-  beardColor?: string;
   eyebrowStyle?: string;
-  hatStyle?: string;
-  shirtStyle?: string;
-  tattooLeftArm?: boolean;
+  tattooArm?: string;
 }) {
-  const [cottonTex, leatherTex, denimTex] = useTexture([
+  const [cottonTex, leatherTex, denimTex, tattooTex] = useTexture([
     "/textures/cotton.png",
     "/textures/leather.png",
     "/textures/denim.png",
+    "/textures/tattoo_maori.png",
   ]);
 
-  [cottonTex, leatherTex, denimTex].forEach((tex) => {
+  [cottonTex, leatherTex, denimTex, tattooTex].forEach((tex) => {
     if (tex) {
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
@@ -547,50 +397,11 @@ export function ParametricMannequin({
         <RealisticFace
           skinColor={skinColor}
           isFemale={isFemale}
-          beardStyle={beardStyle || "Ninguna"}
-          beardColor={beardColor || "#2d1a0e"}
           eyebrowStyle={eyebrowStyle || "Normal"}
         />
 
         {/* Hair */}
         <HairComponent hairStyle={hairStyle} hairColor={hairColor} isFemale={isFemale} />
-
-        {/* Hat (on top of hair) */}
-        <HatComponent hatStyle={hatStyle || "Ninguno"} isFemale={isFemale} />
-
-        {/* Glasses */}
-        {glasses && (
-          <group position={[0, 0.022, 0.13]} scale={[1.25, 1.25, 1.25]}>
-            <mesh position={[-0.038, 0, 0]}>
-              <planeGeometry args={[0.055, 0.038]} />
-              <meshStandardMaterial {...glassMat} />
-            </mesh>
-            <mesh position={[0.038, 0, 0]}>
-              <planeGeometry args={[0.055, 0.038]} />
-              <meshStandardMaterial {...glassMat} />
-            </mesh>
-            {/* Frames */}
-            <mesh position={[-0.038, 0, 0]}>
-              <ringGeometry args={[0.022, 0.028, 20]} />
-              <meshStandardMaterial {...frameMat} />
-            </mesh>
-            <mesh position={[0.038, 0, 0]}>
-              <ringGeometry args={[0.022, 0.028, 20]} />
-              <meshStandardMaterial {...frameMat} />
-            </mesh>
-            {/* Bridge */}
-            <mesh><boxGeometry args={[0.016, 0.005, 0.004]} /><meshStandardMaterial {...frameMat} /></mesh>
-            {/* Temples */}
-            <mesh position={[-0.065, 0, -0.042]} rotation={[0, Math.PI / 2, 0]}>
-              <boxGeometry args={[0.085, 0.004, 0.004]} />
-              <meshStandardMaterial {...frameMat} />
-            </mesh>
-            <mesh position={[0.065, 0, -0.042]} rotation={[0, Math.PI / 2, 0]}>
-              <boxGeometry args={[0.085, 0.004, 0.004]} />
-              <meshStandardMaterial {...frameMat} />
-            </mesh>
-          </group>
-        )}
       </group>
 
       {/* ── NECK — realistic tapered cylinder with sternocleidomastoid suggestion ── */}
@@ -621,8 +432,7 @@ export function ParametricMannequin({
           <meshStandardMaterial {...shirtMat} />
         </mesh>
 
-        {/* Shirt collar details */}
-        <ShirtCollars shirtStyle={shirtStyle || "Basic"} shirtColor={shirtColor} isFemale={isFemale} />
+        {/* Basic shirt style only */}
 
         {/* Female bust */}
         {isFemale && breastR > 0 && (
@@ -646,11 +456,7 @@ export function ParametricMannequin({
             <meshStandardMaterial {...shirtMat} />
           </mesh>
 
-          {/* Shirt hem */}
-          <mesh position={[0, -0.28, 0]}>
-            <cylinderGeometry args={[waistR * 1.06, waistR * 1.10, 0.04, 32]} />
-            <meshStandardMaterial {...shirtMat} />
-          </mesh>
+          {/* Removed Shirt hem as requested */}
         </group>
       </group>
 
@@ -679,7 +485,12 @@ export function ParametricMannequin({
               <meshStandardMaterial {...skinMat} />
             </mesh>
             {/* Tattoo sleeve */}
-            {tattooLeftArm && <TattooSleeve isFemale={isFemale} />}
+            {tattooArm === "Brazo Izquierdo" && (
+              <mesh position={[0, -0.12, 0]}>
+                <capsuleGeometry args={[foreArmR * 1.01, 0.23, 16, 32]} />
+                <meshStandardMaterial map={tattooTex} transparent color="#0a0a0a" roughness={0.7} opacity={0.85} alphaTest={0.1} />
+              </mesh>
+            )}
             {/* Wrist and Hand (single oval) */}
             <mesh position={[0, -0.29, 0]} scale={[1.0, 1.3, 1.0]}>
               <sphereGeometry args={[foreArmR * 1.05, 24, 24]} />
@@ -709,6 +520,13 @@ export function ParametricMannequin({
               <capsuleGeometry args={[foreArmR, 0.23, 16, 32]} />
               <meshStandardMaterial {...skinMat} />
             </mesh>
+            {/* Tattoo sleeve */}
+            {tattooArm === "Brazo Derecho" && (
+              <mesh position={[0, -0.12, 0]}>
+                <capsuleGeometry args={[foreArmR * 1.01, 0.23, 16, 32]} />
+                <meshStandardMaterial map={tattooTex} transparent color="#0a0a0a" roughness={0.7} opacity={0.85} alphaTest={0.1} />
+              </mesh>
+            )}
             {/* Wrist and Hand (single oval) */}
             <mesh position={[0, -0.29, 0]} scale={[1.0, 1.3, 1.0]}>
               <sphereGeometry args={[foreArmR * 1.05, 24, 24]} />
@@ -808,30 +626,36 @@ export function ParametricMannequin({
 
       {/* ── RIGHT LEG ── */}
       <group position={[isFemale ? 0.095 : 0.088, 0.82, 0]}>
+        {/* Thigh */}
         <mesh position={[0, -0.24, 0]}>
           <capsuleGeometry args={[isSkirt ? thighR * 0.9 : thighR, 0.30, 16, 32]} />
           <meshStandardMaterial {...thighMat} />
         </mesh>
+        {/* Bermuda Hem */}
         {isBermuda && (
           <mesh position={[0, -0.4, 0]}>
             <cylinderGeometry args={[thighR * 1.05, thighR * 1.05, 0.03, 32]} />
             <meshStandardMaterial {...deniMat} />
           </mesh>
         )}
+        {/* Knee */}
         <mesh position={[0, -0.43, 0.018]}>
           <sphereGeometry args={[isSkirt || isBermuda ? thighR * 0.8 : thighR * 0.88, 28, 28]} />
           <meshStandardMaterial {...kneeMat} />
         </mesh>
+        {/* Cargo pocket (Relaxed fit only) */}
         {pantsFit === "Relaxed" && (
           <mesh position={[thighR * 0.85, -0.25, 0]} scale={[0.4, 0.5, 0.2]}>
             <boxGeometry args={[0.1, 0.12, 0.04]} />
             <meshStandardMaterial {...deniMat} />
           </mesh>
         )}
+        {/* Calf */}
         <mesh position={[0, -0.64, 0]}>
           <capsuleGeometry args={[isSkirt || isBermuda ? calfR * 0.9 : calfR, 0.28, 16, 32]} />
           <meshStandardMaterial {...lowerLegMat} />
         </mesh>
+        {/* Flared extension */}
         {isFlared && (
           <mesh position={[0, -0.72, 0]}>
             <cylinderGeometry args={[calfR, calfR * 1.8, 0.35, 32]} />
@@ -880,15 +704,9 @@ export function AvatarCreatorNative({
   initialHairStyle = "Corto",
   initialHairColor = "#1a0a00",
   initialGender = "Hombre",
-  initialGlasses = false,
   initialBodyType = "Normal",
   initialMuscleDefinition = 0.3,
-  initialBeardStyle = "Ninguna",
-  initialBeardColor = "#2d1a0e",
   initialEyebrowStyle = "Normal",
-  initialHatStyle = "Ninguno",
-  initialShirtStyle = "Basic",
-  initialTattooLeftArm = false,
 }: AvatarCreatorNativeProps) {
   type TabType = "body" | "face" | "clothes" | "extras";
   const [activeTab, setActiveTab] = useState<TabType>("body");
@@ -904,19 +722,14 @@ export function AvatarCreatorNative({
   // Face / Head
   const [hairStyle, setHairStyle] = useState(initialHairStyle);
   const [hairColor, setHairColor] = useState(initialHairColor);
-  const [beardStyle, setBeardStyle] = useState(initialBeardStyle);
-  const [beardColor, setBeardColor] = useState(initialBeardColor);
   const [eyebrowStyle, setEyebrowStyle] = useState(initialEyebrowStyle);
-  const [glasses, setGlasses] = useState(initialGlasses);
-  const [hatStyle, setHatStyle] = useState(initialHatStyle);
 
   // Clothes
   const [shirtColor, setShirtColor] = useState(initialShirtColor);
-  const [shirtStyle, setShirtStyle] = useState(initialShirtStyle);
   const [shoesColor, setShoesColor] = useState(initialShoesColor);
 
   // Extras
-  const [tattooLeftArm, setTattooLeftArm] = useState(initialTattooLeftArm);
+  const [tattooArm, setTattooArm] = useState("Ninguno");
 
   const scaleY = heightCm / 170.0;
   const scaleXZ = Math.pow(weightKg / 70.0, 0.5);
@@ -952,12 +765,9 @@ export function AvatarCreatorNative({
     { name: "Rojo", hex: "#a52a2a" },
     { name: "Gris Urbano", hex: "#606060" },
   ];
-  const hairStyles = ["Calvo", "Corto", "Largo", "Recogido", "Rizado"];
-  const beardStyles = ["Ninguna", "Esbozo", "Corta", "Larga"];
+  const hairStyles = ["Calvo", "Corto", "Largo", "Recogido"];
   const bodyTypes = ["Delgado", "Normal", "Atlético", "Robusto"];
   const eyebrowStyles = ["Fino", "Normal", "Grueso"];
-  const hatStyles = ["Ninguno", "Gorra", "Sombrero", "Headband"];
-  const shirtStyles = ["Basic", "V-Neck", "Polo"];
 
   const handleSave = () => {
     onAvatarExported(
@@ -970,15 +780,15 @@ export function AvatarCreatorNative({
       hairStyle,
       hairColor,
       gender,
-      glasses,
+      false, // glasses
       bodyType,
       muscleDefinition,
-      beardStyle,
-      beardColor,
+      "Ninguna", // beardStyle
+      "#2d1a0e", // beardColor
       eyebrowStyle,
-      hatStyle,
-      shirtStyle,
-      tattooLeftArm,
+      "Ninguno", // hatStyle
+      "Basic", // shirtStyle
+      tattooArm === "Brazo Izquierdo" ? true : false,
     );
   };
 
@@ -1000,7 +810,7 @@ export function AvatarCreatorNative({
           <directionalLight position={[-4, 4, -3]} intensity={0.5} />
           {/* Rim light for depth */}
           <pointLight position={[0, 2.5, -2.5]} intensity={0.4} color="#b0d0ff" />
-          <Environment preset="studio" />
+          <Environment preset="city" />
 
           <ParametricMannequin
             skinColor={skinColor}
@@ -1009,17 +819,12 @@ export function AvatarCreatorNative({
             hairStyle={hairStyle}
             hairColor={hairColor}
             gender={gender}
-            glasses={glasses}
             scaleY={scaleY}
             scaleXZ={scaleXZ}
             bodyType={bodyType}
             muscleDefinition={muscleDefinition}
-            beardStyle={beardStyle}
-            beardColor={beardColor}
             eyebrowStyle={eyebrowStyle}
-            hatStyle={hatStyle}
-            shirtStyle={shirtStyle}
-            tattooLeftArm={tattooLeftArm}
+            tattooArm={tattooArm}
           />
           <ContactShadows position={[0, -0.9, 0]} opacity={0.45} scale={5} blur={2.2} far={4} />
           <OrbitControls
@@ -1166,21 +971,6 @@ export function AvatarCreatorNative({
           {activeTab === "face" && (
             <div className="space-y-7 animate-in fade-in slide-in-from-right-4 duration-300">
 
-              {/* Glasses */}
-              <div className="space-y-3">
-                <label className="text-sm font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-2"><Glasses className="w-4 h-4"/> Gafas</label>
-                <div className="flex gap-3">
-                  {[{label: "Con gafas", val: true}, {label: "Sin gafas", val: false}].map((opt) => (
-                    <button key={String(opt.val)} onClick={() => setGlasses(opt.val)}
-                      className={`flex-1 py-2.5 font-bold rounded-xl border-2 text-sm transition-all ${glasses === opt.val
-                        ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700"
-                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500"
-                      }`}
-                    >{opt.label}</button>
-                  ))}
-                </div>
-              </div>
-
               {/* Hair Style */}
               <div className="space-y-3">
                 <label className="text-sm font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-2"><Scissors className="w-4 h-4"/> Peinado</label>
@@ -1211,37 +1001,6 @@ export function AvatarCreatorNative({
                 </div>
               </div>
 
-              {/* Beard (hidden for female) */}
-              {!( gender === "Mujer") && (
-                <div className="space-y-3">
-                  <label className="text-sm font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-2"><User className="w-4 h-4"/> Barba</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {beardStyles.map((s) => (
-                      <button key={s} onClick={() => setBeardStyle(s)}
-                        className={`py-2.5 text-xs font-bold rounded-xl border-2 transition-all ${beardStyle === s
-                          ? "bg-amber-50 dark:bg-amber-900/20 border-amber-600 text-amber-700 dark:text-amber-400"
-                          : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300"
-                        }`}
-                      >{s}</button>
-                    ))}
-                  </div>
-                  {/* Beard Color */}
-                  <div className={`transition-opacity ${beardStyle === "Ninguna" ? "opacity-30 pointer-events-none" : ""}`}>
-                    <label className="text-xs font-semibold text-neutral-600 dark:text-neutral-400 block mb-2">Color de Barba</label>
-                    <div className="flex gap-2 flex-wrap">
-                      {hairColors.map((c) => (
-                        <button key={c.hex} onClick={() => setBeardColor(c.hex)}
-                          className={`w-9 h-9 rounded-full border border-neutral-300 dark:border-neutral-700 transition-all flex items-center justify-center ${beardColor === c.hex ? "scale-110 ring-4 ring-amber-400/40" : "hover:scale-105"}`}
-                          style={{ backgroundColor: c.hex }} title={c.name}
-                        >
-                          {beardColor === c.hex && <Check className="w-3 h-3 text-white/90 mix-blend-difference" />}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Eyebrows */}
               <div className="space-y-3">
                 <label className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Cejas</label>
@@ -1256,42 +1015,12 @@ export function AvatarCreatorNative({
                   ))}
                 </div>
               </div>
-
-              {/* Hat */}
-              <div className="space-y-3">
-                <label className="text-sm font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-2"><Sparkles className="w-4 h-4"/> Accesorio</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {hatStyles.map((s) => (
-                    <button key={s} onClick={() => setHatStyle(s)}
-                      className={`py-2.5 text-xs font-bold rounded-xl border-2 transition-all ${hatStyle === s
-                        ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 text-emerald-700"
-                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300"
-                      }`}
-                    >{s}</button>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
           {/* ── CLOTHES TAB ── */}
           {activeTab === "clothes" && (
             <div className="space-y-7 animate-in fade-in slide-in-from-right-4 duration-300">
-
-              {/* Shirt Style */}
-              <div className="space-y-3">
-                <label className="text-sm font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-2"><Shirt className="w-4 h-4"/> Estilo de Camiseta</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {shirtStyles.map((s) => (
-                    <button key={s} onClick={() => setShirtStyle(s)}
-                      className={`py-2.5 text-xs font-bold rounded-xl border-2 transition-all ${shirtStyle === s
-                        ? "bg-rose-50 dark:bg-rose-900/20 border-rose-600 text-rose-700 dark:text-rose-400"
-                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300"
-                      }`}
-                    >{s}</button>
-                  ))}
-                </div>
-              </div>
 
               {/* Shirt Color */}
               <div className="space-y-3">
@@ -1330,18 +1059,18 @@ export function AvatarCreatorNative({
             <div className="space-y-7 animate-in fade-in slide-in-from-right-4 duration-300">
 
               <div className="space-y-3">
-                <label className="text-sm font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-2"><PenTool className="w-4 h-4"/> Tatuaje Brazo Izquierdo</label>
-                <div className="flex gap-3">
-                  {[{label: "Con tatuaje", val: true}, {label: "Sin tatuaje", val: false}].map((opt) => (
-                    <button key={String(opt.val)} onClick={() => setTattooLeftArm(opt.val)}
-                      className={`flex-1 py-2.5 font-bold rounded-xl border-2 text-sm transition-all ${tattooLeftArm === opt.val
+                <label className="text-sm font-bold text-neutral-800 dark:text-neutral-200 flex items-center gap-2"><PenTool className="w-4 h-4"/> Tatuajes</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {["Ninguno", "Brazo Izquierdo", "Brazo Derecho"].map((opt) => (
+                    <button key={opt} onClick={() => setTattooArm(opt)}
+                      className={`py-2.5 font-bold rounded-xl border-2 text-xs transition-all ${tattooArm === opt
                         ? "bg-purple-50 dark:bg-purple-900/20 border-purple-600 text-purple-700"
-                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500"
+                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300"
                       }`}
-                    >{opt.label}</button>
+                    >{opt}</button>
                   ))}
                 </div>
-                {tattooLeftArm && (
+                {tattooArm !== "Ninguno" && (
                   <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                     ✨ Mangas de tatuaje tribal visibles en el brazo izquierdo del maniquí.
                   </p>
@@ -1356,10 +1085,7 @@ export function AvatarCreatorNative({
                   ["Cuerpo", `${bodyType} · ${Math.round(muscleDefinition * 100)}% músculo`],
                   ["Medidas", `${heightCm} cm · ${weightKg} kg`],
                   ["Cabello", `${hairStyle}`],
-                  ...(!( gender === "Mujer") ? [["Barba", beardStyle] as [string,string]] : []),
-                  ["Gafas", glasses ? "Sí" : "No"],
-                  ["Accesorio", hatStyle],
-                  ["Camiseta", shirtStyle],
+                  ["Tatuajes", tattooArm],
                 ].map(([key, val]) => (
                   <div key={key} className="flex justify-between text-xs">
                     <span className="text-neutral-500 dark:text-neutral-400">{key}</span>
@@ -1382,5 +1108,180 @@ export function AvatarCreatorNative({
         </div>
       </div>
     </div>
+  );
+}
+
+
+export function ParametricPants({
+  color = "#1e3a8a",
+  avatarScaleXZ = 1.0,
+  avatarScaleY = 1.0,
+  pantsScaleX = 1.0,
+  pantsScaleY = 1.0,
+  pantsFit = "Regular",
+  isFemale = false,
+}: {
+  color?: string;
+  avatarScaleXZ?: number;
+  avatarScaleY?: number;
+  pantsScaleX?: number;
+  pantsScaleY?: number;
+  pantsFit?: string;
+  isFemale?: boolean;
+}) {
+  const [denimTex] = useTexture(["/textures/denim.png"]);
+  if (denimTex) {
+    denimTex.wrapS = THREE.RepeatWrapping;
+    denimTex.wrapT = THREE.RepeatWrapping;
+    denimTex.repeat.set(2, 2);
+  }
+  
+  const deniMat = {
+    color: color,
+    map: denimTex,
+    roughness: 0.82,
+    metalness: 0.02,
+  };
+
+  let thighMod = 0, calfMod = 0, hipMod = 0;
+  switch (pantsFit) {
+    case "Skinny":
+      thighMod = -0.015; calfMod = -0.018; break;
+    case "Wide Leg":
+      thighMod = 0.03; calfMod = 0.038; break;
+    case "Relaxed":
+      thighMod = 0.02; calfMod = 0.025; break;
+    case "Mom Fit":
+      hipMod = 0.025; thighMod = 0.012; calfMod = -0.005; break;
+    case "Skinny-Mom":
+      hipMod = 0.02; thighMod = -0.008; calfMod = -0.015; break;
+    case "Bermuda":
+      thighMod = 0.01; break;
+    case "Flared":
+      hipMod = 0.01; thighMod = -0.01; calfMod = -0.015; break;
+    case "Skirt":
+      hipMod = 0.01; thighMod = -0.01; calfMod = -0.01; break;
+  }
+
+  const isBermuda = pantsFit === "Bermuda";
+  const isSkirt = pantsFit === "Skirt";
+  const isFlared = pantsFit === "Flared";
+
+  const hipR_base = isFemale ? 0.145 : 0.125;
+  
+  // We add an offset so it sits *outside* the skin.
+  const offset = 0.008;
+  const finalHipR = (hipR_base + hipMod + offset * 1.5) * pantsScaleX;
+  const thighR = ((isFemale ? 0.068 : 0.062) + thighMod + offset) * pantsScaleX;
+  const calfR = ((isFemale ? 0.046 : 0.05) + calfMod + offset) * pantsScaleX;
+  
+  const modelY = -0.9 + (0.111 * avatarScaleY);
+
+  return (
+    <group scale={[avatarScaleXZ, avatarScaleY, avatarScaleXZ]} position={[0, modelY, 0]}>
+      {/* ── HIPS / PELVIS ── */}
+      <mesh position={[0, 0.87, 0]}>
+        <sphereGeometry args={[finalHipR, 32, 32]} />
+        <meshStandardMaterial {...deniMat} />
+      </mesh>
+
+      {isSkirt && (
+        <mesh position={[0, 0.65, 0]}>
+          <cylinderGeometry args={[finalHipR * 1.02, finalHipR * 1.3, 0.45, 32]} />
+          <meshStandardMaterial {...deniMat} />
+        </mesh>
+      )}
+
+      {/* Belt */}
+      <mesh position={[0, 0.90, 0]}>
+        <cylinderGeometry args={[finalHipR * 1.03, finalHipR * 1.03, 0.04, 32]} />
+        <meshStandardMaterial color="#111" roughness={0.9} />
+      </mesh>
+      {/* Belt buckle */}
+      <mesh position={[0, 0.90, finalHipR * 1.05]}>
+        <boxGeometry args={[0.04, 0.038, 0.01]} />
+        <meshStandardMaterial color="#c0a060" roughness={0.2} metalness={0.85} />
+      </mesh>
+
+      {/* ── LEFT LEG ── */}
+      {!isSkirt && (
+        <group position={[isFemale ? -0.095 : -0.088, 0.82, 0]} scale={[1, pantsScaleY, 1]}>
+          <mesh position={[0, -0.24, 0]}>
+            <capsuleGeometry args={[thighR, 0.30, 16, 32]} />
+            <meshStandardMaterial {...deniMat} />
+          </mesh>
+          {isBermuda && (
+            <mesh position={[0, -0.4, 0]}>
+              <cylinderGeometry args={[thighR * 1.05, thighR * 1.05, 0.03, 32]} />
+              <meshStandardMaterial {...deniMat} />
+            </mesh>
+          )}
+          {!isBermuda && (
+            <>
+              <mesh position={[0, -0.43, 0.018]}>
+                <sphereGeometry args={[thighR * 0.88, 28, 28]} />
+                <meshStandardMaterial {...deniMat} />
+              </mesh>
+              {pantsFit === "Relaxed" && (
+                <mesh position={[-thighR * 0.85, -0.25, 0]} scale={[0.4, 0.5, 0.2]}>
+                  <boxGeometry args={[0.1, 0.12, 0.04]} />
+                  <meshStandardMaterial {...deniMat} />
+                </mesh>
+              )}
+              <mesh position={[0, -0.64, 0]}>
+                <capsuleGeometry args={[calfR, 0.28, 16, 32]} />
+                <meshStandardMaterial {...deniMat} />
+              </mesh>
+              {isFlared && (
+                <mesh position={[0, -0.72, 0]}>
+                  <cylinderGeometry args={[calfR, calfR * 1.8, 0.35, 32]} />
+                  <meshStandardMaterial {...deniMat} />
+                </mesh>
+              )}
+            </>
+          )}
+        </group>
+      )}
+
+      {/* ── RIGHT LEG ── */}
+      {!isSkirt && (
+        <group position={[isFemale ? 0.095 : 0.088, 0.82, 0]} scale={[1, pantsScaleY, 1]}>
+          <mesh position={[0, -0.24, 0]}>
+            <capsuleGeometry args={[thighR, 0.30, 16, 32]} />
+            <meshStandardMaterial {...deniMat} />
+          </mesh>
+          {isBermuda && (
+            <mesh position={[0, -0.4, 0]}>
+              <cylinderGeometry args={[thighR * 1.05, thighR * 1.05, 0.03, 32]} />
+              <meshStandardMaterial {...deniMat} />
+            </mesh>
+          )}
+          {!isBermuda && (
+            <>
+              <mesh position={[0, -0.43, 0.018]}>
+                <sphereGeometry args={[thighR * 0.88, 28, 28]} />
+                <meshStandardMaterial {...deniMat} />
+              </mesh>
+              {pantsFit === "Relaxed" && (
+                <mesh position={[thighR * 0.85, -0.25, 0]} scale={[0.4, 0.5, 0.2]}>
+                  <boxGeometry args={[0.1, 0.12, 0.04]} />
+                  <meshStandardMaterial {...deniMat} />
+                </mesh>
+              )}
+              <mesh position={[0, -0.64, 0]}>
+                <capsuleGeometry args={[calfR, 0.28, 16, 32]} />
+                <meshStandardMaterial {...deniMat} />
+              </mesh>
+              {isFlared && (
+                <mesh position={[0, -0.72, 0]}>
+                  <cylinderGeometry args={[calfR, calfR * 1.8, 0.35, 32]} />
+                  <meshStandardMaterial {...deniMat} />
+                </mesh>
+              )}
+            </>
+          )}
+        </group>
+      )}
+    </group>
   );
 }
