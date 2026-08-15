@@ -1,20 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
+  
+  // Show toast if redirected due to expired session
+  if (typeof window !== 'undefined' && searchParams.get('expired') === 'true') {
+    // Prevent showing toast on every render by replacing the URL
+    window.history.replaceState(null, '', '/login');
+    setTimeout(() => toast.error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'), 100);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,9 +62,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold tracking-tighter mb-2 text-black dark:text-white">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <span className="text-white text-lg">V</span>
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain dark:invert" />
             TryOn <span className="text-neutral-500">Hub</span>
           </Link>
           <h1 className="text-2xl font-semibold mt-6">Bienvenido de nuevo</h1>
@@ -126,5 +132,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center p-6"><div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

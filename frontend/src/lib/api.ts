@@ -26,6 +26,10 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   });
 
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      window.location.href = '/login?expired=true';
+    }
     const errorData = await response.json().catch(() => ({}));
     const detail = Array.isArray(errorData.detail) ? JSON.stringify(errorData.detail) : errorData.detail;
     throw new Error(detail || `Request failed with status ${response.status}`);

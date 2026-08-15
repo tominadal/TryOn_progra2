@@ -54,9 +54,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold tracking-tighter mb-2 text-black dark:text-white">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <span className="text-white text-lg">V</span>
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain dark:invert" />
             TryOn <span className="text-neutral-500">Hub</span>
           </Link>
           <h1 className="text-2xl font-semibold mt-6">Crea una cuenta</h1>
