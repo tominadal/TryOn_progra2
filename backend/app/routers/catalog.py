@@ -282,8 +282,19 @@ class GarmentCreate(BaseModel):
     price: float
     fit: str = "Regular"
     color: str = "Blue"
+    color_hex: str = "#1e3a8a"
     sizes: List[str] = ["S", "M", "L", "XL"]
     image_url: str = "/products/jean_classic.png"
+    generate_3d: bool = True
+    material: Optional[str] = None
+    waist_rise: Optional[str] = None
+    description: Optional[str] = None
+    texture: Optional[str] = None
+    elasticity: Optional[str] = None
+    fabric_weight: Optional[str] = None
+    distress_level: Optional[int] = 0
+    has_cuffs: Optional[bool] = False
+    has_pleats: Optional[bool] = False
 
 
 @router.get("/brand")
@@ -329,29 +340,44 @@ def create_garment(
             size=garment_in.sizes[0] if garment_in.sizes else "M",
             color=garment_in.color,
             price=garment_in.price,
-            is_processed=True,
+            material=garment_in.material,
+            description=garment_in.description,
+            is_processed=garment_in.generate_3d,
             available_sizes=garment_in.sizes,
             available_colors=[],
         )
         db.add(new_garment)
         db.flush() # Flush instead of commit to get ID but keep in transaction
 
-        # Process with AI
-        strategy = GeminiTryOnStrategy()
-        asset_data = strategy.process_garment({
-            "SKU": new_garment.sku,
-            "Name": new_garment.name,
-            "Fit": new_garment.fit,
-            "Size": new_garment.size,
-            "Color": new_garment.color,
-            "Price": new_garment.price,
-            "image_url": garment_in.image_url or "",
-        })
+        metadata_json = {}
+        if garment_in.generate_3d:
+            # Process with AI
+            strategy = GeminiTryOnStrategy()
+            asset_data = strategy.process_garment({
+                "SKU": new_garment.sku,
+                "Name": new_garment.name,
+                "Fit": new_garment.fit,
+                "Size": new_garment.size,
+                "Color": new_garment.color,
+                "Price": new_garment.price,
+                "Material": garment_in.material,
+                "Description": garment_in.description,
+                "Waist_Rise": garment_in.waist_rise,
+                "color_hex": garment_in.color_hex,
+                "texture": garment_in.texture,
+                "elasticity": garment_in.elasticity,
+                "fabric_weight": garment_in.fabric_weight,
+                "distress_level": garment_in.distress_level,
+                "has_cuffs": garment_in.has_cuffs,
+                "has_pleats": garment_in.has_pleats,
+                "image_url": garment_in.image_url or "",
+            })
+            metadata_json = asset_data["metadata_json"]
 
         asset = GarmentAsset(
             garment_id=new_garment.id,
             ai_generated_image_url=garment_in.image_url,
-            metadata_json=asset_data["metadata_json"],
+            metadata_json=metadata_json,
         )
         db.add(asset)
         

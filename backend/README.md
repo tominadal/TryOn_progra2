@@ -176,13 +176,13 @@ app/
 
 ---
 
-## Cumplimiento de Requerimientos Funcionales
+## Cumplimiento de Requerimientos Funcionales (Casos de Uso)
 
-| Requerimiento | Descripción | Módulos Implicados |
+| Requerimiento | Descripción del Caso de Uso | Módulos Implicados |
 |---|---|---|
-| RQ1 | Autenticación y Gestión de Usuarios (Roles) | `routers/auth.py`, `routers/users.py`, `services/auth_service.py` |
-| RQ2 | Configuración del Avatar Digital | `routers/tryon.py` |
-| RQ3 | Ingesta de Catálogos (B2B) | `routers/catalog.py` |
-| RQ4 | Pipeline de IA (Procesamiento Asíncrono) | `routers/catalog.py` (BackgroundTasks), `services/ai_strategy.py` |
-| RQ5 | Experiencia Virtual Try-On | `routers/tryon.py` |
-| RQ6 | Flujo de Comercio Electrónico | `routers/commerce.py` |
+| **RQ1** | **Los usuarios podrán registrarse** y autenticarse con seguridad (JWT y contraseñas hasheadas). | `routers/auth.py`, `routers/users.py`, `services/auth_service.py` |
+| **RQ2** | **Los usuarios (consumidores) podrán crear y personalizar su avatar digital 3D** (anatomía y estilos). | `routers/tryon.py`, `models/experience.py` |
+| **RQ3** | **Los usuarios (marcas) podrán gestionar su catálogo** subiendo imágenes y metadatos físicos de prendas. | `routers/catalog.py`, `models/catalog.py` |
+| **RQ4** | **Los usuarios (marcas) podrán delegar a la IA** la generación automática de los modelos 3D de sus prendas. | `services/ai_strategy.py`, Tareas de Background |
+| **RQ5** | **Los usuarios (consumidores) podrán visualizar la simulación 3D** (Virtual Try-On) de las prendas sobre su avatar. | `routers/tryon.py` |
+| **RQ6** | **Los usuarios (consumidores) podrán agregar prendas al carrito**, ver subtotales y procesar la orden. | `routers/commerce.py`, `models/commerce.py` |

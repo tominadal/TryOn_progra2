@@ -27,8 +27,19 @@ export default function BrandDashboard() {
   const [productPrice, setProductPrice] = useState("");
   const [productFit, setProductFit] = useState("Regular");
   const [productColor, setProductColor] = useState("Azul");
+  const [productColorHex, setProductColorHex] = useState("#1e3a8a");
   const [productSize, setProductSize] = useState("S, M, L, XL");
+  const [productMaterial, setProductMaterial] = useState("100% Algodón");
+  const [productWaistRise, setProductWaistRise] = useState("Tiro Medio");
+  const [productTexture, setProductTexture] = useState("Denim Clásico");
+  const [productElasticity, setProductElasticity] = useState("Rígido");
+  const [productFabricWeight, setProductFabricWeight] = useState("Medio");
+  const [productDistressLevel, setProductDistressLevel] = useState("0");
+  const [productHasCuffs, setProductHasCuffs] = useState(false);
+  const [productHasPleats, setProductHasPleats] = useState(false);
+  const [productDescription, setProductDescription] = useState("");
   const [productFile, setProductFile] = useState<File | null>(null);
+  const [generate3D, setGenerate3D] = useState(true);
   const [garments, setGarments] = useState<Garment[]>([]);
   const [loadingGarments, setLoadingGarments] = useState(true);
 
@@ -62,7 +73,11 @@ export default function BrandDashboard() {
     }
 
     setIsUploading(true);
-    toast.info("Iniciando subida y generación 3D...");
+    if (generate3D) {
+      toast.info("Iniciando subida y generación 3D...");
+    } else {
+      toast.info("Subiendo producto...");
+    }
     
     try {
       // 1. Upload actual image file
@@ -94,15 +109,30 @@ export default function BrandDashboard() {
           price: parseFloat(productPrice),
           fit: productFit,
           color: productColor,
+          color_hex: productColorHex,
           sizes: productSize.split(",").map(s => s.trim()),
-          image_url: realImageUrl
+          image_url: realImageUrl,
+          generate_3d: generate3D,
+          material: productMaterial,
+          waist_rise: productWaistRise,
+          description: productDescription,
+          texture: productTexture,
+          elasticity: productElasticity,
+          fabric_weight: productFabricWeight,
+          distress_level: parseInt(productDistressLevel),
+          has_cuffs: productHasCuffs,
+          has_pleats: productHasPleats
         })
       });
 
       setProductName("");
       setProductPrice("");
       setProductFile(null);
-      toast.success("¡Producto subido! El gemelo digital 3D se ha generado exitosamente.");
+      if (generate3D) {
+        toast.success("¡Producto subido! El gemelo digital 3D se ha generado exitosamente.");
+      } else {
+        toast.success("¡Producto subido exitosamente!");
+      }
       loadGarments();
     } catch (err) {
       const error = err as Error;
@@ -124,13 +154,9 @@ export default function BrandDashboard() {
             <h1 className="text-3xl font-bold tracking-tight">Dashboard de Marca</h1>
             <p className="text-neutral-500 mt-1">Gestiona tus productos y gemelos digitales</p>
           </div>
-          <button className="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-xl font-medium text-sm hover:scale-105 transition-transform shadow-lg flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Nuevo Producto
-          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white dark:bg-neutral-900/40 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-800 flex items-center gap-4 shadow-sm">
             <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
               <Package className="w-6 h-6" />
@@ -147,15 +173,6 @@ export default function BrandDashboard() {
             <div>
               <p className="text-2xl font-bold">{garments.filter(g => g.is_processed).length}</p>
               <p className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Modelos 3D Generados</p>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-neutral-900/40 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-800 flex items-center gap-4 shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-              <Activity className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">+45%</p>
-              <p className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Interacción Try-On</p>
             </div>
           </div>
         </div>
@@ -206,7 +223,7 @@ export default function BrandDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1">Color Principal</label>
+                    <label className="block text-sm font-semibold mb-1">Color Principal (Nombre)</label>
                     <input 
                       type="text" 
                       value={productColor}
@@ -214,6 +231,23 @@ export default function BrandDashboard() {
                       placeholder="Ej. Azul Oscuro"
                       className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Color Hex (Tinte 3D)</label>
+                    <div className="flex gap-2 items-center">
+                      <input 
+                        type="color" 
+                        value={productColorHex}
+                        onChange={(e) => setProductColorHex(e.target.value)}
+                        className="w-12 h-12 rounded-xl cursor-pointer bg-transparent border-0 p-0"
+                      />
+                      <input 
+                        type="text" 
+                        value={productColorHex}
+                        onChange={(e) => setProductColorHex(e.target.value)}
+                        className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -224,6 +258,118 @@ export default function BrandDashboard() {
                     onChange={(e) => setProductSize(e.target.value)}
                     placeholder="Ej. S, M, L, XL"
                     className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                
+                <div className="mt-6 mb-2">
+                  <h3 className="text-lg font-bold border-b border-neutral-200 dark:border-neutral-800 pb-2">Propiedades Físicas (IA 3D)</h3>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Textura Base</label>
+                    <select 
+                      value={productTexture}
+                      onChange={(e) => setProductTexture(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                    >
+                      <option>Denim Clásico</option>
+                      <option>Denim Crudo (Rígido)</option>
+                      <option>Cuero/Ecocuero</option>
+                      <option>Algodón Suave</option>
+                      <option>Lino/Fresco</option>
+                      <option>Gabardina</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Elasticidad</label>
+                    <select 
+                      value={productElasticity}
+                      onChange={(e) => setProductElasticity(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                    >
+                      <option>Rígido</option>
+                      <option>Confort (Leve elastano)</option>
+                      <option>Súper Elástico (Spandex)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Peso de Tela</label>
+                    <select 
+                      value={productFabricWeight}
+                      onChange={(e) => setProductFabricWeight(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                    >
+                      <option>Liviano</option>
+                      <option>Medio</option>
+                      <option>Pesado</option>
+                    </select>
+                  </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Composición / Material</label>
+                    <input 
+                      type="text" 
+                      value={productMaterial}
+                      onChange={(e) => setProductMaterial(e.target.value)}
+                      placeholder="Ej. 98% Algodón, 2% Elastano"
+                      className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Tiro (Waist Rise)</label>
+                    <select 
+                      value={productWaistRise}
+                      onChange={(e) => setProductWaistRise(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                    >
+                      <option>Tiro Alto</option>
+                      <option>Tiro Medio</option>
+                      <option>Tiro Bajo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-1 mt-4">Desgaste: {productDistressLevel}%</label>
+                  <input 
+                    type="range" 
+                    min="0" max="100"
+                    value={productDistressLevel}
+                    onChange={(e) => setProductDistressLevel(e.target.value)}
+                    className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer mt-1"
+                  />
+                </div>
+
+                <div className="flex gap-6 mt-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                    <input 
+                      type="checkbox" 
+                      checked={productHasCuffs}
+                      onChange={(e) => setProductHasCuffs(e.target.checked)}
+                      className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    Tiene Dobladillos (Cuff)
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                    <input 
+                      type="checkbox" 
+                      checked={productHasPleats}
+                      onChange={(e) => setProductHasPleats(e.target.checked)}
+                      className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    Tiene Pinzas
+                  </label>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold mb-1">Descripción y Detalles</label>
+                  <textarea 
+                    value={productDescription}
+                    onChange={(e) => setProductDescription(e.target.value)}
+                    placeholder="Ej. Diseño con roturas vintage en las rodillas y dobladillo deshilachado..."
+                    rows={2}
+                    className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors resize-none"
                   />
                 </div>
                 <div>
@@ -246,6 +392,19 @@ export default function BrandDashboard() {
                     )}
                   </div>
                 </div>
+
+                <label className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={generate3D}
+                    onChange={(e) => setGenerate3D(e.target.checked)}
+                    className="w-5 h-5 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="font-bold text-sm text-blue-900 dark:text-blue-300">Activar Probador Virtual 3D</p>
+                    <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">Generar automáticamente el gemelo digital paramétrico para este producto.</p>
+                  </div>
+                </label>
 
                 <button 
                   type="submit"

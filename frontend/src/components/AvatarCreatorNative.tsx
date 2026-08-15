@@ -115,6 +115,16 @@ export function AvatarCreatorNative({
   const eyebrowStyles = ["Fino", "Normal", "Grueso"];
   const shirtSleeves = ["Manga Larga", "Manga Corta", "Sin Mangas"];
 
+  // ── Style Helpers ────────────────────────────────────────────────────────
+  const commonSliderClass = "w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all";
+  const commonColorPickerClass = "w-16 h-16 p-1 bg-white dark:bg-neutral-900 border-2 border-neutral-200 dark:border-neutral-800 rounded-xl cursor-pointer hover:border-blue-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20";
+  
+  const getSelectBtnClass = (isActive: boolean) => 
+    `py-3 text-xs sm:text-sm font-bold rounded-xl border-2 transition-all flex items-center justify-center ${isActive
+      ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700 dark:text-blue-400"
+      : "bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300 dark:hover:border-neutral-700 hover:text-neutral-700 dark:hover:text-neutral-300"
+    }`;
+
   const handleSave = () => {
     onAvatarExported(
       'parametric',
@@ -251,10 +261,7 @@ export function AvatarCreatorNative({
                 <div className="grid grid-cols-2 gap-2">
                   {["Hombre", "Mujer"].map((g) => (
                     <button key={g} onClick={() => setGender(g)}
-                      className={`py-3 text-sm font-bold rounded-xl border-2 transition-all ${gender === g
-                        ? "bg-violet-50 dark:bg-blue-900/20 border-blue-600 text-blue-700 dark:text-blue-400"
-                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300"
-                      }`}
+                      className={getSelectBtnClass(gender === g)}
                     >{g}</button>
                   ))}
                 </div>
@@ -268,7 +275,7 @@ export function AvatarCreatorNative({
                 </div>
                 <input type="range" min="0" max="100" value={Math.round(muscleDefinition * 100)}
                   onChange={(e) => setMuscleDefinition(parseInt(e.target.value) / 100)}
-                  className="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  className={commonSliderClass}
                 />
               </div>
 
@@ -280,7 +287,7 @@ export function AvatarCreatorNative({
                 </div>
                 <input type="range" min="140" max="210" value={heightCm}
                   onChange={(e) => setHeightCm(parseInt(e.target.value))}
-                  className="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  className={commonSliderClass}
                 />
               </div>
 
@@ -302,7 +309,7 @@ export function AvatarCreatorNative({
                       const lit = 90 - (val / 100) * 75;
                       setSkinColor(`hsl(${hue}, ${sat}%, ${lit}%)`);
                     }}
-                    className="w-full h-4 rounded-full appearance-none cursor-pointer"
+                    className="w-full h-4 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     style={{ background: 'linear-gradient(to right, hsl(30, 80%, 90%), hsl(25, 65%, 52%), hsl(20, 50%, 15%))' }}
                   />
                   <div className="w-10 h-10 shrink-0 rounded-full border-2 border-neutral-200 dark:border-neutral-700 shadow-sm" style={{ backgroundColor: skinColor }}></div>
@@ -333,7 +340,7 @@ export function AvatarCreatorNative({
                       min={morph.min} max={morph.max} step={morph.step} 
                       value={morph.value} 
                       onChange={(e) => morph.setter(parseFloat(e.target.value))}
-                      className="w-full accent-blue-500"
+                      className={commonSliderClass}
                     />
                   </div>
                 ))}
@@ -351,10 +358,7 @@ export function AvatarCreatorNative({
                 <div className="grid grid-cols-2 gap-2">
                   {hairStyles.map((s) => (
                     <button key={s} onClick={() => setHairStyle(s)}
-                      className={`py-2.5 text-xs font-bold rounded-xl border-2 transition-all ${hairStyle === s
-                        ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700 dark:text-blue-400"
-                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300"
-                      }`}
+                      className={getSelectBtnClass(hairStyle === s)}
                     >{s}</button>
                   ))}
                 </div>
@@ -371,7 +375,7 @@ export function AvatarCreatorNative({
                     type="color" 
                     value={hairColor}
                     onChange={(e) => setHairColor(e.target.value)}
-                    className="w-16 h-16 p-1 bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 rounded-2xl cursor-pointer"
+                    className={commonColorPickerClass}
                   />
                   <p className="text-xs text-neutral-500 max-w-[200px]">
                     Elige el tono exacto para el cabello.
@@ -385,10 +389,7 @@ export function AvatarCreatorNative({
                 <div className="grid grid-cols-3 gap-2">
                   {eyebrowStyles.map((s) => (
                     <button key={s} onClick={() => setEyebrowStyle(s)}
-                      className={`py-2.5 text-xs font-bold rounded-xl border-2 transition-all ${eyebrowStyle === s
-                        ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700"
-                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300"
-                      }`}
+                      className={getSelectBtnClass(eyebrowStyle === s)}
                     >{s}</button>
                   ))}
                 </div>
@@ -407,7 +408,7 @@ export function AvatarCreatorNative({
                     type="color" 
                     value={shirtColor}
                     onChange={(e) => setShirtColor(e.target.value)}
-                    className="w-16 h-16 p-1 bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 rounded-2xl cursor-pointer"
+                    className={commonColorPickerClass}
                   />
                   <p className="text-xs text-neutral-500 max-w-[200px]">
                     Elige el color exacto para tu camiseta.
@@ -426,7 +427,7 @@ export function AvatarCreatorNative({
                     type="color" 
                     value={shoesColor}
                     onChange={(e) => setShoesColor(e.target.value)}
-                    className="w-16 h-16 p-1 bg-white dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 rounded-2xl cursor-pointer"
+                    className={commonColorPickerClass}
                   />
                   <p className="text-xs text-neutral-500 max-w-[200px]">
                     Elige el color exacto para el calzado.
@@ -440,10 +441,7 @@ export function AvatarCreatorNative({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {shirtSleeves.map((s) => (
                     <button key={s} onClick={() => setShirtSleeve(s)}
-                      className={`py-2.5 text-xs font-bold rounded-xl border-2 transition-all ${shirtSleeve === s
-                        ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700 dark:text-blue-400"
-                        : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300"
-                      }`}
+                      className={getSelectBtnClass(shirtSleeve === s)}
                     >{s}</button>
                   ))}
                 </div>
@@ -457,7 +455,7 @@ export function AvatarCreatorNative({
         <div className="p-5 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
           <button
             onClick={handleSave}
-            className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-500 hover:to-blue-500 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm"
+            className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm"
           >
             Guardar Gemelo Digital →
           </button>

@@ -214,14 +214,30 @@ export function ParametricMannequin({
         )}
 
 
-        {/* Abdomen/belly — bigger for Robusto thanks to bellyFat */}
         <group scale={[isFemale ? 1 : bellyScaleX, 1, isFemale ? 1 : bellyScaleZ]}>
           <mesh position={[0, -0.10, 0]}>
             <capsuleGeometry args={[waistR, 0.20, 32, 32]} />
             <meshStandardMaterial {...shirtMat} />
           </mesh>
 
-          {/* Removed Shirt hem as requested */}
+          {/* Abs (6-pack) based on muscle definition */}
+          {muscleDefinition > 0.1 && (
+            <group position={[0, -0.10, 0]}>
+              {[ 
+                [-0.038, 0.07], [0.038, 0.07],   // Upper abs
+                [-0.038, 0.00], [0.038, 0.00],   // Middle abs
+                [-0.032, -0.07], [0.032, -0.07] // Lower abs
+              ].map((pos, i) => {
+                const zScale = 0.4 * muscleDefinition;
+                return (
+                  <mesh key={`ab-${i}`} position={[pos[0], pos[1], waistR * 0.94]} scale={[isFemale ? 0.8 : 1, 1.25, zScale]}>
+                    <sphereGeometry args={[0.035, 16, 16]} />
+                    <meshStandardMaterial {...shirtMat} />
+                  </mesh>
+                );
+              })}
+            </group>
+          )}
         </group>
       </group>
 

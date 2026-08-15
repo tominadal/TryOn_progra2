@@ -94,10 +94,8 @@ export function ParametricPants({
   const thighR = Math.max(minThighR, ((isFemale ? 0.068 : 0.062) * legThickness + thighMod) * pantsScaleX + offset);
   const calfR = Math.max(minCalfR, ((isFemale ? 0.046 : 0.05) * legThickness + calfMod) * pantsScaleX + offset);
   
-  // Cancel out the root avatarScaleY for the legs, so pants "quedan cortos" on tall avatars
-  const legScaleY = pantsScaleY / (avatarScaleY || 1.0);
-  
-  const modelY = -0.9 + (0.111 * avatarScaleY) + waistRiseOffset;
+  const modelY = -0.9 + (0.111 * avatarScaleY);
+  const beltY = 0.90 + waistRiseOffset * 3;
 
   return (
     <group scale={[avatarScaleXZ, avatarScaleY, avatarScaleXZ]} position={[0, modelY, 0]}>
@@ -115,19 +113,27 @@ export function ParametricPants({
       )}
 
       {/* Belt */}
-      <mesh position={[0, 0.90, 0]}>
+      <mesh position={[0, beltY, 0]}>
         <cylinderGeometry args={[finalHipR * 1.03, finalHipR * 1.03, 0.04, 32]} />
         <meshStandardMaterial color="#111" roughness={0.9} />
       </mesh>
       {/* Belt buckle */}
-      <mesh position={[0, 0.90, finalHipR * 1.05]}>
+      <mesh position={[0, beltY, finalHipR * 1.05]}>
         <boxGeometry args={[0.04, 0.038, 0.01]} />
         <meshStandardMaterial color={accent} roughness={0.2} metalness={0.85} />
       </mesh>
 
+      {/* High-Rise Abdomen Fill */}
+      {waistRiseOffset > 0 && (
+        <mesh position={[0, 0.87 + (beltY - 0.87) / 2, 0]}>
+          <cylinderGeometry args={[finalHipR * 1.01, finalHipR * 1.01, beltY - 0.87, 32]} />
+          <meshStandardMaterial {...deniMat} />
+        </mesh>
+      )}
+
       {/* ── LEFT LEG ── */}
       {!isSkirt && (
-        <group position={[isFemale ? -0.095 : -0.088, 0.82, 0]} scale={[1, legScaleY, 1]}>
+        <group position={[isFemale ? -0.095 : -0.088, 0.82, 0]} scale={[1, pantsScaleY, 1]}>
           <mesh position={[0, -0.24, 0]}>
             <capsuleGeometry args={[thighR, 0.30, 16, 32]} />
             <meshStandardMaterial {...deniMat} />
@@ -174,7 +180,7 @@ export function ParametricPants({
 
       {/* ── RIGHT LEG ── */}
       {!isSkirt && (
-        <group position={[isFemale ? 0.095 : 0.088, 0.82, 0]} scale={[1, legScaleY, 1]}>
+        <group position={[isFemale ? 0.095 : 0.088, 0.82, 0]} scale={[1, pantsScaleY, 1]}>
           <mesh position={[0, -0.24, 0]}>
             <capsuleGeometry args={[thighR, 0.30, 16, 32]} />
             <meshStandardMaterial {...deniMat} />

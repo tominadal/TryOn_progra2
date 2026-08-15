@@ -32,8 +32,8 @@ function calculateSizeScale(size: string): number {
   if (numMatch) {
     const numSize = parseInt(numMatch[0]);
     // Standard jeans sizing base is often 32 for M.
-    // Each step is approx 2.5% scale difference.
-    return 1.0 + (numSize - 32) * 0.025;
+    // Each step is approx 1% scale difference to avoid extreme clipping or bagginess
+    return 1.0 + (numSize - 32) * 0.01;
   }
   
   // Fallback for custom strings like "Único"
@@ -210,7 +210,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   // Combine AI scale with Avatar size and weight
   const finalPantsScaleX = aiScaleX * sizeScaleMod * avatarScaleXZ;
-  const finalPantsScaleY = aiScaleY * avatarScaleY;
+  const finalPantsScaleY = aiScaleY;
 
   // ── Gallery images (from backend GarmentImage records) ───────────────────
   const galleryImages: string[] = product.images?.length
@@ -421,7 +421,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               {(product.model_3d_url || product.metadata_json?.scale_x) ? (
                 <button
                   onClick={handleTryOnToggle}
-                  className={`flex-1 py-4 px-6 font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 text-sm ${
+                  className={`flex-1 py-4 px-6 font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 text-sm ${
                     isTryOnActive
                       ? "bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white"
                       : "bg-black dark:bg-white text-white dark:text-black shadow-black/20"
@@ -440,14 +440,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   )}
                 </button>
               ) : (
-                <button disabled className="flex-1 py-4 px-6 bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-bold rounded-2xl cursor-not-allowed text-sm">
+                <button disabled className="flex-1 py-4 px-6 bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-bold rounded-xl cursor-not-allowed text-sm">
                   Probador No Disponible
                 </button>
               )}
 
               <button
                 onClick={handleAddToCart}
-                className="flex-1 py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm"
+                className="flex-1 py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm"
               >
                 <ShoppingCart className="w-4 h-4" />
                 Añadir al Carrito
@@ -502,10 +502,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <button
                       key={s}
                       onClick={() => setSelectedSize(s)}
-                      className={`min-w-[3rem] h-11 px-3 rounded-xl font-bold text-sm transition-all border-2 ${
+                      className={`min-w-[3rem] h-11 px-3 rounded-xl font-bold text-sm transition-all border-2 flex items-center justify-center ${
                         selectedSize === s
-                          ? "bg-black text-white dark:bg-white dark:text-black border-transparent shadow-md"
-                          : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                          ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700 dark:text-blue-400"
+                          : "bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300 dark:hover:border-neutral-700 hover:text-neutral-700 dark:hover:text-neutral-300"
                       }`}
                     >
                       {s}

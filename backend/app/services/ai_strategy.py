@@ -63,19 +63,24 @@ class GeminiTryOnStrategy(VirtualTryOnStrategy):
 
     VISION_PROMPT = """\
 You are an elite 3D Fashion Engineer specialising in parametric garment reconstruction for WebGL (React Three Fiber) applications.
-You receive a photograph of a real garment along with its catalog metadata.
+You receive a photograph of a real garment along with its detailed physical metadata provided by the manufacturer.
 Your task is to analyze BOTH the image pixels AND the metadata to produce a precise, deterministic, and unique parametric descriptor JSON.
 
-Analyse the image rigorously for the following advanced physical properties:
-- Silhouette & Structure: Leg taper (skinny vs wide), waist rise, leg length (cropped vs full).
-- Colorimetry: Extract the exact dominant colour hex code from the image pixels (ignore text tags if they differ), and secondary accent colours (e.g. contrast stitching, metallic buttons).
-- Material Physics:
-    - roughness: (0.1 to 1.0) High for wool/heavy denim, low for silk/leather.
-    - metalness: (0.0 to 1.0) Are there metallic reflections? 
-    - fabric_weight: (0.1 to 1.0) Does the fabric drape heavily (1.0) or flutter lightly (0.1)?
-    - stretch_factor: (0.0 to 1.0) Does it look like raw selvedge denim (0.0) or spandex blend (0.8)?
-    - opacity: (0.1 to 1.0) Is the fabric sheer/transparent? (Usually 1.0 for pants).
-- Detailing: Distress level (rips, fades), pleats, cuffs.
+CRITICAL DIRECTIVE: The manufacturer has provided EXACT physical parameters (color_hex, distress_level, stretch_factor, etc). You MUST USE these values over your own deductions. The image is primarily to deduce the Silhouette & Structure.
+
+Integrate the provided Metadata into the following JSON schema:
+- Silhouette & Structure: Leg taper (skinny vs wide), leg length (cropped vs full). For waist_rise, match the Metadata exactly (High Rise -> 0.8+, Low Rise -> 0.2).
+- Colorimetry: USE the exact 'color_hex' from the Metadata for "color_hex". Only extract secondary accent colours (e.g. contrast stitching, metallic buttons) from the image.
+- Material Physics: USE the Metadata provided to set these parameters strictly:
+    - roughness: Set based on 'texture' (e.g., Denim -> 0.8+, Leather -> 0.2).
+    - metalness: Set based on 'texture' (e.g., Denim -> 0.1, Leather -> 0.4).
+    - fabric_weight: Set based on 'fabric_weight' (Liviano -> 0.3, Medio -> 0.6, Pesado -> 0.9).
+    - stretch_factor: Set based on 'elasticity' (Rígido -> 0.1, Confort -> 0.4, Súper Elástico -> 0.8+).
+    - opacity: (0.1 to 1.0) Usually 1.0 for pants.
+- Detailing:
+    - distress: Map the 'distress_level' directly (0 to 100 becomes 0.0 to 1.0).
+    - has_cuff: USE 'has_cuffs' boolean.
+    - has_pleats: USE 'has_pleats' boolean.
 
 Return ONLY a single valid JSON object. No markdown formatting, no explanations.
 Your JSON must strictly match the structure of the examples below.
@@ -83,6 +88,7 @@ Your JSON must strictly match the structure of the examples below.
 --- FEW-SHOT EXAMPLES ---
 
 Example 1: A photo of heavily distressed, light-blue Mom Jeans.
+Metadata: { "color_hex": "#8ba3b5", "texture": "Denim Clásico", "elasticity": "Rígido", "fabric_weight": "Pesado", "distress_level": 90, "has_cuffs": true, "has_pleats": false, "Waist_Rise": "Tiro Alto" }
 {
   "scale_x": 1.10,
   "scale_y": 0.95,
@@ -90,8 +96,8 @@ Example 1: A photo of heavily distressed, light-blue Mom Jeans.
   "accent_hex": "#b58752",
   "roughness": 0.85,
   "metalness": 0.1,
-  "fabric_weight": 0.8,
-  "stretch_factor": 0.2,
+  "fabric_weight": 0.9,
+  "stretch_factor": 0.1,
   "opacity": 1.0,
   "waist_rise": 0.85,
   "taper": -0.1,
@@ -102,6 +108,7 @@ Example 1: A photo of heavily distressed, light-blue Mom Jeans.
 }
 
 Example 2: A photo of sleek, black faux-leather skinny pants.
+Metadata: { "color_hex": "#1a1a1a", "texture": "Cuero/Ecocuero", "elasticity": "Súper Elástico", "fabric_weight": "Medio", "distress_level": 0, "has_cuffs": false, "has_pleats": false, "Waist_Rise": "Tiro Medio" }
 {
   "scale_x": 0.90,
   "scale_y": 1.0,
@@ -120,7 +127,7 @@ Example 2: A photo of sleek, black faux-leather skinny pants.
   "fit_label": "Skinny"
 }
 
-Now, analyse the provided garment image and return ONLY the JSON object.
+Now, analyse the provided garment image AND its metadata to return ONLY the JSON object.
 """
 
     def __init__(self):
