@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   
   const router = useRouter();
@@ -25,9 +24,6 @@ export default function LoginPage() {
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
-      if (rememberMe) {
-        formData.append("remember_me", "true");
-      }
 
       const data = await fetch("http://localhost:8000/api/v1/auth/login", {
         method: "POST",
@@ -42,11 +38,12 @@ export default function LoginPage() {
       }
       
       const json = await data.json();
-      await login(json.access_token, rememberMe);
+      await login(json.access_token);
       toast.success("¡Bienvenido de nuevo!");
       router.push("/");
-    } catch (err: any) {
-      toast.error(err.message || "Error al iniciar sesión");
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message || "Error al iniciar sesión");
     } finally {
       setIsLoading(false);
     }
@@ -101,21 +98,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <div className="relative flex items-center justify-center">
-                  <input 
-                    type="checkbox" 
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="peer appearance-none w-5 h-5 border-2 border-neutral-300 dark:border-neutral-700 rounded transition-all checked:bg-blue-600 checked:border-blue-600"
-                  />
-                  <div className="absolute opacity-0 peer-checked:opacity-100 text-white pointer-events-none">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  </div>
-                </div>
-                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white transition-colors">Recordar usuario</span>
-              </label>
+            <div className="flex items-center justify-end">
 
               <a href="#" className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">¿Olvidaste tu contraseña?</a>
             </div>

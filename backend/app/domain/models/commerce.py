@@ -18,14 +18,15 @@ class Cart(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    items = relationship("CartItem", back_populates="cart")
+    items = relationship("CartItem", back_populates="cart", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="cart")
 
 class CartItem(Base):
     __tablename__ = "cart_items"
 
     id = Column(Integer, primary_key=True, index=True)
-    cart_id = Column(Integer, ForeignKey("carts.id"), nullable=False)
-    garment_id = Column(Integer, ForeignKey("garments.id"), nullable=False)
+    cart_id = Column(Integer, ForeignKey("carts.id", ondelete="CASCADE"), nullable=False)
+    garment_id = Column(Integer, ForeignKey("garments.id", ondelete="CASCADE"), nullable=False)
     quantity = Column(Integer, default=1)
     
     cart = relationship("Cart", back_populates="items")
@@ -42,14 +43,15 @@ class Order(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    items = relationship("OrderItem", back_populates="order")
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="orders")
 
 class OrderItem(Base):
     __tablename__ = "order_items"
 
     id = Column(Integer, primary_key=True, index=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    garment_id = Column(Integer, ForeignKey("garments.id"), nullable=False)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
+    garment_id = Column(Integer, ForeignKey("garments.id", ondelete="SET NULL"), nullable=True)
     price = Column(Float, nullable=False)
     quantity = Column(Integer, default=1)
     

@@ -25,6 +25,9 @@ export default function BrandDashboard() {
   const [isUploading, setIsUploading] = useState(false);
   const [productName, setProductName] = useState("");
   const [productPrice, setProductPrice] = useState("");
+  const [productFit, setProductFit] = useState("Regular");
+  const [productColor, setProductColor] = useState("Azul");
+  const [productSize, setProductSize] = useState("S, M, L, XL");
   const [productFile, setProductFile] = useState<File | null>(null);
   const [garments, setGarments] = useState<Garment[]>([]);
   const [loadingGarments, setLoadingGarments] = useState(true);
@@ -62,13 +65,37 @@ export default function BrandDashboard() {
     toast.info("Iniciando subida y generación 3D...");
     
     try {
+      // 1. Upload actual image file
+      const formData = new FormData();
+      formData.append("file", productFile);
+
+      const uploadToken = localStorage.getItem("token") || "";
+      const uploadRes = await fetch("http://localhost:8000/api/v1/catalog/upload-image", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${uploadToken}`
+        },
+        body: formData
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Error al subir la imagen al servidor.");
+      }
+      
+      const uploadData = await uploadRes.json();
+      const realImageUrl = uploadData.url;
+
+      // 2. Create garment entry with real image url
       await fetchApi("/catalog/garment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: productName,
           price: parseFloat(productPrice),
-          image_url: "/products/jean_classic.png" // Mocked until AWS S3/Cloudinary is setup
+          fit: productFit,
+          color: productColor,
+          sizes: productSize.split(",").map(s => s.trim()),
+          image_url: realImageUrl
         })
       });
 
@@ -77,8 +104,9 @@ export default function BrandDashboard() {
       setProductFile(null);
       toast.success("¡Producto subido! El gemelo digital 3D se ha generado exitosamente.");
       loadGarments();
-    } catch (err: any) {
-      toast.error(err.message || "Error al subir el producto.");
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message || "Error al subir el producto.");
     } finally {
       setIsUploading(false);
     }
@@ -122,7 +150,7 @@ export default function BrandDashboard() {
             </div>
           </div>
           <div className="bg-white dark:bg-neutral-900/40 p-6 rounded-3xl border border-neutral-200 dark:border-neutral-800 flex items-center gap-4 shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
               <Activity className="w-6 h-6" />
             </div>
             <div>
@@ -159,6 +187,42 @@ export default function BrandDashboard() {
                     value={productPrice}
                     onChange={(e) => setProductPrice(e.target.value)}
                     placeholder="Ej. 89.99"
+                    className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Fit</label>
+                    <select 
+                      value={productFit}
+                      onChange={(e) => setProductFit(e.target.value)}
+                      className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                    >
+                      <option>Skinny</option>
+                      <option>Regular</option>
+                      <option>Relaxed</option>
+                      <option>Wide Leg</option>
+                      <option>Flared</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Color Principal</label>
+                    <input 
+                      type="text" 
+                      value={productColor}
+                      onChange={(e) => setProductColor(e.target.value)}
+                      placeholder="Ej. Azul Oscuro"
+                      className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Talles (separados por coma)</label>
+                  <input 
+                    type="text" 
+                    value={productSize}
+                    onChange={(e) => setProductSize(e.target.value)}
+                    placeholder="Ej. S, M, L, XL"
                     className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
                   />
                 </div>

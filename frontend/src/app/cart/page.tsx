@@ -57,9 +57,10 @@ export default function CartPage() {
       setItems([]);
       setTotal(0);
       router.push("/");
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error;
       console.error(err);
-      toast.error(err.message || "Error al procesar el pago");
+      toast.error(error.message || "Error al procesar el pago");
     }
   };
 

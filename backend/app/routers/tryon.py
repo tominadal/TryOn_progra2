@@ -210,7 +210,7 @@ def generate_preview(
     except Exception as e:
         preview_url = f"{settings.BASE_URL}/static/placeholder.png"
         success = False
-        print(f"[WARN] Pillow compositing failed for garment {garment_id}: {e}")
+#         print(f"[WARN] Pillow compositing failed for garment {garment_id}: {e}")
 
     return {
         "garment_id": garment_id,

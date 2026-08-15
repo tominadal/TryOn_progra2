@@ -28,19 +28,19 @@ export function Navbar() {
 
   return (
     <nav className="fixed w-full z-50 top-0 border-b border-neutral-200 dark:border-neutral-900 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Left Side: Brand and Links */}
-        <div className="flex items-center gap-8">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative">
+        {/* Left Side: Brand */}
+        <div className="flex items-center">
           <Link href="/" className="text-xl font-bold tracking-tighter flex items-center gap-2 hover:opacity-80 transition-opacity text-black dark:text-white">
-            <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
-              <span className="text-white text-xs">V</span>
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain dark:invert" />
             TryOn <span className="text-neutral-500">Hub</span>
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link href="/" className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">Inicio</Link>
-            <Link href="/marketplace" className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">Marketplace</Link>
-          </div>
+        </div>
+
+        {/* Center: Links */}
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm font-medium">
+          <Link href="/" className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">Inicio</Link>
+          <Link href="/marketplace" className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">Marketplace</Link>
         </div>
 
         {/* Right Side: Actions */}

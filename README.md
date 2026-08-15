@@ -1,50 +1,47 @@
-# TryOnHub: Plataforma B2B2C de Prueba Virtual 3D
+# TryOnHub: Plataforma B2B2C de Prueba Virtual 3D y Modelado Generativo
 
 Este repositorio contiene el código fuente de **TryOnHub**, un sistema de comercio electrónico avanzado con capacidades de prueba virtual tridimensional (Virtual Try-On), desarrollado como proyecto académico para la cátedra de Programación II.
 
-## Arquitectura del Sistema
+## 🚀 Características Principales
 
-La arquitectura sigue el patrón cliente-servidor, componiéndose de dos subsistemas principales:
+- **Flujo B2B2C Completo**: Sistema multirrol donde las Marcas (B2B) suben fotos reales de sus prendas y los Consumidores (B2C) las prueban en sus gemelos digitales.
+- **Generación 3D Paramétrica**: Integración con **Google Gemini 1.5 Pro Vision**. Las fotos subidas por las marcas son analizadas en tiempo real por la IA para extraer colores predominantes y metadatos paramétricos (escala, calce).
+- **Vestidor Virtual (Fitting Room)**: Interfaz construida en React Three Fiber (R3F) donde los parámetros dictados por la IA deforman y colorean mallas base nativas para representar la prenda sobre el avatar personalizado del usuario.
+- **Transacciones Robustas**: Gestión atómica de base de datos garantizando que no se publiquen prendas sin su respectivo modelado 3D, y que las marcas no queden huérfanas en fallos de red.
 
-### 1. Backend (Motor Paramétrico y API REST)
-Desarrollado en **Python (FastAPI)**, actúa no solo como API transaccional sino como motor de preprocesamiento de geometría tridimensional.
+## 📚 Documentación de Arquitectura
 
-- **Generación Paramétrica de Prendas**: Utiliza la librería `trimesh` para la construcción matemática de mallas 3D (`.glb`). Los parámetros base de la malla se derivan del análisis semántico del catálogo mediante la API de **Google Gemini 1.5 Pro**.
-- **Gestión de Base de Datos**: Emplea **SQLAlchemy** (ORM) sobre una base de datos SQLite para la gestión de usuarios (consumidores y marcas), catálogos (SKUs) y metadatos de los modelos 3D (`thumbnail_url`, `model_3d_url`).
-- **Migraciones**: Integración con **Alembic** para el control de versiones del esquema relacional.
+Hemos estructurado la documentación en directorios separados para facilitar su lectura:
+- 📊 **[Diagrama de Entidad-Relación (ERD)](docs/diagrama_entidad_relacion.md)**: Estructura de la base de datos (Roles, Marcas, Prendas, etc).
+- ⚙️ **[Diagrama de Secuencia de Subida e IA](docs/diagrama_secuencia.md)**: Flujo de comunicación entre el Frontend, FastAPI, la Base de Datos y Gemini Vision.
 
-### 2. Frontend (Motor 3D de Cliente y SPA)
-Desarrollado en **React (Next.js)**, proporcionando una Single Page Application de alto rendimiento y una interfaz de usuario inmersiva.
+## 🏗 Arquitectura del Sistema
 
-- **Creador de Avatares Nativo (Paramétrico)**: Se desarrolló un motor 3D propietario utilizando `@react-three/fiber` y `@react-three/drei`. El módulo genera un avatar jerárquico que asegura la correcta articulación (ej. brazos y codos conectados), adapta proporciones anatómicas según género (masculino/femenino), y aplica transformaciones espaciales en tiempo real (escala y color) basadas en parámetros ingresados por el usuario.
-- **Composición 3D Integrada (Fitting Room)**: El lienzo interactivo (Virtual Try-On) está completamente inmerso en la página del producto. Cuenta con un entorno simulado de vestidor (suelo ajustado geométricamente, paredes, reflejos) donde la geometría paramétrica de la prenda (Skinny, Mom Fit, Straight, etc.) se moldea dinámicamente sobre las piernas del avatar en tiempo real.
-- **Catálogo Dinámico e IA**: Interfaz de Marketplace 100% funcional con filtrado en vivo por precios y calces. Cada producto cuenta con su propia galería de imágenes de alta fidelidad con vistas laterales y traseras autogeneradas e independizadas mediante rutinas de Inteligencia Artificial para evitar contenido duplicado.
-- **Interfaz Premium (UI/UX)**: Diseño inmersivo que utiliza Glassmorphism, animaciones fluidas, paletas de colores vibrantes y navegación responsiva.
-- **Flujo de Comercio Electrónico**: Implementación transversal desde el catálogo hasta el carrito de compras (`/cart`), manteniendo la sesión del usuario intacta (incluso entre reinicios) mediante persistencia local y tokens JWT simulados.
+El sistema sigue el patrón cliente-servidor (SPA + API REST).
 
-## Requisitos de Entorno
+### 1. Backend (Motor Inteligente y API)
+- **Framework**: FastAPI (Python 3.9+)
+- **Base de Datos**: SQLite gestionado con SQLAlchemy (ORM) y migraciones con Alembic.
+- **Inteligencia Artificial**: Pipeline asíncrono con `google-generativeai` que transforma imágenes PNG/JPG en un `metadata_json` que el frontend luego compila dinámicamente en WebGL.
+
+### 2. Frontend (Motor 3D Cliente)
+- **Framework**: React (Next.js 14+)
+- **Gráficos 3D**: `@react-three/fiber` y `@react-three/drei` (WebGL).
+- **Diseño UI/UX**: TailwindCSS, `lucide-react`, Glassmorphism, y notificaciones con react-hot-toast.
+- **Motor Paramétrico Propio**: Al prescindir de servicios externos caídos, creamos un motor nativo `AvatarCreatorNative` extremadamente modular que manipula la topología de avatares en el navegador del cliente.
+
+## 🛠 Instalación y Configuración
 
 ### Backend
-- Python 3.9+
-- `pip install -r requirements.txt` (directorio backend)
-- Las dependencias críticas incluyen `fastapi`, `uvicorn`, `sqlalchemy`, `alembic`, `trimesh`, `numpy`, y `google-generativeai`.
+1. Navega a `cd backend/`
+2. Instala dependencias: `pip install -r requirements.txt`
+3. Configura las variables de entorno `.env` incluyendo tu `GEMINI_API_KEY`.
+4. Inicia el servidor: `python -m uvicorn app.main:app --reload --port 8000`
 
 ### Frontend
-- Node.js 18+
-- `npm install` (directorio frontend)
-- Las dependencias críticas incluyen `next`, `react`, `three`, `@react-three/fiber`, `@react-three/drei` y `tailwindcss`.
-
-## Flujo de Ejecución
-
-1. **Pre-procesamiento (Backend)**: El catálogo base debe ser cargado y procesado. El script interno parsea los atributos de cada prenda, invoca al modelo de lenguaje para derivar parámetros matemáticos, y finalmente delega a `trimesh` la exportación de las mallas 3D resultantes al almacenamiento estático.
-2. **Registro de Consumidor**: El usuario ingresa a la plataforma, genera credenciales de acceso y es redirigido a la configuración inicial de su Gemelo Digital (Digital Twin).
-3. **Simulación de Prueba (Try-On)**: Al seleccionar una prenda, el sistema computa los parámetros físicos del usuario y renderiza la malla final superponiendo la prenda correspondiente.
-4. **Checkout**: El producto puede ser agregado al carrito, donde se preserva la integridad de los datos (metadatos, precio, SKUs) para la eventual simulación de facturación y pedido.
-
-## Decisiones de Diseño (Trade-offs)
-
-- **Renderizado 3D en Cliente vs. Servidor**: Se optó por derivar el esfuerzo computacional del renderizado final (iluminación, composición, cámara) a la GPU del dispositivo cliente (mediante WebGL/Three.js) para maximizar la escalabilidad del sistema, en lugar de utilizar granjas de renderizado en el servidor.
-- **Motor Paramétrico Nativo vs. SaaS**: La integración planificada con Ready Player Me fue descartada tras el cese de sus servicios públicos. Como alternativa robusta, se diseñó un motor paramétrico propio en React Three Fiber, garantizando independencia tecnológica, reducción de latencia (sin iframes) y continuidad académica del proyecto.
+1. Navega a `cd frontend/`
+2. Instala paquetes: `npm install`
+3. Inicia el servidor de desarrollo: `npm run dev`
 
 ---
-*Desarrollado para el ciclo lectivo vigente. Universidad - Cátedra de Programación II.*
+*Desarrollado para la cátedra de Programación II.*

@@ -19,33 +19,38 @@ def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
     user_dict = user_in.model_dump(exclude={"password", "brand_name"})
     user_dict["hashed_password"] = hashed_password
     
-    # Manejar creación de cuenta tipo Marca (role_id == 2)
-    if user_dict.get("role_id") == 2:
-        # If brand_id is directly provided (e.g., from seed/tests), skip brand creation
-        if not user_dict.get("brand_id"):
-            if not user_in.brand_name:
-                raise HTTPException(status_code=400, detail="Brand name is required for brand accounts")
-            
-            # Obtener el primer marketplace (por defecto demo.tryon.com)
-            marketplace = db.query(Marketplace).first()
-            if not marketplace:
-                marketplace = Marketplace(name="Default Mall", domain="default.com")
-                db.add(marketplace)
-                db.commit()
-                db.refresh(marketplace)
+    try:
+        # Manejar creación de cuenta tipo Marca (role_id == 2)
+        if user_dict.get("role_id") == 2:
+            if not user_dict.get("brand_id"):
+                if not user_in.brand_name:
+                    raise HTTPException(status_code=400, detail="Brand name is required for brand accounts")
+                
+                # Obtener el primer marketplace (por defecto demo.tryon.com)
+                marketplace = db.query(Marketplace).first()
+                if not marketplace:
+                    marketplace = Marketplace(name="Default Mall", domain="default.com")
+                    db.add(marketplace)
+                    db.flush()
 
-            new_brand = Brand(
-                name=user_in.brand_name,
-                description="Brand created via registration",
-                marketplace_id=marketplace.id
-            )
-            db.add(new_brand)
-            db.commit()
-            db.refresh(new_brand)
-            
-            user_dict["brand_id"] = new_brand.id
+                new_brand = Brand(
+                    name=user_in.brand_name,
+                    description="Brand created via registration",
+                    marketplace_id=marketplace.id
+                )
+                db.add(new_brand)
+                db.flush()
+                
+                user_dict["brand_id"] = new_brand.id
 
-    return user_repo.create(db, obj_in=user_dict)
+        new_user = User(**user_dict)
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return new_user
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Transaction failed: {str(e)}")
 
 @router.get("/me", response_model=UserResponse)
 def read_users_me(current_user: User = Depends(get_current_active_user)):

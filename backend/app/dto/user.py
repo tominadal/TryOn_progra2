@@ -4,7 +4,7 @@ from datetime import datetime
 
 class UserBase(BaseModel):
     email: EmailStr
-    full_name: str | None = None
+    full_name: str | None = Field(None, min_length=2, max_length=100)
     is_active: bool = True
     role_id: int = Field(..., gt=0, description="ID of the role assigned to this user")
     brand_id: int | None = Field(None, description="Optional brand affiliation")

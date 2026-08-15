@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from app.config.settings import settings
 from app.routers import auth, users, catalog, tryon, commerce
@@ -45,6 +45,14 @@ async def integrity_error_handler(request: Request, exc: IntegrityError):
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
         content={"detail": "Database conflict: a record with this data already exists."},
+    )
+
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_error_handler(request: Request, exc: SQLAlchemyError):
+    """Fallback handler for generic database errors to prevent 500 crashes leaking info."""
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "An internal database error occurred."},
     )
 
 

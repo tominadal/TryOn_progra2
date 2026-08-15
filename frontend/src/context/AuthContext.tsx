@@ -13,7 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (token: string, rememberMe?: boolean) => Promise<void>;
+  login: (token: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -29,8 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check both storages
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
     if (token) {
       fetchUser();
     } else {
@@ -43,30 +42,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = await fetchApi("/users/me");
       setUser(userData);
     } catch (error: any) {
-      if (error.message !== "Could not validate credentials") {
-        console.error("Failed to fetch user:", error);
-      }
+      console.error("Failed to fetch user:", error);
       localStorage.removeItem("token");
-      sessionStorage.removeItem("token");
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (token: string, rememberMe = true) => {
-    if (rememberMe) {
-      localStorage.setItem("token", token);
-      sessionStorage.removeItem("token");
-    } else {
-      sessionStorage.setItem("token", token);
-      localStorage.removeItem("token");
-    }
+  const login = async (token: string) => {
+    localStorage.setItem("token", token);
     await fetchUser();
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
     setUser(null);
   };
 

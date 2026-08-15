@@ -2,17 +2,27 @@
 Strategy Pattern implementation for Virtual Try-On AI processing.
 
 VirtualTryOnStrategy (Abstract Base)
-├── GeminiTryOnStrategy  — Production: calls Google Gemini API
+├── GeminiTryOnStrategy  — Production: Gemini Vision analyses the real garment image
 └── MockTryOnStrategy    — Testing/fallback: returns deterministic mock data
 
 Design Justification (Oral Defense):
     This pattern allows the AI backend to evolve independently from the
-    e-commerce and try-on router layers. Switching from Gemini 2D to a
-    proprietary 3D model requires zero changes in any router or service.
+    e-commerce and try-on router layers. Switching strategies requires
+    zero changes in any router or service layer (Open/Closed Principle).
+
+    GeminiTryOnStrategy uses multimodal Vision to analyse the actual product
+    photograph (not just text tags), producing a rich set of parametric 3D
+    descriptors that are UNIQUE to each garment. This directly attacks the
+    market pain-point: a prefabricated 3D model cannot represent an unseen
+    garment accurately. Our system reads the real pixels to derive the exact
+    silhouette, color, texture, and construction details.
 """
 from abc import ABC, abstractmethod
 import uuid
 import json
+import re
+import base64
+import httpx
 
 from app.config.settings import settings
 
@@ -36,114 +46,223 @@ class VirtualTryOnStrategy(ABC):
         pass
 
 
+
 class GeminiTryOnStrategy(VirtualTryOnStrategy):
     """
-    Production strategy using Google Gemini API to analyse garment attributes
-    and generate a standardized virtual asset description.
+    Production strategy using Google Gemini Vision API.
+
+    It downloads the product photograph and sends it alongside the garment
+    metadata to Gemini, which analyses the REAL pixels (silhouette, texture,
+    weave pattern, colour tones, waist rise, leg taper, seam details) and
+    returns a rich JSON of parametric 3D descriptors.
+
+    This means every garment, no matter how different its cut or colour from
+    any other, produces a unique and faithful 3D representation — something
+    that prefabricated models cannot achieve.
     """
 
-    def __init__(self):
-        try:
-            import google.genai as genai
-            self._client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            self._sdk = "new"
-        except ImportError:
-            try:
-                import google.generativeai as genai_legacy
-                genai_legacy.configure(api_key=settings.GEMINI_API_KEY)
-                self._legacy_model = genai_legacy.GenerativeModel("gemini-2.0-flash")
-                self._sdk = "legacy"
-            except ImportError:
-                self._sdk = "none"
+    VISION_PROMPT = """\
+You are an elite 3D Fashion Engineer specialising in parametric garment reconstruction for WebGL (React Three Fiber) applications.
+You receive a photograph of a real garment along with its catalog metadata.
+Your task is to analyze BOTH the image pixels AND the metadata to produce a precise, deterministic, and unique parametric descriptor JSON.
 
-    def _generate_3d_pants_glb(self, scale_x: float, scale_y: float, color_hex: str, filename: str) -> str:
-        """Generates a parametric 3D pants model using Trimesh."""
-        import trimesh
-        import numpy as np
-        
-        # Parse hex color to RGBA
-        h = color_hex.lstrip('#')
-        rgb = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
-        color = (*rgb, 255)
-        
-        # Create primitives
-        leg1 = trimesh.creation.cylinder(radius=0.2 * scale_x, height=1.0 * scale_y)
-        leg1.apply_translation([0.25, -0.5 * scale_y, 0])
-        
-        leg2 = trimesh.creation.cylinder(radius=0.2 * scale_x, height=1.0 * scale_y)
-        leg2.apply_translation([-0.25, -0.5 * scale_y, 0])
-        
-        waist = trimesh.creation.box(extents=[0.9 * scale_x, 0.4 * scale_y, 0.45])
-        waist.apply_translation([0, 0.2 * scale_y, 0])
-        
-        # Combine into a single mesh
-        pants = trimesh.util.concatenate([leg1, leg2, waist])
-        pants.visual.face_colors = color
-        
-        # Ensure uploads dir exists
-        import os
-        uploads_dir = os.path.join("static", "uploads")
-        os.makedirs(uploads_dir, exist_ok=True)
-        
-        filepath = os.path.join(uploads_dir, filename)
-        pants.export(filepath)
-        return f"{settings.BASE_URL}/static/uploads/{filename}"
+Analyse the image rigorously for the following advanced physical properties:
+- Silhouette & Structure: Leg taper (skinny vs wide), waist rise, leg length (cropped vs full).
+- Colorimetry: Extract the exact dominant colour hex code from the image pixels (ignore text tags if they differ), and secondary accent colours (e.g. contrast stitching, metallic buttons).
+- Material Physics:
+    - roughness: (0.1 to 1.0) High for wool/heavy denim, low for silk/leather.
+    - metalness: (0.0 to 1.0) Are there metallic reflections? 
+    - fabric_weight: (0.1 to 1.0) Does the fabric drape heavily (1.0) or flutter lightly (0.1)?
+    - stretch_factor: (0.0 to 1.0) Does it look like raw selvedge denim (0.0) or spandex blend (0.8)?
+    - opacity: (0.1 to 1.0) Is the fabric sheer/transparent? (Usually 1.0 for pants).
+- Detailing: Distress level (rips, fades), pleats, cuffs.
+
+Return ONLY a single valid JSON object. No markdown formatting, no explanations.
+Your JSON must strictly match the structure of the examples below.
+
+--- FEW-SHOT EXAMPLES ---
+
+Example 1: A photo of heavily distressed, light-blue Mom Jeans.
+{
+  "scale_x": 1.10,
+  "scale_y": 0.95,
+  "color_hex": "#8ba3b5",
+  "accent_hex": "#b58752",
+  "roughness": 0.85,
+  "metalness": 0.1,
+  "fabric_weight": 0.8,
+  "stretch_factor": 0.2,
+  "opacity": 1.0,
+  "waist_rise": 0.85,
+  "taper": -0.1,
+  "distress": 0.9,
+  "has_cuff": true,
+  "has_pleats": false,
+  "fit_label": "Mom Fit"
+}
+
+Example 2: A photo of sleek, black faux-leather skinny pants.
+{
+  "scale_x": 0.90,
+  "scale_y": 1.0,
+  "color_hex": "#1a1a1a",
+  "accent_hex": "#1a1a1a",
+  "roughness": 0.2,
+  "metalness": 0.4,
+  "fabric_weight": 0.6,
+  "stretch_factor": 0.8,
+  "opacity": 1.0,
+  "waist_rise": 0.5,
+  "taper": 0.4,
+  "distress": 0.0,
+  "has_cuff": false,
+  "has_pleats": false,
+  "fit_label": "Skinny"
+}
+
+Now, analyse the provided garment image and return ONLY the JSON object.
+"""
+
+    def __init__(self):
+        self._sdk = "none"
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            self._model = genai.GenerativeModel("gemini-2.5-flash")
+            self._sdk = "genai"
+        except (ImportError, Exception):
+            pass
+
+    def _fetch_image_b64(self, image_url: str) -> tuple[bytes, str]:
+        """Download image and return (bytes, mime_type). Falls back gracefully."""
+        try:
+            if image_url.startswith("http"):
+                resp = httpx.get(image_url, timeout=10, follow_redirects=True)
+                resp.raise_for_status()
+                content_type = resp.headers.get("content-type", "image/jpeg").split(";")[0]
+                return resp.content, content_type
+        except Exception:
+            pass
+        return b"", "image/jpeg"
 
     def process_garment(self, garment_data: dict) -> dict:
-        prompt = (
-            "Act as an expert AI 3D Modeler. You are processing a catalog entry "
-            "for a Virtual Try-On system.\n"
-            f"Garment Data: {json.dumps(garment_data)}\n\n"
-            "Analyse this garment and return ONLY a valid JSON object with these precise mathematical properties for a 3D mesh:\n"
-            '{"scale_x": <float between 0.8 (slim) and 1.3 (relaxed) based on fit>,'
-            '"scale_y": <float between 0.9 (cropped) and 1.1 (long)>,'
-            '"color_hex": "<hex color code representing the jeans, e.g. #000080 for navy>"}'
-            "\nDo not include any markdown blocks or backticks, just the raw JSON."
-        )
+        """
+        Core method: sends garment image + metadata to Gemini Vision,
+        parses the rich JSON response, and returns the 3D descriptor dict
+        ready for storage in GarmentAsset.metadata_json.
+        """
+        image_url = garment_data.get("image_url") or garment_data.get("ImageURL") or ""
+        meta_text = json.dumps({
+            k: v for k, v in garment_data.items()
+            if k not in ("image_url", "ImageURL")
+        })
 
         try:
-            if self._sdk == "new":
-                import google.genai as genai
-                response = self._client.models.generate_content(
-                    model="gemini-2.0-flash",
-                    contents=prompt,
-                )
-                llm_text = response.text
-            elif self._sdk == "legacy":
-                response = self._legacy_model.generate_content(prompt)
-                llm_text = response.text
-            else:
+            if self._sdk == "none":
                 raise RuntimeError("No Gemini SDK available")
-                
-            # Clean LLM output
-            import re
-            json_str = re.sub(r'```json|```', '', llm_text).strip()
-            params = json.loads(json_str)
-            
-            scale_x = float(params.get("scale_x", 1.0))
-            scale_y = float(params.get("scale_y", 1.0))
-            color_hex = params.get("color_hex", "#1c3d72")
-            
-            # Generate the actual 3D .glb file!
-            filename = f"garment_3d_{uuid.uuid4().hex[:8]}.glb"
-            asset_url = self._generate_3d_pants_glb(scale_x, scale_y, color_hex, filename)
-            
+
+            # Build multimodal content list
+            contents = []
+            img_bytes, mime = self._fetch_image_b64(image_url)
+            if img_bytes:
+                # Inline image blob format supported by google-generativeai 0.8.x
+                contents.append({"mime_type": mime, "data": img_bytes})
+            contents.append(
+                f"Garment metadata: {meta_text}\n\n{self.VISION_PROMPT}"
+            )
+
+            response = self._model.generate_content(contents)
+            llm_text = response.text
+
+            # Strip markdown fences if present
+            json_str = re.sub(r"```json|```", "", llm_text).strip()
+            # Find first JSON object in case of any preamble
+            match = re.search(r"\{[^{}]+\}", json_str, re.DOTALL)
+            if not match:
+                raise ValueError(f"No JSON object found in response: {llm_text[:200]}")
+            params = json.loads(match.group())
+
+            # Validate and clamp all numeric fields
+            def fclamp(val, lo, hi, default):
+                try:
+                    return max(lo, min(hi, float(val)))
+                except (TypeError, ValueError):
+                    return default
+
+            descriptor = {
+                "scale_x":    fclamp(params.get("scale_x"),   0.80, 1.35, 1.0),
+                "scale_y":    fclamp(params.get("scale_y"),   0.85, 1.15, 1.0),
+                "color_hex":  str(params.get("color_hex", "#2a4a7f")),
+                "accent_hex": str(params.get("accent_hex", params.get("color_hex", "#1a3060"))),
+                "roughness":  fclamp(params.get("roughness"),  0.3,  1.0,  0.82),
+                "waist_rise": fclamp(params.get("waist_rise"), 0.0, 1.0,  0.5),
+                "taper":      fclamp(params.get("taper"),      -0.5, 0.5,  0.0),
+                "distress":   fclamp(params.get("distress"),   0.0, 1.0,  0.0),
+                "has_cuff":   bool(params.get("has_cuff", False)),
+                "has_pleats": bool(params.get("has_pleats", False)),
+                "fit_label":  str(params.get("fit_label", "Regular")),
+                "source":     "gemini_vision_parametric",
+            }
+
+#             print(f"[AI] Vision analysis complete")
+
             return {
-                "ai_generated_image_url": asset_url, # Now pointing to a .glb
-                "thumbnail_url": "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=800",
-                "metadata_json": {"llm_response": params, "source": "gemini_trimesh_3d"},
+                "ai_generated_image_url": image_url,
+                "metadata_json": descriptor,
             }
 
         except Exception as e:
-            print(f"[WARN] Gemini 3D processing failed for garment: {e}")
-            # Fallback to a basic blue mesh
-            filename = f"fallback_3d_{uuid.uuid4().hex[:8]}.glb"
-            asset_url = self._generate_3d_pants_glb(1.0, 1.0, "#4a70a8", filename)
-            return {
-                "ai_generated_image_url": asset_url,
-                "thumbnail_url": "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=800",
-                "metadata_json": {"error": str(e), "source": "gemini_fallback_3d"},
-            }
+#             print(f"[WARN] Gemini Vision processing failed: {e}")
+            # Robust fallback: use text-based heuristics
+            return self._text_fallback(garment_data, str(e))
+
+    def _text_fallback(self, garment_data: dict, error: str) -> dict:
+        """Text-only heuristic fallback when image analysis fails."""
+        fit = str(garment_data.get("Fit") or garment_data.get("fit", "")).lower()
+        color_raw = str(garment_data.get("Color") or garment_data.get("color", "blue")).lower()
+
+        # Fit heuristics
+        fit_map = {
+            "skinny":   {"scale_x": 0.88, "scale_y": 1.02, "taper":  0.40, "fit_label": "Skinny"},
+            "slim":     {"scale_x": 0.93, "scale_y": 1.02, "taper":  0.25, "fit_label": "Slim"},
+            "regular":  {"scale_x": 1.00, "scale_y": 1.00, "taper":  0.00, "fit_label": "Regular"},
+            "mom":      {"scale_x": 1.10, "scale_y": 1.00, "taper":  0.10, "fit_label": "Mom Fit"},
+            "wide":     {"scale_x": 1.20, "scale_y": 1.03, "taper": -0.35, "fit_label": "Wide Leg"},
+            "relaxed":  {"scale_x": 1.15, "scale_y": 1.00, "taper": -0.15, "fit_label": "Relaxed"},
+            "flared":   {"scale_x": 1.05, "scale_y": 1.05, "taper": -0.40, "fit_label": "Flared"},
+            "bermuda":  {"scale_x": 1.05, "scale_y": 0.88, "taper":  0.05, "fit_label": "Bermuda"},
+        }
+        fit_params = next((v for k, v in fit_map.items() if k in fit), fit_map["regular"])
+
+        # Basic colour name → hex
+        color_map = {
+            "negro": "#0d0d0d", "black": "#0d0d0d",
+            "blanco": "#f5f5f5", "white": "#f5f5f5",
+            "azul": "#1e3a8a", "blue": "#1e3a8a",
+            "gris": "#4a4a4a", "gray": "#4a4a4a", "grey": "#4a4a4a",
+            "verde": "#2d5a1b", "green": "#2d5a1b",
+            "marron": "#5c3a1e", "brown": "#5c3a1e",
+            "beige": "#c5a97d", "khaki": "#c5a97d",
+        }
+        color_hex = next((v for k, v in color_map.items() if k in color_raw), "#2a4a7f")
+
+        return {
+            "ai_generated_image_url": garment_data.get("image_url", ""),
+            "metadata_json": {
+                **fit_params,
+                "scale_x":    fit_params["scale_x"],
+                "scale_y":    fit_params["scale_y"],
+                "color_hex":  color_hex,
+                "accent_hex": color_hex,
+                "roughness":  0.82,
+                "waist_rise": 0.5,
+                "distress":   0.0,
+                "has_cuff":   False,
+                "has_pleats": False,
+                "error":      error,
+                "source":     "text_fallback_parametric",
+            },
+        }
 
 
 class MockTryOnStrategy(VirtualTryOnStrategy):

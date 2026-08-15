@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { ShoppingCart, Ruler, Palette, CheckCircle2, Info } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Box } from "@react-three/drei";
-import { ParametricMannequin, ParametricPants } from "@/components/AvatarCreatorNative";
+import { ParametricMannequin, ParametricPants } from "@/components/avatar";
 
 // ── Size Parsing Logic ───────────────────────────────────────────────────────
 function calculateSizeScale(size: string): number {
@@ -87,6 +87,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   // Gallery
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
+  const [notFound, setNotFound] = useState(false);
+
   useEffect(() => {
     fetchApi(`/catalog/garments/${productId}`)
       .then((g: Garment) => {
@@ -95,15 +97,20 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         if (g.available_colors?.length) setSelectedColor(g.available_colors[0]);
         if (g.available_sizes?.length) setSelectedSize(g.available_sizes[1] ?? g.available_sizes[0]);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        setNotFound(true);
+      })
       .finally(() => setLoading(false));
+  }, [productId]);
 
+  useEffect(() => {
     if (user) {
       fetchApi("/tryon/avatar")
         .then((d) => { if (d) setAvatarData(d); })
         .catch(() => {});
     }
-  }, [productId, user]);
+  }, [user]);
 
   const handleAddToCart = async () => {
     if (!user) { router.push("/login"); return; }
@@ -118,8 +125,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         }),
       });
       toast.success("¡Añadido al carrito!");
-    } catch (err: any) {
-      toast.error(err.message || "Error al añadir al carrito");
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message || "Error al añadir al carrito");
     }
   };
 
@@ -128,6 +136,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     if (!avatarData) { toast.error("¡Primero debes crear tu Avatar 3D!"); router.push("/avatar"); return; }
     setIsTryOnActive((v) => !v);
   };
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold mb-4">Producto no encontrado</h1>
+        <button onClick={() => router.push("/")} className="text-blue-500 hover:underline">Volver al inicio</button>
+      </div>
+    );
+  }
 
   if (loading || !product) {
     return (
@@ -155,8 +172,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const avatarShirtStyle = avatarData?.shirt_style || "Basic";
   const avatarTattoo = Boolean(avatarData?.tattoo_left_arm);
 
+  // Parse advanced morphs
+  let morphs: any = {};
+  try {
+    morphs = JSON.parse(avatarBodyType);
+  } catch (e) {
+    // Legacy string
+  }
+
   // ── Selected color drives TryOn pants color ──────────────────────────────
-  const tryOnPantsColor = selectedColor?.hex || product.available_colors?.[0]?.hex || "#1e3a8a";
+  // Use selected variant color; fall back to AI-detected color from the real image
+  const aiColorHex = product.metadata_json?.color_hex ?? product.available_colors?.[0]?.hex ?? "#1e3a8a";
+  const tryOnPantsColor = selectedColor?.hex || aiColorHex;
+  const accentHex = product.metadata_json?.accent_hex ?? tryOnPantsColor;
 
   // ── Avatar scale ─────────────────────────────────────────────────────────
   const avatarScaleY = avatarHeight / 170.0;
@@ -165,10 +193,21 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   // ── Size drives pants scale in 3D ────────────────────────────────────────
   const sizeScaleMod = calculateSizeScale(selectedSize);
 
-  // ── AI Parameters ────────────────────────────────────────────────────────
-  const aiScaleX = product.metadata_json?.scale_x ?? 1.0;
-  const aiScaleY = product.metadata_json?.scale_y ?? 1.0;
-  
+  // ── AI Vision Parameters ─────────────────────────────────────────────────
+  // These come from Gemini analysing the REAL garment photograph,
+  // making every product's 3D representation unique and image-faithful.
+  const aiScaleX    = product.metadata_json?.scale_x    ?? 1.0;
+  const aiScaleY    = product.metadata_json?.scale_y    ?? 1.0;
+  const aiRoughness = product.metadata_json?.roughness  ?? 0.82;
+  const aiTaper     = product.metadata_json?.taper      ?? 0.0;  // negative=wide, positive=skinny
+  const aiWaistRise = product.metadata_json?.waist_rise ?? 0.5;
+  const aiDistress  = product.metadata_json?.distress   ?? 0.0;
+  const aiHasCuff   = product.metadata_json?.has_cuff   ?? false;
+  const aiHasPleats = product.metadata_json?.has_pleats ?? false;
+  // fit_label from Vision takes precedence over text field
+  const aiFitLabel  = product.metadata_json?.fit_label  ?? product.fit ?? "Regular";
+  const aiSource    = product.metadata_json?.source ?? "";
+
   // Combine AI scale with Avatar size and weight
   const finalPantsScaleX = aiScaleX * sizeScaleMod * avatarScaleXZ;
   const finalPantsScaleY = aiScaleY * avatarScaleY;
@@ -236,24 +275,35 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         hairStyle={avatarHairStyle}
                         hairColor={avatarHairColor}
                         gender={avatarGender}
-                        glasses={avatarGlasses}
                         scaleY={avatarScaleY}
                         scaleXZ={avatarScaleXZ}
-                        bodyType={avatarBodyType}
                         muscleDefinition={avatarMuscle}
-                        beardStyle={avatarBeardStyle}
-                        beardColor={avatarBeardColor}
                         eyebrowStyle={avatarEyebrow}
-                        hatStyle={avatarHat}
-                        shirtStyle={avatarShirtStyle}
-                        tattooLeftArm={avatarTattoo}
+                        isNakedBottom={true}
+                        chestWidth={morphs.chestWidth}
+                        bellyWidth={morphs.bellyWidth}
+                        bellyDepth={morphs.bellyDepth}
+                        hipWidth={morphs.hipWidth}
+                        armThickness={morphs.armThickness}
+                        legThickness={morphs.legThickness}
+                        breastSize={morphs.breastSize}
+                        neckThickness={morphs.neckThickness}
                       />
                       <ParametricPants
                         color={tryOnPantsColor}
-                        scaleX={finalPantsScaleX}
-                        scaleY={finalPantsScaleY}
-                        pantsFit={product.fit || "Regular"}
+                        accentColor={accentHex}
+                        avatarScaleXZ={avatarScaleXZ}
+                        avatarScaleY={avatarScaleY}
+                        pantsScaleX={finalPantsScaleX}
+                        pantsScaleY={finalPantsScaleY}
+                        pantsFit={aiFitLabel}
                         isFemale={avatarGender === "Mujer"}
+                        legThickness={morphs.legThickness}
+                        hipWidth={morphs.hipWidth}
+                        roughness={aiRoughness}
+                        taper={aiTaper}
+                        waistRise={aiWaistRise}
+                        hasCuff={aiHasCuff}
                       />
                     </group>
                     <ContactShadows position={[0, -0.89, 0]} opacity={0.6} scale={5} blur={1.8} far={4} />
@@ -275,6 +325,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-bold text-white bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full">
                     Talle {selectedSize} · {selectedColor?.name}
                   </div>
+                  {/* AI analysis source badge */}
+                  {aiSource && (
+                    <div className="absolute bottom-4 right-4 flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border shadow-sm backdrop-blur-md"
+                      style={{
+                        background: aiSource.includes("vision") ? "rgba(124,58,237,0.12)" : "rgba(0,0,0,0.5)",
+                        borderColor: aiSource.includes("vision") ? "#7c3aed" : "#555",
+                        color: aiSource.includes("vision") ? "#c4b5fd" : "#aaa",
+                      }}
+                    >
+                      <div className={`w-1.5 h-1.5 rounded-full ${aiSource.includes("vision") ? "bg-blue-400 animate-pulse" : "bg-gray-500"}`} />
+                      {aiSource.includes("vision") ? "IA Visión" : "IA Texto"}
+                    </div>
+                  )}
                   <button
                     onClick={handleTryOnToggle}
                     className="absolute top-4 right-4 bg-white/90 dark:bg-black/90 backdrop-blur-md p-2 rounded-full shadow-sm hover:scale-110 transition-transform"
@@ -450,7 +513,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   ))}
                 </div>
                 {isTryOnActive && (
-                  <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mt-2 animate-in fade-in duration-300">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2 animate-in fade-in duration-300">
                     📏 El talle ajusta el ancho del pantalón en el Probador 3D
                   </p>
                 )}

@@ -9,9 +9,7 @@ export function Footer() {
         {/* Brand */}
         <div className="space-y-4">
           <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tighter text-black dark:text-white">
-            <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
-              <span className="text-white text-xs">V</span>
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain dark:invert" />
             TryOn <span className="text-neutral-500">Hub</span>
           </Link>
           <p className="text-sm text-neutral-500 dark:text-neutral-400">

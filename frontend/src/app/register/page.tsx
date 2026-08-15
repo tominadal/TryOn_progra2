@@ -41,8 +41,9 @@ export default function RegisterPage() {
 
       toast.success("¡Cuenta creada exitosamente! Por favor inicia sesión.");
       router.push("/login");
-    } catch (err: any) {
-      toast.error(err.message || "Error al registrarse");
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message || "Error al registrarse");
     } finally {
       setIsLoading(false);
     }

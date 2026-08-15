@@ -59,6 +59,7 @@ def _garment_to_dict(g: Garment) -> dict:
         "image": primary_image,
         "images": gallery,
         "model_3d_url": asset.ai_generated_image_url if asset else None,
+        "metadata_json": asset.metadata_json if asset else {},
     }
 
 
@@ -107,6 +108,8 @@ def process_catalog_background(job_id: int, file_content: bytes):
             db.commit()
             db.refresh(garment)
 
+            # Pass image_url so the Vision strategy can analyse the real photograph
+            garment_data["image_url"] = garment_data.get("ImageURL") or garment_data.get("Image") or ""
             asset_data = strategy.process_garment(garment_data)
 
             asset = GarmentAsset(
@@ -241,9 +244,45 @@ def get_garment(garment_id: int, db: Session = Depends(get_db)):
 
 # --- BRAND DASHBOARD ENDPOINTS ---
 
+import shutil
+from pathlib import Path
+import uuid
+
+@router.post("/upload-image")
+def upload_garment_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Upload a raw garment image and return its URL."""
+    if current_user.role_id != 2 or not current_user.brand_id:
+        raise HTTPException(status_code=403, detail="Not authorized as brand")
+        
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image")
+
+    # Ensure uploads directory exists
+    uploads_dir = Path("static/uploads")
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    ext = file.filename.split('.')[-1] if '.' in file.filename else 'png'
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    file_path = uploads_dir / filename
+    
+    try:
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save image: {str(e)}")
+        
+    # Return the URL accessible via the static files mount in main.py
+    return {"url": f"http://localhost:8000/static/uploads/{filename}"}
 class GarmentCreate(BaseModel):
     name: str
     price: float
+    fit: str = "Regular"
+    color: str = "Blue"
+    sizes: List[str] = ["S", "M", "L", "XL"]
     image_url: str = "/products/jean_classic.png"
 
 
@@ -280,29 +319,51 @@ def create_garment(
     if current_user.role_id != 2 or not current_user.brand_id:
         raise HTTPException(status_code=403, detail="Not authorized as brand")
 
-    count = db.query(Garment).count()
-    new_garment = Garment(
-        brand_id=current_user.brand_id,
-        sku=f"BRAND-{current_user.brand_id}-{count + 1}",
-        name=garment_in.name,
-        fit="Regular",
-        size="M",
-        color="Variado",
-        price=garment_in.price,
-        is_processed=True,
-        available_sizes=["S", "M", "L", "XL"],
-        available_colors=[],
-    )
-    db.add(new_garment)
-    db.commit()
-    db.refresh(new_garment)
+    try:
+        count = db.query(Garment).count()
+        new_garment = Garment(
+            brand_id=current_user.brand_id,
+            sku=f"BRAND-{current_user.brand_id}-{count + 1}",
+            name=garment_in.name,
+            fit=garment_in.fit,
+            size=garment_in.sizes[0] if garment_in.sizes else "M",
+            color=garment_in.color,
+            price=garment_in.price,
+            is_processed=True,
+            available_sizes=garment_in.sizes,
+            available_colors=[],
+        )
+        db.add(new_garment)
+        db.flush() # Flush instead of commit to get ID but keep in transaction
 
-    asset = GarmentAsset(
-        garment_id=new_garment.id,
-        ai_generated_image_url=garment_in.image_url,
-        metadata_json={"source": "dashboard_upload"},
-    )
-    db.add(asset)
-    db.commit()
+        # Process with AI
+        strategy = GeminiTryOnStrategy()
+        asset_data = strategy.process_garment({
+            "SKU": new_garment.sku,
+            "Name": new_garment.name,
+            "Fit": new_garment.fit,
+            "Size": new_garment.size,
+            "Color": new_garment.color,
+            "Price": new_garment.price,
+            "image_url": garment_in.image_url or "",
+        })
 
-    return {"id": new_garment.id, "name": new_garment.name, "price": new_garment.price}
+        asset = GarmentAsset(
+            garment_id=new_garment.id,
+            ai_generated_image_url=garment_in.image_url,
+            metadata_json=asset_data["metadata_json"],
+        )
+        db.add(asset)
+        
+        # Now commit both successfully
+        db.commit()
+        db.refresh(new_garment)
+
+        return {"id": new_garment.id, "name": new_garment.name, "price": new_garment.price}
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error al procesar la prenda. El modelo 3D falló o los datos son inválidos: {str(e)}"
+        )

@@ -58,8 +58,8 @@ class Garment(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    asset = relationship("GarmentAsset", back_populates="garment", uselist=False)
-    images = relationship("GarmentImage", back_populates="garment", order_by="GarmentImage.sort_order")
+    asset = relationship("GarmentAsset", back_populates="garment", uselist=False, cascade="all, delete-orphan")
+    images = relationship("GarmentImage", back_populates="garment", order_by="GarmentImage.sort_order", cascade="all, delete-orphan")
 
 
 class GarmentImage(Base):
