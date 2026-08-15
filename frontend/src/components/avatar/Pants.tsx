@@ -77,17 +77,25 @@ export function ParametricPants({
       thighMod = -taperFactor * 0.5; calfMod = -taperFactor; break;
   }
 
-  const isBermuda = pantsFit === "Bermuda";
-  const isSkirt = pantsFit === "Skirt";
-  const isFlared = pantsFit === "Flared";
+  const fitLower = pantsFit.toLowerCase();
+  const isBermuda = fitLower.includes("bermuda") || fitLower.includes("short");
+  const isSkirt = fitLower.includes("skirt") || fitLower.includes("pollera");
+  const isFlared = fitLower.includes("flare");
 
   const hipR_base = isFemale ? 0.145 * hipWidth : 0.125 * hipWidth;
-  
-  // Offset so pants sit *outside* the skin.
   const offset = 0.008;
-  const finalHipR = (hipR_base + hipMod + offset * 1.5) * pantsScaleX;
-  const thighR = ((isFemale ? 0.068 : 0.062) * legThickness + thighMod + offset) * pantsScaleX;
-  const calfR = ((isFemale ? 0.046 : 0.05) * legThickness + calfMod + offset) * pantsScaleX;
+  
+  // We must ensure the pants radius is never smaller than the mannequin's skin radius
+  const minHipR = hipR_base + 0.005;
+  const minThighR = (isFemale ? 0.068 : 0.062) * legThickness + 0.005;
+  const minCalfR = (isFemale ? 0.046 : 0.05) * legThickness + 0.005;
+
+  const finalHipR = Math.max(minHipR, (hipR_base + hipMod) * pantsScaleX + offset * 1.5);
+  const thighR = Math.max(minThighR, ((isFemale ? 0.068 : 0.062) * legThickness + thighMod) * pantsScaleX + offset);
+  const calfR = Math.max(minCalfR, ((isFemale ? 0.046 : 0.05) * legThickness + calfMod) * pantsScaleX + offset);
+  
+  // Cancel out the root avatarScaleY for the legs, so pants "quedan cortos" on tall avatars
+  const legScaleY = pantsScaleY / (avatarScaleY || 1.0);
   
   const modelY = -0.9 + (0.111 * avatarScaleY) + waistRiseOffset;
 
@@ -119,7 +127,7 @@ export function ParametricPants({
 
       {/* ── LEFT LEG ── */}
       {!isSkirt && (
-        <group position={[isFemale ? -0.095 : -0.088, 0.82, 0]} scale={[1, pantsScaleY, 1]}>
+        <group position={[isFemale ? -0.095 : -0.088, 0.82, 0]} scale={[1, legScaleY, 1]}>
           <mesh position={[0, -0.24, 0]}>
             <capsuleGeometry args={[thighR, 0.30, 16, 32]} />
             <meshStandardMaterial {...deniMat} />
@@ -166,7 +174,7 @@ export function ParametricPants({
 
       {/* ── RIGHT LEG ── */}
       {!isSkirt && (
-        <group position={[isFemale ? 0.095 : 0.088, 0.82, 0]} scale={[1, pantsScaleY, 1]}>
+        <group position={[isFemale ? 0.095 : 0.088, 0.82, 0]} scale={[1, legScaleY, 1]}>
           <mesh position={[0, -0.24, 0]}>
             <capsuleGeometry args={[thighR, 0.30, 16, 32]} />
             <meshStandardMaterial {...deniMat} />

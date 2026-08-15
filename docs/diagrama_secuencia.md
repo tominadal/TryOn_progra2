@@ -1,6 +1,10 @@
-# Diagrama de Secuencia UML: Subida de Prendas y Generación 3D
+# Diagrama de Secuencia UML: TryOnHub
 
-Este diagrama ilustra cómo funciona la arquitectura de TryOnHub cuando una marca sube un nuevo producto y nuestra Inteligencia Artificial parametriza el diseño 3D.
+Este documento contiene los diagramas de secuencia para los casos de uso más importantes del sistema, de acuerdo a las buenas prácticas de UML.
+
+## 1. Subida de Prendas y Generación 3D (Brand)
+
+Este diagrama ilustra cómo funciona la arquitectura cuando una marca sube un nuevo producto y nuestra Inteligencia Artificial parametriza el diseño 3D.
 
 ```mermaid
 sequenceDiagram
@@ -38,6 +42,38 @@ sequenceDiagram
     end
 ```
 
-### Explicación Técnica
-1. **Transacción Atómica**: Todo el proceso de base de datos (`Garment` y `GarmentAsset`) se hace dentro de una única transacción. Si Gemini Vision se cae, todo se deshace (`rollback`), evitando dejar la base de datos con prendas "zombis" que no pueden mostrarse en el probador 3D.
-2. **Vision-Driven Parameters**: Gemini Vision extrae directamente los colores predominantes en HEX y las medidas a escala basándose en la foto real que sube el usuario. No usamos texturas estáticas, sino variables React Three Fiber (`material.color.set(hex)`).
+## 2. Probador Virtual (Try-On) Interactiva (Client)
+
+Este diagrama detalla la interacción principal del sistema: cuando un usuario entra a ver cómo le queda una prenda en su avatar 3D.
+
+```mermaid
+sequenceDiagram
+    actor Cliente as 👤 Cliente (User)
+    participant NextJS as 💻 Next.js Frontend
+    participant R3F as 🎨 React Three Fiber
+    participant FastApi as ⚙️ FastAPI Backend
+    participant DB as 🗄️ PostgreSQL
+
+    Cliente->>NextJS: Accede a /product/{id}
+    NextJS->>FastApi: GET /api/v1/catalog/garment/{id}
+    FastApi->>DB: query Garment & GarmentAsset
+    DB-->>FastApi: Devuelve Metadata 3D (Fit, Escala, Color)
+    FastApi-->>NextJS: Retorna JSON de la Prenda
+    
+    NextJS->>FastApi: GET /api/v1/tryon/avatar
+    FastApi->>DB: query Avatar (del current_user)
+    DB-->>FastApi: Devuelve JSON de anatomía (Morphs)
+    FastApi-->>NextJS: Retorna JSON del Avatar
+    
+    NextJS->>R3F: Inicializa <Canvas>
+    NextJS->>R3F: Pasa props (AvatarMorphs + GarmentMetadata)
+    
+    rect rgb(230, 255, 230)
+        Note over R3F: Renderizado Paramétrico en Cliente
+        R3F->>R3F: Escala geometría del avatar base (chestWidth, legThickness)
+        R3F->>R3F: Calcula radio de prenda apoyado en la piel (offset dinámico)
+        R3F->>R3F: Aplica shaders y texturas PBR (Denim, Cotton)
+    end
+    
+    R3F-->>Cliente: Muestra Modelo 3D Interactivo
+```

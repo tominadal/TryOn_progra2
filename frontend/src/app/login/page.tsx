@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -18,11 +18,13 @@ function LoginForm() {
   const { login } = useAuth();
   
   // Show toast if redirected due to expired session
-  if (typeof window !== 'undefined' && searchParams.get('expired') === 'true') {
-    // Prevent showing toast on every render by replacing the URL
-    window.history.replaceState(null, '', '/login');
-    setTimeout(() => toast.error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'), 100);
-  }
+  useEffect(() => {
+    if (typeof window !== 'undefined' && searchParams.get('expired') === 'true') {
+      // Prevent showing toast on every render by replacing the URL
+      window.history.replaceState(null, '', '/login');
+      setTimeout(() => toast.error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'), 100);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

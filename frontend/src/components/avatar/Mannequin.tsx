@@ -290,7 +290,7 @@ export function ParametricMannequin({
       {/* ── HIPS / PELVIS ── */}
       <mesh position={[0, 0.87, 0]}>
         <sphereGeometry args={[finalHipR, 32, 32]} />
-        <meshStandardMaterial {...actualDeniMat} />
+        <meshStandardMaterial {...(isNakedBottom ? skinMat : actualDeniMat)} />
       </mesh>
 
       {/* Skirt Cone */}

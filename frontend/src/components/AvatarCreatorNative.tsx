@@ -316,11 +316,11 @@ export function AvatarCreatorNative({
                 {[
                   { label: "Grosor de Pecho", value: chestWidth, setter: setChestWidth, min: 0.7, max: 1.5, step: 0.05 },
                   ...(gender === "Mujer" ? [{ label: "Tamaño de Busto", value: breastSize, setter: setBreastSize, min: 0.5, max: 1.10, step: 0.05 }] : []),
-                  { label: "Ancho Abdominal", value: bellyWidth, setter: setBellyWidth, min: 0.7, max: 1.8, step: 0.05 },
-                  { label: "Prominencia Abdominal", value: bellyDepth, setter: setBellyDepth, min: 0.7, max: 1.8, step: 0.05 },
+                  { label: "Ancho Abdominal", value: bellyWidth, setter: setBellyWidth, min: 0.7, max: 1.2, step: 0.05 },
+                  { label: "Prominencia Abdominal", value: bellyDepth, setter: setBellyDepth, min: 0.7, max: 1.5, step: 0.05 },
                   { label: "Ancho de Caderas", value: hipWidth, setter: setHipWidth, min: 0.7, max: 1.4, step: 0.05 },
                   { label: "Grosor de Brazos", value: armThickness, setter: setArmThickness, min: 0.7, max: 1.5, step: 0.05 },
-                  { label: "Grosor de Piernas", value: legThickness, setter: setLegThickness, min: 0.7, max: 1.5, step: 0.05 },
+                  { label: "Grosor de Piernas", value: legThickness, setter: setLegThickness, min: 0.7, max: 1.25, step: 0.05 },
                   { label: "Grosor de Cuello", value: neckThickness, setter: setNeckThickness, min: 0.7, max: 1.5, step: 0.05 },
                 ].map((morph) => (
                   <div key={morph.label} className="space-y-1.5">

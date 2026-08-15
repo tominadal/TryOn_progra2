@@ -51,10 +51,10 @@ export default function Home() {
             La Prueba Virtual con IA está activa
           </div>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-400">
-            Encuentra tu calce perfecto. <br/> Sin el probador físico.
+            El fin de las devoluciones por talle. <br/> Bienvenido al estándar del gemelo digital.
           </h1>
           <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mx-auto leading-relaxed">
-            Crea tu gemelo digital en segundos. Experimenta pruebas virtuales hiperrealistas para las mejores marcas de denim directamente en tu navegador.
+            No somos un "probador mejorado". Somos una forma radicalmente diferente de comprar. Crea tu clon 3D paramétrico y ten la certeza absoluta de cómo te quedará la ropa antes de pagarla.
           </p>
           <div className="pt-8 flex justify-center gap-4">
             <Link href="/marketplace" className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-500 transition-all active:scale-95 shadow-lg shadow-blue-500/30">
@@ -68,14 +68,14 @@ export default function Home() {
       <section className="py-24 px-6 max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           <div className="w-full lg:w-1/2 space-y-6">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Sobre Nosotros</h2>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Nuestro Movimiento</h2>
             <p className="text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed">
-              En TryOnHub creemos que la tecnología debe estar al servicio de la moda y la sustentabilidad. 
-              Nuestra misión es reducir drásticamente las devoluciones en la industria textil mediante tecnología 3D de vanguardia y avatares paramétricos de alta precisión.
+              En TryOnHub no buscamos mejorar la tabla de talles. Queremos volverla obsoleta. 
+              Nuestra misión es liderar un movimiento hacia el consumo responsable, reduciendo drásticamente la huella de carbono causada por las devoluciones masivas de e-commerce.
             </p>
             <p className="text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed">
-              Al digitalizar prendas en 3D y permitirte crear tu propio gemelo digital con tus medidas exactas, 
-              garantizamos que lo que ves en pantalla es exactamente cómo te quedará en la vida real.
+              Al digitalizar prendas con Inteligencia Artificial y permitirte probarlas sobre tu propio avatar paramétrico exacto, 
+              te devolvemos la confianza absoluta sobre tu cuerpo a la hora de comprar online. Es el punto de inflexión del retail.
             </p>
             <div className="pt-4">
               <Link href="/avatar" className="inline-flex items-center gap-2 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/25">
@@ -84,7 +84,7 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full lg:w-1/2">
-            <div className="aspect-square md:aspect-video lg:aspect-square bg-neutral-200 dark:bg-neutral-800 rounded-3xl overflow-hidden relative shadow-2xl">
+            <div className="aspect-[4/3] md:aspect-video lg:aspect-[4/3] bg-neutral-200 dark:bg-neutral-800 rounded-3xl overflow-hidden relative shadow-2xl">
               <img 
                 src="/images/about_fashion.png" 
                 alt="Tecnología 3D en el Estudio" 

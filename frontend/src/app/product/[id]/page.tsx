@@ -300,9 +300,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         isFemale={avatarGender === "Mujer"}
                         legThickness={morphs.legThickness}
                         hipWidth={morphs.hipWidth}
-                        roughness={aiRoughness}
-                        taper={aiTaper}
                         waistRise={aiWaistRise}
+                        taper={aiTaper}
+                        roughness={aiRoughness}
                         hasCuff={aiHasCuff}
                       />
                     </group>
