@@ -12,7 +12,7 @@ sequenceDiagram
     participant NextJS as 💻 Next.js Frontend
     participant FastApi as ⚙️ FastAPI Backend
     participant Gemini as 🧠 Gemini 1.5 Pro Vision
-    participant DB as 🗄️ PostgreSQL
+    participant DB as 🗄️ SQLite
 
     Brand->>NextJS: Sube imagen de la prenda + Datos (Talla, Precio)
     NextJS->>FastApi: POST /api/v1/catalog/upload-image (FormData)
@@ -20,7 +20,7 @@ sequenceDiagram
     
     NextJS->>FastApi: POST /api/v1/catalog/garment (JSON con image_url)
     
-    rect rgb(200, 220, 255)
+    rect rgba(173, 216, 230, 0.15)
         Note over FastApi,DB: Transacción Atómica
         FastApi->>DB: Inicia Transacción
         FastApi->>DB: flush() Garment
@@ -52,7 +52,7 @@ sequenceDiagram
     participant NextJS as 💻 Next.js Frontend
     participant R3F as 🎨 React Three Fiber
     participant FastApi as ⚙️ FastAPI Backend
-    participant DB as 🗄️ PostgreSQL
+    participant DB as 🗄️ SQLite
 
     Cliente->>NextJS: Accede a /product/{id}
     NextJS->>FastApi: GET /api/v1/catalog/garment/{id}
@@ -68,7 +68,7 @@ sequenceDiagram
     NextJS->>R3F: Inicializa <Canvas>
     NextJS->>R3F: Pasa props (AvatarMorphs + GarmentMetadata)
     
-    rect rgb(230, 255, 230)
+    rect rgba(144, 238, 144, 0.15)
         Note over R3F: Renderizado Paramétrico en Cliente
         R3F->>R3F: Escala geometría del avatar base (chestWidth, legThickness)
         R3F->>R3F: Calcula radio de prenda apoyado en la piel (offset dinámico)

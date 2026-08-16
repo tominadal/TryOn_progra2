@@ -22,6 +22,13 @@ classDiagram
         +String description
     }
 
+    class Marketplace {
+        +Integer id
+        +String name
+        +String domain
+        +Boolean is_active
+    }
+
     class Avatar {
         +Integer id
         +String skin_color
@@ -69,16 +76,35 @@ classDiagram
         +calculateSubtotal() Float
     }
 
+    class Order {
+        +Integer id
+        +Float total_amount
+        +String status
+        +Datetime created_at
+    }
+
+    class OrderItem {
+        +Integer id
+        +Float price
+        +Integer quantity
+    }
+
     %% Asociaciones
     User "1" --> "1" Role : tiene
     User "1" --> "0..1" Avatar : posee
     User "1" --> "*" CartItem : agrega
+    User "1" --> "*" Order : realiza
     User "1" --> "0..1" Brand : administra (si es marca)
+    User "1" --> "0..1" Marketplace : administra (si es dueño)
     
+    Brand "1" --> "1" Marketplace : publica en
     Brand "1" --> "*" Garment : vende
     
     Garment "1" --> "0..1" GarmentAsset : contiene 3D
-    Garment "1" --> "*" CartItem : pertenece a
+    Garment "1" --> "*" CartItem : pertenece a (carrito)
+    Garment "1" --> "*" OrderItem : pertenece a (orden)
+    
+    Order "1" --> "*" OrderItem : contiene
 ```
 
 ### Justificación de Diseño (Patrón UML)

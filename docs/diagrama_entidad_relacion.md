@@ -23,6 +23,15 @@ erDiagram
         int marketplace_id FK
     }
 
+    AVATAR {
+        int id PK
+        int user_id FK
+        float height_cm
+        float weight_kg
+        string body_type
+        string skin_color
+    }
+
     USER {
         int id PK
         string email
@@ -64,7 +73,24 @@ erDiagram
         string color
     }
 
+    ORDER {
+        int id PK
+        int user_id FK
+        float total_amount
+        string status
+        datetime created_at
+    }
+
+    ORDER_ITEM {
+        int id PK
+        int order_id FK
+        int garment_id FK
+        float price
+        int quantity
+    }
+
     USER }|--|| ROLE : "pertenece a"
+    USER ||--o| AVATAR : "posee"
     USER }o--o| BRAND : "administra (si es marca)"
     USER }o--o| MARKETPLACE : "administra (si es dueño)"
     BRAND }|--|| MARKETPLACE : "publica en"
@@ -74,6 +100,10 @@ erDiagram
     
     USER ||--o{ CART_ITEM : "agrega a su carrito"
     GARMENT ||--o{ CART_ITEM : "es contenido en"
+    
+    USER ||--o{ ORDER : "realiza"
+    ORDER ||--o{ ORDER_ITEM : "contiene"
+    GARMENT ||--o{ ORDER_ITEM : "vendido como"
 ```
 
 ## Relaciones Principales
