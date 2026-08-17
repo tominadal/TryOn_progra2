@@ -26,7 +26,7 @@ def login_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user")
         
     if remember_me:
         access_token_expires = timedelta(days=30)

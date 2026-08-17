@@ -45,8 +45,15 @@ class GarmentRepository(CRUDBase[Garment, GarmentCreateSchema, GarmentUpdateSche
             .all()
         )
 
-    def get_by_brand(self, db: Session, brand_id: int) -> List[Garment]:
-        return db.query(Garment).filter(Garment.brand_id == brand_id).all()
+    def get_by_brand(self, db: Session, brand_id: int, skip: int = 0, limit: int = 100) -> List[Garment]:
+        """Return garments for a brand with pagination to prevent unbounded result sets."""
+        return (
+            db.query(Garment)
+            .filter(Garment.brand_id == brand_id)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def get_by_fit(self, db: Session, fit: str) -> List[Garment]:
         return db.query(Garment).filter(Garment.fit == fit, Garment.is_processed.is_(True)).all()

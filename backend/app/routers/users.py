@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.domain.database import get_db
 from app.domain.repositories.user_repository import user_repo
@@ -6,6 +6,7 @@ from app.dto.user import UserCreate, UserResponse
 from app.services.auth_service import get_password_hash, get_current_active_user
 from app.domain.models.user import User
 from app.domain.models.organization import Brand, Marketplace
+from app.constants import RoleID
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -21,7 +22,7 @@ def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
     
     try:
         # Manejar creación de cuenta tipo Marca (role_id == 2)
-        if user_dict.get("role_id") == 2:
+        if user_dict.get("role_id") == RoleID.BRAND_MANAGER:
             if not user_dict.get("brand_id"):
                 if not user_in.brand_name:
                     raise HTTPException(status_code=400, detail="Brand name is required for brand accounts")
@@ -48,9 +49,12 @@ def create_user(user_in: UserCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_user)
         return new_user
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Transaction failed: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Transaction failed: {str(e)}")
 
 @router.get("/me", response_model=UserResponse)
 def read_users_me(current_user: User = Depends(get_current_active_user)):

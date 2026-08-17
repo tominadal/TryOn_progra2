@@ -9,6 +9,7 @@ from app.domain.repositories import garment_repo, garment_image_repo
 from app.services.auth_service import get_current_active_user
 from app.services.ai_strategy import GeminiTryOnStrategy
 from app.config.settings import settings
+from app.constants import RoleID
 import pandas as pd
 import io
 
@@ -16,6 +17,26 @@ router = APIRouter(prefix="/catalog", tags=["catalog"])
 
 # Required columns in the uploaded Excel file
 REQUIRED_COLUMNS = {"SKU", "Name", "Fit", "Size", "Color", "Price"}
+
+# Known image magic bytes for server-side validation (defeats falsified Content-Type headers)
+_IMAGE_SIGNATURES: list[tuple[bytes, str]] = [
+    (b"\xff\xd8\xff", "jpeg"),
+    (b"\x89PNG\r\n\x1a\n", "png"),
+    (b"GIF87a", "gif"),
+    (b"GIF89a", "gif"),
+    (b"RIFF", "webp"),   # full check: header[8:12] == b"WEBP"
+]
+
+
+def _is_valid_image(content: bytes) -> bool:
+    """Return True if the file content starts with a known image magic-byte signature."""
+    for sig, _ in _IMAGE_SIGNATURES:
+        if content[:len(sig)] == sig:
+            # Extra check for WEBP: RIFF????WEBP
+            if sig == b"RIFF":
+                return len(content) >= 12 and content[8:12] == b"WEBP"
+            return True
+    return False
 
 
 def _validate_excel_columns(df: pd.DataFrame) -> None:
@@ -105,8 +126,8 @@ def process_catalog_background(job_id: int, file_content: bytes):
                 available_colors=[],
             )
             db.add(garment)
-            db.commit()
-            db.refresh(garment)
+            # Flush to get the PK without committing — keeps garment + asset in one atomic commit
+            db.flush()
 
             # Pass image_url so the Vision strategy can analyse the real photograph
             garment_data["image_url"] = garment_data.get("ImageURL") or garment_data.get("Image") or ""
@@ -121,6 +142,7 @@ def process_catalog_background(job_id: int, file_content: bytes):
             db.add(asset)
 
             job.processed_items += 1
+            # Single commit per garment (garment + asset atomic) — was previously 2 commits
             db.commit()
 
         job.status = JobStatus.READY
@@ -254,29 +276,34 @@ def upload_garment_image(
     current_user: User = Depends(get_current_active_user)
 ):
     """Upload a raw garment image and return its URL."""
-    if current_user.role_id != 2 or not current_user.brand_id:
+    if current_user.role_id != RoleID.BRAND_MANAGER or not current_user.brand_id:
         raise HTTPException(status_code=403, detail="Not authorized as brand")
-        
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File must be an image")
+
+    # Read content first so we can validate via magic bytes
+    content = file.file.read()
+
+    # --- Security: validate real image format via magic bytes (defeats falsified Content-Type) ---
+    if not _is_valid_image(content):
+        raise HTTPException(status_code=400, detail="File must be a valid image (JPEG, PNG, GIF or WEBP)")
 
     # Ensure uploads directory exists
     uploads_dir = Path("static/uploads")
     uploads_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Generate unique filename
-    ext = file.filename.split('.')[-1] if '.' in file.filename else 'png'
+    ext = file.filename.split('.')[-1] if file.filename and '.' in file.filename else 'png'
     filename = f"{uuid.uuid4().hex}.{ext}"
     file_path = uploads_dir / filename
-    
+
     try:
-        with file_path.open("wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        file_path.write_bytes(content)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save image: {str(e)}")
-        
-    # Return the URL accessible via the static files mount in main.py
-    return {"url": f"http://localhost:8000/static/uploads/{filename}"}
+
+    # Use settings.BASE_URL so this works in production (not hardcoded to localhost)
+    return {"url": f"{settings.BASE_URL}/static/uploads/{filename}"}
+
+
 class GarmentCreate(BaseModel):
     name: str
     price: float
@@ -303,7 +330,7 @@ def get_brand_catalog(
     db: Session = Depends(get_db),
 ):
     """Get all garments for the current authenticated brand."""
-    if current_user.role_id != 2 or not current_user.brand_id:
+    if current_user.role_id != RoleID.BRAND_MANAGER or not current_user.brand_id:
         raise HTTPException(status_code=403, detail="Not authorized as brand")
 
     garments = garment_repo.get_by_brand(db, current_user.brand_id)
@@ -327,7 +354,7 @@ def create_garment(
     db: Session = Depends(get_db),
 ):
     """Upload a single garment manually via dashboard."""
-    if current_user.role_id != 2 or not current_user.brand_id:
+    if current_user.role_id != RoleID.BRAND_MANAGER or not current_user.brand_id:
         raise HTTPException(status_code=403, detail="Not authorized as brand")
 
     try:
@@ -380,16 +407,16 @@ def create_garment(
             metadata_json=metadata_json,
         )
         db.add(asset)
-        
+
         # Now commit both successfully
         db.commit()
         db.refresh(new_garment)
 
         return {"id": new_garment.id, "name": new_garment.name, "price": new_garment.price}
-        
+
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Error al procesar la prenda. El modelo 3D falló o los datos son inválidos: {str(e)}"
         )

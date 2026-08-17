@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel, Field
 from app.domain.database import get_db
 from app.domain.models.commerce import Cart, CartItem, Order, OrderItem, OrderStatus
@@ -21,14 +21,20 @@ def get_cart(
     current_user: User = Depends(get_current_active_user),
 ):
     """Retrieve the current user's shopping cart."""
-    cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
+    # joinedload eliminates the N+1 query problem: 1 query instead of N+1
+    cart = (
+        db.query(Cart)
+        .options(joinedload(Cart.items).joinedload(CartItem.garment))
+        .filter(Cart.user_id == current_user.id)
+        .first()
+    )
     if not cart:
         return {"items": [], "total": 0.0}
 
     items = []
     total = 0.0
     for item in cart.items:
-        garment = db.query(Garment).filter(Garment.id == item.garment_id).first()
+        garment = item.garment  # already loaded — no extra query
         price = garment.price if garment else 0.0
         items.append(
             {
@@ -127,7 +133,13 @@ def checkout(
     Converts the cart into an order and clears the cart.
     Prices are locked at checkout time (snapshot pricing).
     """
-    cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
+    # joinedload eliminates the N+1 query problem for checkout as well
+    cart = (
+        db.query(Cart)
+        .options(joinedload(Cart.items).joinedload(CartItem.garment))
+        .filter(Cart.user_id == current_user.id)
+        .first()
+    )
     if not cart or not cart.items:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Cart is empty"
@@ -140,7 +152,7 @@ def checkout(
 
     total = 0.0
     for item in cart.items:
-        garment = db.query(Garment).filter(Garment.id == item.garment_id).first()
+        garment = item.garment  # already loaded — no extra query
         # Snapshot price at checkout time
         price = garment.price if garment else 0.0
 
@@ -170,12 +182,18 @@ def get_orders(
     current_user: User = Depends(get_current_active_user),
 ):
     """Retrieve all orders for the current user."""
-    orders = db.query(Order).filter(Order.user_id == current_user.id).all()
+    # joinedload eliminates the N+1 query problem for orders
+    orders = (
+        db.query(Order)
+        .options(joinedload(Order.items).joinedload(OrderItem.garment))
+        .filter(Order.user_id == current_user.id)
+        .all()
+    )
     result = []
     for order in orders:
         items = []
         for oi in order.items:
-            garment = db.query(Garment).filter(Garment.id == oi.garment_id).first()
+            garment = oi.garment  # already loaded — no extra query
             items.append(
                 {
                     "garment_id": oi.garment_id,

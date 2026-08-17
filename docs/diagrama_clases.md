@@ -58,7 +58,7 @@ classDiagram
     class GarmentAsset {
         +Integer id
         +String ai_generated_image_url
-        +String metadata_json
+        +JSON metadata_json
     }
 
     class Brand {
@@ -68,11 +68,16 @@ classDiagram
         +uploadGarment() Garment
     }
 
+    class Cart {
+        +Integer id
+        +Datetime created_at
+        +Datetime updated_at
+        +getTotal() Float
+    }
+
     class CartItem {
         +Integer id
         +Integer quantity
-        +String size
-        +String color
         +calculateSubtotal() Float
     }
 
@@ -92,21 +97,24 @@ classDiagram
     %% Asociaciones
     User "1" --> "1" Role : tiene
     User "1" --> "0..1" Avatar : posee
-    User "1" --> "*" CartItem : agrega
+    User "1" --> "0..1" Cart : tiene
     User "1" --> "*" Order : realiza
     User "1" --> "0..1" Brand : administra (si es marca)
     User "1" --> "0..1" Marketplace : administra (si es dueño)
-    
+
     Brand "1" --> "1" Marketplace : publica en
     Brand "1" --> "*" Garment : vende
-    
+
+    Cart "1" --> "*" CartItem : contiene
+    CartItem "*" --> "1" Garment : referencia
+
     Garment "1" --> "0..1" GarmentAsset : contiene 3D
-    Garment "1" --> "*" CartItem : pertenece a (carrito)
-    Garment "1" --> "*" OrderItem : pertenece a (orden)
-    
+    Garment "1" --> "*" OrderItem : referenciada en
+
     Order "1" --> "*" OrderItem : contiene
 ```
 
 ### Justificación de Diseño (Patrón UML)
 *   **Atributos vs Asociaciones**: Tal como sugiere la buena práctica de UML, los datos primitivos (como `skin_color` o `price`) están modelados como *Atributos* internos de las clases, mientras que las relaciones complejas y de dominio importante (como el vínculo entre un `User` y su `Avatar`, o una `Brand` y sus `Garment`) están modeladas como *Asociaciones* (flechas).
 *   **Encapsulamiento**: Campos sensibles como la contraseña (`hashed_password`) se modelan con visibilidad privada (`-`).
+*   **Cart como entidad intermedia**: El `Cart` es una entidad propia (no una relación directa User→CartItem) porque tiene identidad propia, timestamps y puede persistir entre sesiones. Un `User` tiene exactamente un `Cart` (composición 1..1), y ese `Cart` contiene múltiples `CartItem`. Esta separación facilita operaciones como limpiar el carrito sin afectar el historial de órdenes.

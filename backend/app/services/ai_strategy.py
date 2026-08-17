@@ -23,8 +23,11 @@ import json
 import re
 import base64
 import httpx
+import logging
 
 from app.config.settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 class VirtualTryOnStrategy(ABC):
@@ -211,7 +214,7 @@ Now, analyse the provided garment image AND its metadata to return ONLY the JSON
                 "source":     "gemini_vision_parametric",
             }
 
-#             print(f"[AI] Vision analysis complete")
+            logger.info("[AI] Gemini Vision analysis complete for garment")
 
             return {
                 "ai_generated_image_url": image_url,
@@ -219,7 +222,7 @@ Now, analyse the provided garment image AND its metadata to return ONLY the JSON
             }
 
         except Exception as e:
-#             print(f"[WARN] Gemini Vision processing failed: {e}")
+            logger.warning("[AI] Gemini Vision processing failed: %s", e)
             # Robust fallback: use text-based heuristics
             return self._text_fallback(garment_data, str(e))
 
