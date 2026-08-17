@@ -21,7 +21,6 @@ from abc import ABC, abstractmethod
 import uuid
 import json
 import re
-import base64
 import httpx
 import logging
 

@@ -3,7 +3,7 @@ import uuid
 from io import BytesIO
 
 import requests
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from PIL import Image
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -17,15 +17,6 @@ from app.domain.models.user import User
 from app.services.auth_service import get_current_active_user
 
 router = APIRouter(prefix="/tryon", tags=["tryon"])
-
-ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
-MAX_AVATAR_SIZE_MB = 5
-
-
-def _safe_filename(original_filename: str) -> str:
-    basename = os.path.basename(original_filename)
-    safe_base = "".join(c for c in basename if c.isalnum() or c in "._-")
-    return f"{uuid.uuid4().hex}_{safe_base}"
 
 
 class AvatarCreate(BaseModel):

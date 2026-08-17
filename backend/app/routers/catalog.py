@@ -1,16 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks, status
+from pathlib import Path
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
 from app.domain.database import get_db, SessionLocal
 from app.domain.models.catalog import ProcessingJob, JobStatus, Garment, GarmentAsset, GarmentImage
 from app.domain.models.user import User
-from app.domain.repositories import garment_repo, garment_image_repo
+from app.domain.repositories import garment_repo
 from app.services.auth_service import get_current_active_user
 from app.services.ai_strategy import GeminiTryOnStrategy
 from app.config.settings import settings
 from app.constants import RoleID
 import pandas as pd
+import uuid
 import io
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
@@ -266,9 +268,6 @@ def get_garment(garment_id: int, db: Session = Depends(get_db)):
 
 # --- BRAND DASHBOARD ENDPOINTS ---
 
-import shutil
-from pathlib import Path
-import uuid
 
 @router.post("/upload-image")
 def upload_garment_image(
