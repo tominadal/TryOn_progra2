@@ -305,6 +305,7 @@ export default function BrandDashboard() {
                       <option>Pesado</option>
                     </select>
                   </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold mb-1">Composición / Material</label>
