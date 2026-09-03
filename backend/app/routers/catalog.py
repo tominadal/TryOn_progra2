@@ -8,7 +8,7 @@ from app.domain.models.catalog import ProcessingJob, JobStatus, Garment, Garment
 from app.domain.models.user import User
 from app.domain.repositories import garment_repo
 from app.services.auth_service import get_current_active_user
-from app.services.ai_strategy import GeminiTryOnStrategy
+from app.services.ai_strategy import GeminiTryOnStrategy, AIServiceError
 from app.config.settings import settings
 from app.constants import RoleID
 import pandas as pd
@@ -377,28 +377,35 @@ def create_garment(
 
         metadata_json = {}
         if garment_in.generate_3d:
-            # Process with AI
-            strategy = GeminiTryOnStrategy()
-            asset_data = strategy.process_garment({
-                "SKU": new_garment.sku,
-                "Name": new_garment.name,
-                "Fit": new_garment.fit,
-                "Size": new_garment.size,
-                "Color": new_garment.color,
-                "Price": new_garment.price,
-                "Material": garment_in.material,
-                "Description": garment_in.description,
-                "Waist_Rise": garment_in.waist_rise,
-                "color_hex": garment_in.color_hex,
-                "texture": garment_in.texture,
-                "elasticity": garment_in.elasticity,
-                "fabric_weight": garment_in.fabric_weight,
-                "distress_level": garment_in.distress_level,
-                "has_cuffs": garment_in.has_cuffs,
-                "has_pleats": garment_in.has_pleats,
-                "image_url": garment_in.image_url or "",
-            })
-            metadata_json = asset_data["metadata_json"]
+            # Process with AI wrapped in dedicated try...except for strict transactional integrity
+            try:
+                strategy = GeminiTryOnStrategy()
+                asset_data = strategy.process_garment({
+                    "SKU": new_garment.sku,
+                    "Name": new_garment.name,
+                    "Fit": new_garment.fit,
+                    "Size": new_garment.size,
+                    "Color": new_garment.color,
+                    "Price": new_garment.price,
+                    "Material": garment_in.material,
+                    "Description": garment_in.description,
+                    "Waist_Rise": garment_in.waist_rise,
+                    "color_hex": garment_in.color_hex,
+                    "texture": garment_in.texture,
+                    "elasticity": garment_in.elasticity,
+                    "fabric_weight": garment_in.fabric_weight,
+                    "distress_level": garment_in.distress_level,
+                    "has_cuffs": garment_in.has_cuffs,
+                    "has_pleats": garment_in.has_pleats,
+                    "image_url": garment_in.image_url or "",
+                })
+                metadata_json = asset_data["metadata_json"]
+            except Exception as e:
+                db.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"No se pudo generar modelo 3D: {str(e)}",
+                )
 
         asset = GarmentAsset(
             garment_id=new_garment.id,
@@ -413,9 +420,11 @@ def create_garment(
 
         return {"id": new_garment.id, "name": new_garment.name, "price": new_garment.price}
 
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=500,
-            detail=f"Error al procesar la prenda. El modelo 3D falló o los datos son inválidos: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error inesperado al procesar la prenda: {str(e)}",
         )
