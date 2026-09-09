@@ -29,6 +29,11 @@ from app.config.settings import settings
 logger = logging.getLogger(__name__)
 
 
+class AIServiceError(RuntimeError):
+    """Excepción lanzada cuando falla el procesamiento de IA o la descarga de la imagen."""
+    pass
+
+
 class VirtualTryOnStrategy(ABC):
     """Abstract base strategy for garment processing."""
 
@@ -143,15 +148,12 @@ Now, analyse the provided garment image AND its metadata to return ONLY the JSON
             pass
 
     def _fetch_image_b64(self, image_url: str) -> tuple[bytes, str]:
-        """Download image and return (bytes, mime_type). Falls back gracefully."""
-        try:
-            if image_url.startswith("http"):
-                resp = httpx.get(image_url, timeout=10, follow_redirects=True)
-                resp.raise_for_status()
-                content_type = resp.headers.get("content-type", "image/jpeg").split(";")[0]
-                return resp.content, content_type
-        except Exception:
-            pass
+        """Download image and return (bytes, mime_type). Raises on download failure or timeout."""
+        if image_url and image_url.startswith("http"):
+            resp = httpx.get(image_url, timeout=10, follow_redirects=True)
+            resp.raise_for_status()
+            content_type = resp.headers.get("content-type", "image/jpeg").split(";")[0]
+            return resp.content, content_type
         return b"", "image/jpeg"
 
     def process_garment(self, garment_data: dict) -> dict:
@@ -221,9 +223,8 @@ Now, analyse the provided garment image AND its metadata to return ONLY the JSON
             }
 
         except Exception as e:
-            logger.warning("[AI] Gemini Vision processing failed: %s", e)
-            # Robust fallback: use text-based heuristics
-            return self._text_fallback(garment_data, str(e))
+            logger.error("[AI] Gemini Vision processing failed: %s", e)
+            raise AIServiceError(f"Fallo en la generación del modelo 3D con IA: {str(e)}") from e
 
     def _text_fallback(self, garment_data: dict, error: str) -> dict:
         """Text-only heuristic fallback when image analysis fails."""

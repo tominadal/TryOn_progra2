@@ -62,3 +62,102 @@ def test_upload_catalog(client: TestClient, db_session):
 
     assert response.status_code == 202, f"Upload failed: {response.json()}"
     assert "job_id" in response.json()
+
+
+def test_create_garment_ai_failure_rolls_back_transaction(client: TestClient, db_session, monkeypatch):
+    """
+    Transactional integrity: if Gemini AI strategy fails or times out during create_garment,
+    the transaction must rollback (cancelling the flush) and return HTTP 500.
+    """
+    from app.domain.models.catalog import Garment
+    from app.services.ai_strategy import GeminiTryOnStrategy, AIServiceError
+
+    # Register brand user
+    res = client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_ai_fail@example.com",
+            "password": "testpassword",
+            "full_name": "Brand Fail User",
+            "role_id": 2,
+            "brand_name": "Rollback Test Brand",
+        },
+    )
+    assert res.status_code == 200
+
+    # Login
+    login_res = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_ai_fail@example.com", "password": "testpassword"},
+    )
+    token = login_res.json()["access_token"]
+
+    # Mock process_garment to simulate Gemini timeout/failure
+    def mock_process_garment_fail(self, garment_data):
+        raise AIServiceError("Gemini Vision API timeout: connection dropped")
+
+    monkeypatch.setattr(GeminiTryOnStrategy, "process_garment", mock_process_garment_fail)
+
+    unique_garment_name = "Rollback Pant Test"
+    payload = {
+        "name": unique_garment_name,
+        "price": 49.99,
+        "fit": "Regular",
+        "color": "Blue",
+        "color_hex": "#1e3a8a",
+        "sizes": ["M", "L"],
+        "image_url": "http://example.com/jean.jpg",
+        "generate_3d": True,
+    }
+
+    response = client.post(
+        "/api/v1/catalog/garment",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload,
+    )
+
+    # Must return 500 error indicating 3D model generation failed
+    assert response.status_code == 500
+    assert "No se pudo generar modelo 3D" in response.json()["detail"]
+
+    # Transaction integrity: Garment must NOT exist in the database (rolled back)
+    garment_in_db = db_session.query(Garment).filter(Garment.name == unique_garment_name).first()
+    assert garment_in_db is None, "Garment should have been rolled back and not persisted in DB"
+
+
+def test_gemini_strategy_raises_ai_service_error():
+    """
+    GeminiTryOnStrategy.process_garment must raise AIServiceError on failure,
+    not fall back silently to _text_fallback.
+    """
+    from app.services.ai_strategy import GeminiTryOnStrategy, AIServiceError
+
+    strategy = GeminiTryOnStrategy()
+    strategy._sdk = "none"  # Simulate SDK unavailable or error
+
+    import pytest
+    with pytest.raises((AIServiceError, RuntimeError)) as exc_info:
+        strategy.process_garment({"name": "Test Jean", "image_url": ""})
+
+    assert "Fallo en la generación del modelo 3D con IA" in str(exc_info.value)
+
+
+def test_gemini_strategy_fetch_image_raises_on_timeout(monkeypatch):
+    """
+    _fetch_image_b64 must propagate httpx exceptions (such as timeout)
+    instead of swallowing them silently.
+    """
+    import httpx
+    import pytest
+    from app.services.ai_strategy import GeminiTryOnStrategy
+
+    strategy = GeminiTryOnStrategy()
+
+    def mock_httpx_get(*args, **kwargs):
+        raise httpx.TimeoutException("Simulated timeout connecting to image host")
+
+    monkeypatch.setattr(httpx, "get", mock_httpx_get)
+
+    with pytest.raises(httpx.TimeoutException):
+        strategy._fetch_image_b64("http://example.com/test.jpg")
+
