@@ -161,3 +161,72 @@ def test_gemini_strategy_fetch_image_raises_on_timeout(monkeypatch):
     with pytest.raises(httpx.TimeoutException):
         strategy._fetch_image_b64("http://example.com/test.jpg")
 
+
+def test_create_garment_success_via_threadpool(client: TestClient, db_session, monkeypatch):
+    """
+    create_garment executes strategy.process_garment asynchronously in threadpool,
+    persisting the garment and returning HTTP 200 with garment details.
+    """
+    from app.domain.models.catalog import Garment
+    from app.services.ai_strategy import GeminiTryOnStrategy
+
+    # Register brand user
+    res = client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_success@example.com",
+            "password": "testpassword",
+            "full_name": "Brand Success User",
+            "role_id": 2,
+            "brand_name": "Success Test Brand",
+        },
+    )
+    assert res.status_code == 200
+
+    # Login
+    login_res = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_success@example.com", "password": "testpassword"},
+    )
+    token = login_res.json()["access_token"]
+
+    # Mock process_garment to simulate successful AI strategy
+    def mock_process_garment_ok(self, garment_data):
+        return {
+            "ai_generated_image_url": "http://example.com/generated_3d.png",
+            "metadata_json": {"confidence_score": 0.98, "fit_type": "Regular"},
+        }
+
+    monkeypatch.setattr(GeminiTryOnStrategy, "process_garment", mock_process_garment_ok)
+
+    payload = {
+        "name": "Async Threadpool Jean",
+        "price": 59.99,
+        "fit": "Regular",
+        "color": "Dark Blue",
+        "color_hex": "#0f172a",
+        "sizes": ["M", "L", "XL"],
+        "image_url": "http://example.com/jean_raw.jpg",
+        "generate_3d": True,
+    }
+
+    response = client.post(
+        "/api/v1/catalog/garment",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Async Threadpool Jean"
+    assert data["price"] == 59.99
+    assert "id" in data
+
+    # Verify garment and asset in DB
+    garment = db_session.query(Garment).filter(Garment.id == data["id"]).first()
+    assert garment is not None
+    assert garment.is_processed is True
+    assert garment.asset is not None
+    assert garment.asset.metadata_json == {"confidence_score": 0.98, "fit_type": "Regular"}
+
+

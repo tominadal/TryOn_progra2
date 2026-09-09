@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks, status
+from fastapi.concurrency import run_in_threadpool
 from pathlib import Path
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -347,7 +348,7 @@ def get_brand_catalog(
 
 
 @router.post("/garment")
-def create_garment(
+async def create_garment(
     garment_in: GarmentCreate,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -380,7 +381,7 @@ def create_garment(
             # Process with AI wrapped in dedicated try...except for strict transactional integrity
             try:
                 strategy = GeminiTryOnStrategy()
-                asset_data = strategy.process_garment({
+                garment_data = {
                     "SKU": new_garment.sku,
                     "Name": new_garment.name,
                     "Fit": new_garment.fit,
@@ -398,7 +399,8 @@ def create_garment(
                     "has_cuffs": garment_in.has_cuffs,
                     "has_pleats": garment_in.has_pleats,
                     "image_url": garment_in.image_url or "",
-                })
+                }
+                asset_data = await run_in_threadpool(strategy.process_garment, garment_data)
                 metadata_json = asset_data["metadata_json"]
             except Exception as e:
                 db.rollback()
