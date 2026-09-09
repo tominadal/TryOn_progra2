@@ -1,2 +1,17 @@
 hoverhub-core/
 implementation_plan.md
+
+# Base de datos local de desarrollo
+*.sqlite
+*.db
+
+# Logs de Next.js dev server
+frontend/.next/dev/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Cache de pytest y mypy
+.pytest_cache/
+.mypy_cache/
