@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 from app.domain.models.base import Base
+from app.services.job_observers import JobSubjectMixin
 
 
 class JobStatus(enum.Enum):
@@ -14,7 +15,7 @@ class JobStatus(enum.Enum):
     FAILED = "FAILED"
 
 
-class ProcessingJob(Base):
+class ProcessingJob(JobSubjectMixin, Base):
     __tablename__ = "processing_jobs"
 
     id = Column(Integer, primary_key=True, index=True)

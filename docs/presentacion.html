@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TryOnHub — Presentación Programación II</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/night.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #6ee7b7;
+      --accent2: #818cf8;
+      --accent3: #f472b6;
+      --accent-dec: #fbbf24;
+      --accent-obs: #34d399;
+      --accent-str: #818cf8;
+      --bg-card: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.12);
+    }
+    .reveal { font-family: 'Inter', sans-serif !important; }
+    .reveal h1, .reveal h2, .reveal h3 { font-family: 'Inter', sans-serif !important; letter-spacing: -0.02em; }
+    .reveal code, .reveal pre { font-family: 'JetBrains Mono', monospace !important; }
+
+    /* ── Slide base ── */
+    .reveal .slides section {
+      text-align: left;
+      padding: 0 !important;
+    }
+
+    /* ── Title slide ── */
+    .slide-title {
+      background: radial-gradient(ellipse at 30% 50%, #1e1b4b 0%, #0f172a 60%);
+      display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+      padding: 60px 80px !important;
+      height: 100vh; box-sizing: border-box;
+    }
+    .slide-title .badge {
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-size: 0.85rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .slide-title h1 {
+      font-size: 3.6rem !important; font-weight: 900 !important;
+      line-height: 1.05 !important; color: #fff !important; margin: 0 0 20px !important;
+    }
+    .slide-title h1 span { color: var(--accent); }
+    .slide-title .subtitle {
+      font-size: 1.15rem; color: rgba(255,255,255,0.55); max-width: 520px;
+      line-height: 1.6; margin-bottom: 40px;
+    }
+    .slide-title .pills { display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px; padding: 5px 14px; font-size: 0.78rem; color: rgba(255,255,255,0.7);
+    }
+    .pill.green { border-color: var(--accent); color: var(--accent); background: rgba(110,231,183,0.08); }
+    .pill.purple { border-color: var(--accent2); color: var(--accent2); background: rgba(129,140,248,0.08); }
+    .pill.pink { border-color: var(--accent3); color: var(--accent3); background: rgba(244,114,182,0.08); }
+
+    /* ── Section header ── */
+    .slide-section {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+      padding: 60px 80px !important; height: 100vh; box-sizing: border-box;
+    }
+    .slide-section .section-num {
+      font-size: 6rem; font-weight: 900; color: rgba(255,255,255,0.05); line-height: 1;
+      margin-bottom: -20px;
+    }
+    .slide-section h2 { font-size: 2.4rem !important; color: var(--accent) !important; margin: 0 0 12px !important; }
+    .slide-section p { color: rgba(255,255,255,0.55); font-size: 1rem; max-width: 500px; }
+
+    /* ── Content slide ── */
+    .slide-content {
+      background: #0f172a;
+      padding: 50px 72px !important;
+      height: 100vh; box-sizing: border-box;
+      display: flex; flex-direction: column;
+    }
+    .slide-content h2 {
+      font-size: 1.7rem !important; color: #fff !important; margin: 0 0 28px !important;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .slide-content h2 span { color: var(--accent); }
+
+    /* ── Cards grid ── */
+    .cards { display: grid; gap: 16px; }
+    .cards.col2 { grid-template-columns: 1fr 1fr; }
+    .cards.col3 { grid-template-columns: 1fr 1fr 1fr; }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 22px;
+    }
+    .card .card-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .card .card-title { font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 6px; }
+    .card .card-body { font-size: 0.78rem; color: rgba(255,255,255,0.5); line-height: 1.55; }
+    .card.green { border-color: rgba(110,231,183,0.3); }
+    .card.purple { border-color: rgba(129,140,248,0.3); }
+    .card.yellow { border-color: rgba(251,191,36,0.3); }
+    .card.pink { border-color: rgba(244,114,182,0.3); }
+
+    /* ── RQ table ── */
+    .rq-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .rq-table th { color: rgba(255,255,255,0.4); font-weight: 600; text-align: left;
+      padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .rq-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); color: rgba(255,255,255,0.75); vertical-align: middle; }
+    .rq-table tr:last-child td { border-bottom: none; }
+    .badge-ok { background: rgba(110,231,183,0.15); color: var(--accent); border-radius: 6px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; }
+    .badge-rq { background: rgba(129,140,248,0.15); color: var(--accent2); border-radius: 6px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; }
+
+    /* ── Code blocks ── */
+    .code-block {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 20px; margin: 12px 0;
+    }
+    .code-block pre { margin: 0; font-size: 0.72rem; line-height: 1.55; color: #e2e8f0; }
+    .code-block .kw { color: #818cf8; }
+    .code-block .fn { color: #6ee7b7; }
+    .code-block .st { color: #fbbf24; }
+    .code-block .cm { color: #475569; }
+
+    /* ── Pattern diagram ── */
+    .pattern-diagram {
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: rgba(255,255,255,0.75); line-height: 1.6;
+    }
+    .pattern-diagram .hl { color: var(--accent); font-weight: 600; }
+    .pattern-diagram .hl2 { color: var(--accent2); font-weight: 600; }
+    .pattern-diagram .hl3 { color: var(--accent-dec); font-weight: 600; }
+    .pattern-diagram .hl4 { color: var(--accent3); font-weight: 600; }
+
+    /* ── Stats bar ── */
+    .stats-row { display: flex; gap: 16px; margin-top: 8px; }
+    .stat-box {
+      flex: 1; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; text-align: center;
+    }
+    .stat-box .stat-num { font-size: 2rem; font-weight: 900; color: var(--accent); }
+    .stat-box .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+    /* ── Stack pills row ── */
+    .stack-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+    .stack-pill {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px; font-size: 0.78rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .stack-pill .sp-icon { font-size: 1rem; }
+    .stack-pill .sp-name { color: rgba(255,255,255,0.8); font-weight: 600; }
+    .stack-pill .sp-role { color: rgba(255,255,255,0.35); font-size: 0.68rem; }
+
+    /* ── Checklist ── */
+    .checklist { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: rgba(255,255,255,0.7); line-height: 1.4; }
+    .checklist li .ci { font-size: 1rem; flex-shrink: 0; }
+    .checklist li strong { color: rgba(255,255,255,0.95); }
+
+    /* ── Bottom label ── */
+    .slide-label {
+      font-size: 0.65rem; color: rgba(255,255,255,0.2); text-transform: uppercase;
+      letter-spacing: 0.12em; margin-top: auto; padding-top: 12px;
+    }
+
+    /* ── Highlight box ── */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(129,140,248,0.08));
+      border: 1px solid rgba(110,231,183,0.25); border-radius: 10px;
+      padding: 16px 20px; margin-top: 14px;
+      font-size: 0.82rem; color: rgba(255,255,255,0.8); line-height: 1.55;
+    }
+    .highlight-box strong { color: var(--accent); }
+
+    /* ── Two-col layout ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .two-col-6-4 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 1 — PORTADA
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-title">
+        <div class="badge">Programación II — Proyecto Final</div>
+        <h1>Try<span>On</span>Hub</h1>
+        <p class="subtitle">Plataforma de prueba virtual 3D de indumentaria. La IA analiza fotos reales de prendas y genera parámetros 3D únicos para tu avatar digital.</p>
+        <div class="pills">
+          <span class="pill green">3 Patrones de Diseño</span>
+          <span class="pill purple">FastAPI + Next.js</span>
+          <span class="pill pink">Gemini 2.5 Flash Vision</span>
+          <span class="pill">27 Tests Unitarios</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 2 — EL PROBLEMA
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>🛍️ El <span>Problema</span></h2>
+        <div class="cards col2">
+          <div class="card pink">
+            <div class="card-icon">💸</div>
+            <div class="card-title">Alta tasa de devoluciones</div>
+            <div class="card-body">Las marcas de moda online pierden entre 20% y 40% de sus ventas en devoluciones porque los clientes no saben cómo les quedará la prenda antes de comprar.</div>
+          </div>
+          <div class="card yellow">
+            <div class="card-icon">🤔</div>
+            <div class="card-title">Incertidumbre del consumidor</div>
+            <div class="card-body">Sin poder probarse la ropa, los compradores dudan. Las fotos en 2D sobre modelos genéricos no representan cuerpos reales ni telas con físicas distintas.</div>
+          </div>
+          <div class="card purple" style="grid-column: 1 / -1">
+            <div class="card-icon">❌</div>
+            <div class="card-title">Soluciones existentes: caras y genéricas</div>
+            <div class="card-body">Los servicios de Virtual Try-On disponibles usan modelos 3D prefabricados que no reflejan la tela, el corte ni el color específico de cada prenda real. Son Single Points of Failure y facturan por cada render.</div>
+          </div>
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 3 — LA SOLUCIÓN
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>✨ La <span>Solución</span> B2B2C</h2>
+        <div class="cards col3">
+          <div class="card">
+            <div class="card-icon">🏢</div>
+            <div class="card-title">Marcas (B2B)</div>
+            <div class="card-body">Suben fotos 2D de su catálogo real. La IA de Gemini Vision analiza los píxeles y extrae parámetros 3D únicos por prenda: silueta, color exacto, textura, elasticidad.</div>
+          </div>
+          <div class="card green">
+            <div class="card-icon">🧠</div>
+            <div class="card-title">IA Generativa</div>
+            <div class="card-body">Gemini 2.5 Flash Vision analiza la fotografía real + metadata del fabricante. Devuelve un JSON paramétrico: <code>waist_rise</code>, <code>taper</code>, <code>color_hex</code>, <code>roughness</code>, <code>distress</code>.</div>
+          </div>
+          <div class="card purple">
+            <div class="card-icon">👤</div>
+            <div class="card-title">Consumidores (B2C)</div>
+            <div class="card-body">Crean un avatar 3D paramétrico con sus medidas corporales reales. El motor WebGL renderiza la prenda adaptada al cuerpo del usuario en tiempo real, en el navegador.</div>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <strong>Diferenciador clave:</strong> No usamos modelos 3D prefabricados. La IA lee los píxeles reales de cada foto y genera parámetros únicos. El renderizado lo hace la GPU del usuario vía WebGL — sin costo de render externo.
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 4 — REQUERIMIENTOS FUNCIONALES
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>📋 Requerimientos <span>Funcionales</span></h2>
+        <table class="rq-table">
+          <thead><tr><th>ID</th><th>Descripción</th><th>Endpoint</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge-rq">RQ1</span></td><td>Usuarios se registran</td><td><code>POST /api/v1/users/</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
+            <tr><td><span class="badge-rq">RQ2</span></td><td>Usuarios se autentican con JWT</td><td><code>POST /api/v1/auth/login</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
+            <tr><td><span class="badge-rq">RQ3</span></td><td>Marcas suben catálogos Excel + IA</td><td><code>POST /api/v1/catalog/upload</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
+            <tr><td><span class="badge-rq">RQ4</span></td><td>Consumidores ven catálogo de prendas</td><td><code>GET /api/v1/catalog/garments</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
+            <tr><td><span class="badge-rq">RQ5</span></td><td>Prueba virtual en avatar 3D</td><td><code>POST /api/v1/tryon/preview/{id}</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
+            <tr><td><span class="badge-rq">RQ6</span></td><td>Carrito de compras</td><td><code>POST /api/v1/commerce/cart</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
+            <tr><td><span class="badge-rq">RQ7</span></td><td>Checkout y órdenes</td><td><code>POST /api/v1/commerce/checkout</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
+            <tr><td><span class="badge-rq">RQ8</span></td><td>Avatar 3D paramétrico con medidas reales</td><td>AvatarCreatorNative (Frontend)</td><td><span class="badge-ok">✓ OK</span></td></tr>
+          </tbody>
+        </table>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 5 — STACK TÉCNICO
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>🛠️ Stack <span>Técnico</span></h2>
+        <div class="two-col">
+          <div>
+            <div style="font-size:0.7rem; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px">Backend</div>
+            <div class="stack-row">
+              <div class="stack-pill"><span class="sp-icon">⚡</span><div><div class="sp-name">FastAPI</div><div class="sp-role">API RESTful + async</div></div></div>
+              <div class="stack-pill"><span class="sp-icon">🗄️</span><div><div class="sp-name">SQLAlchemy</div><div class="sp-role">ORM + Alembic</div></div></div>
+              <div class="stack-pill"><span class="sp-icon">🔐</span><div><div class="sp-name">JWT + bcrypt</div><div class="sp-role">Auth segura</div></div></div>
+              <div class="stack-pill"><span class="sp-icon">🧠</span><div><div class="sp-name">Gemini 2.5 Flash</div><div class="sp-role">Vision AI</div></div></div>
+              <div class="stack-pill"><span class="sp-icon">🐍</span><div><div class="sp-name">Python 3.11</div><div class="sp-role">SQLite (dev)</div></div></div>
+              <div class="stack-pill"><span class="sp-icon">🐳</span><div><div class="sp-name">Docker</div><div class="sp-role">Containerización</div></div></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:0.7rem; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px">Frontend</div>
+            <div class="stack-row">
+              <div class="stack-pill"><span class="sp-icon">⚛️</span><div><div class="sp-name">Next.js 14</div><div class="sp-role">React + SSR</div></div></div>
+              <div class="stack-pill"><span class="sp-icon">🎨</span><div><div class="sp-name">React Three Fiber</div><div class="sp-role">Motor 3D WebGL</div></div></div>
+              <div class="stack-pill"><span class="sp-icon">💅</span><div><div class="sp-name">TailwindCSS</div><div class="sp-role">Glassmorphism UI</div></div></div>
+              <div class="stack-pill"><span class="sp-icon">☁️</span><div><div class="sp-name">Render.com</div><div class="sp-role">Deploy prod</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="stats-row" style="margin-top:20px">
+          <div class="stat-box"><div class="stat-num">27</div><div class="stat-label">Tests unitarios</div></div>
+          <div class="stat-box"><div class="stat-num">3</div><div class="stat-label">Patrones de diseño</div></div>
+          <div class="stat-box"><div class="stat-num">8</div><div class="stat-label">Endpoints REST</div></div>
+          <div class="stat-box"><div class="stat-num">CI/CD</div><div class="stat-label">GitHub Actions</div></div>
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 6 — SECCIÓN PATRONES
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-section">
+        <div class="section-num">02</div>
+        <h2>Patrones de Diseño</h2>
+        <p>Tres patrones aplicados con sentido real en el dominio del problema, basados en Head First Design Patterns.</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 7 — STRATEGY PATTERN
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>🎯 Patrón <span>Strategy</span> — <code>ai_strategy.py</code></h2>
+        <div class="two-col-6-4">
+          <div>
+            <div class="pattern-diagram">
+              <span class="hl2">VirtualTryOnStrategy</span> &lt;&lt;abstract&gt;&gt;<br>
+              &nbsp;└── <span class="fn">process_garment(data)</span> → dict*<br><br>
+              <span class="hl2">GeminiTryOnStrategy</span> (Producción)<br>
+              &nbsp;└── Llama a Gemini 2.5 Flash Vision<br>
+              &nbsp;└── Analiza píxeles reales de la foto<br>
+              &nbsp;└── Lanza <span class="hl4">AIServiceError</span> si falla<br><br>
+              <span class="hl2">MockTryOnStrategy</span> (Testing)<br>
+              &nbsp;└── Retorna datos determinísticos<br>
+              &nbsp;└── Sin llamadas externas (CI safe)
+            </div>
+            <div class="code-block">
+              <pre><span class="cm"># Cambiar estrategia: cero cambios en routers</span>
+<span class="kw">strategy</span> = GeminiTryOnStrategy()   <span class="cm"># prod</span>
+<span class="kw">strategy</span> = MockTryOnStrategy()      <span class="cm"># tests</span>
+result = strategy.process_garment(data)</pre>
+            </div>
+          </div>
+          <div>
+            <ul class="checklist" style="margin-top:0">
+              <li><span class="ci">✅</span><div><strong>Open/Closed:</strong> agregar OpenAI como nueva estrategia sin tocar los routers.</div></li>
+              <li><span class="ci">✅</span><div><strong>Testeable:</strong> MockTryOnStrategy en CI sin API key.</div></li>
+              <li><span class="ci">✅</span><div><strong>AIServiceError:</strong> elimina el fallback silencioso. Si falla, el rollback es explícito.</div></li>
+              <li><span class="ci">✅</span><div><strong>run_in_threadpool:</strong> la IA corre en thread separado sin bloquear el event loop.</div></li>
+            </ul>
+          </div>
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 8 — DECORATOR PATTERN
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>🎨 Patrón <span style="color:var(--accent-dec)">Decorator</span> — <code>strategy_decorators.py</code></h2>
+        <div class="two-col-6-4">
+          <div>
+            <div class="pattern-diagram">
+              <span class="hl2">VirtualTryOnStrategy</span> ← Component<br>
+              &nbsp;├── <span class="hl2">GeminiTryOnStrategy</span> ← ConcreteComponent<br>
+              &nbsp;└── <span class="hl3">StrategyDecorator</span> ← Decorator abstracto<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="hl3">LoggingStrategyDecorator</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp; Loguea prenda, tiempo, source<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="hl3">CachingStrategyDecorator</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hash MD5(image_url) → caché
+            </div>
+            <div class="code-block">
+              <pre><span class="cm"># Composición dinámica en runtime</span>
+strategy = <span class="hl3">LoggingStrategyDecorator</span>(
+    <span class="hl3">CachingStrategyDecorator</span>(
+        <span class="hl2">GeminiTryOnStrategy</span>()
+    )
+)
+<span class="cm"># GeminiTryOnStrategy no se tocó ✓</span></pre>
+            </div>
+          </div>
+          <div>
+            <ul class="checklist" style="margin-top:0">
+              <li><span class="ci">🍵</span><div><strong>Como Starbuzz Coffee:</strong> envolvemos la estrategia en runtime, no heredamos.</div></li>
+              <li><span class="ci">💰</span><div><strong>Valor real:</strong> si una marca sube el mismo Excel dos veces, la caché evita pagar Gemini duplicado.</div></li>
+              <li><span class="ci">🔍</span><div><strong>Logging automático:</strong> latencia de cada llamada a la IA sin tocar la clase original.</div></li>
+              <li><span class="ci">✅</span><div><strong>Open/Closed:</strong> añadir <code>RateLimitingDecorator</code> sin modificar nada existente.</div></li>
+            </ul>
+          </div>
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 9 — OBSERVER PATTERN
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>📡 Patrón <span style="color:var(--accent-obs)">Observer</span> — <code>job_observers.py</code></h2>
+        <div class="two-col-6-4">
+          <div>
+            <div class="pattern-diagram">
+              <span class="hl2">IJobObserver</span> &lt;&lt;abstract&gt;&gt;<br>
+              &nbsp;└── <span class="fn">update(job_id, old, new, ctx)</span>*<br><br>
+              <span class="hl">LoggingJobObserver</span> ← audit trail de estado<br>
+              <span class="hl">StatsJobObserver</span> ← contadores en memoria<br><br>
+              <span class="hl2">JobSubjectMixin</span> → aplicado a ProcessingJob<br>
+              &nbsp;├── register_observer(obs)<br>
+              &nbsp;├── remove_observer(obs)<br>
+              &nbsp;└── notify_observers(old, new, ctx)
+            </div>
+            <div class="code-block">
+              <pre><span class="cm"># Modelo Push (como WeatherStation del libro)</span>
+job.register_observer(<span class="hl">LoggingJobObserver</span>())
+job.register_observer(<span class="hl">StatsJobObserver</span>())
+job.status = JobStatus.READY
+job.notify_observers(old, new, ctx={<span class="st">"processed_items"</span>: 12})
+<span class="cm"># → Logging: "Job #5: PROCESSING → READY | 12 prendas"</span>
+<span class="cm"># → Stats: jobs_completed += 1, total_garments += 12</span></pre>
+            </div>
+          </div>
+          <div>
+            <ul class="checklist" style="margin-top:0">
+              <li><span class="ci">🌤️</span><div><strong>Como WeatherStation:</strong> ProcessingJob es el Subject, los observers son los displays.</div></li>
+              <li><span class="ci">🔌</span><div><strong>Desacoplado:</strong> agregar <code>SlackObserver</code> o <code>WebSocketObserver</code> sin tocar el router.</div></li>
+              <li><span class="ci">🛡️</span><div><strong>Resiliente:</strong> si un observer falla, los demás siguen recibiendo la notificación.</div></li>
+              <li><span class="ci">✅</span><div><strong>Push model:</strong> el Subject empuja todos los datos. El Observer no necesita referencia al Subject.</div></li>
+            </ul>
+          </div>
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 10 — CONTRIBUCIONES DEL EQUIPO
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>👥 Contribuciones del <span>Equipo</span></h2>
+        <div class="cards col2">
+          <div class="card purple">
+            <div class="card-icon">🧑‍💻</div>
+            <div class="card-title">Tomás — eltanook</div>
+            <div class="card-body">
+              Motor 3D paramétrico completo (React Three Fiber). Pipeline de IA con Gemini Vision. Arquitectura Strategy + Decorator + Observer. Brand Dashboard con upload individual. Autenticación JWT. Documentación UML. 16 commits.
+            </div>
+          </div>
+          <div class="card green">
+            <div class="card-icon">🧑‍💻</div>
+            <div class="card-title">Facundo Latini — faculatini</div>
+            <div class="card-body">
+              <strong>fix(backend):</strong> Eliminó fallback silencioso de Gemini, implementó rollback explícito y <code>AIServiceError</code> para integridad transaccional.<br><br>
+              <strong>perf(backend):</strong> Delegó la inferencia pesada de IA a <code>run_in_threadpool</code> (async FastAPI).<br><br>
+              <strong>Tests:</strong> +165 líneas de tests de integridad transaccional y threadpool. 3 commits.
+            </div>
+          </div>
+        </div>
+        <div class="highlight-box" style="margin-top:14px">
+          El trabajo de Facu es complementario: reforzó la robustez transaccional y la performance async del pipeline de IA que Tomás implementó. Ambos cambios son críticos para producción.
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 11 — TESTING
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>🧪 Testing — <span>27 Tests Unitarios</span></h2>
+        <div class="cards col3" style="font-size:0.78rem">
+          <div class="card">
+            <div class="card-title">Auth & Users (4)</div>
+            <div class="card-body">Registro, login, email duplicado, <code>/me</code> con y sin auth.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Catalog (6)</div>
+            <div class="card-body">Upload Excel válido, columnas faltantes, tipo inválido (CSV), rollback ante fallo de IA, éxito con threadpool, AIServiceError.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Commerce (3)</div>
+            <div class="card-body">Add to cart, checkout vacío, checkout exitoso.</div>
+          </div>
+          <div class="card green">
+            <div class="card-title">Patrones — Decorator (6)</div>
+            <div class="card-body">Logging delega, conforma interfaz, llama inner 1 vez. Caching: hit, miss, source=cache, clear_cache. Cadena completa.</div>
+          </div>
+          <div class="card green">
+            <div class="card-title">Patrones — Observer (8)</div>
+            <div class="card-body">Logging.update(), StatsObs: READY/FAILED/intermedio, summary(). Mixin: register, remove, error no rompe, no duplicados.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Extra (11)</div>
+            <div class="card-body">Health, strategy interface, password débil, auth errónea, carrito vacío, prenda no encontrada, 404, 401.</div>
+          </div>
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 12 — CIERRE
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-title" style="background: radial-gradient(ellipse at 70% 50%, #064e3b 0%, #0f172a 60%);">
+        <div class="badge">Conclusión</div>
+        <h1><span>Gracias</span></h1>
+        <p class="subtitle">TryOnHub demuestra cómo los patrones de diseño del curso se aplican en un sistema real: Strategy para la IA, Decorator para envolver sin modificar, Observer para desacoplar notificaciones.</p>
+        <div class="pills">
+          <span class="pill green">Strategy: swap de IA sin tocar routers</span>
+          <span class="pill" style="border-color:var(--accent-dec);color:var(--accent-dec)">Decorator: logging + caché sobre Gemini</span>
+          <span class="pill" style="border-color:var(--accent-obs);color:var(--accent-obs)">Observer: jobs notifican en Push model</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    progress: true,
+    controls: true,
+    slideNumber: 'c/t',
+    transition: 'fade',
+    backgroundTransition: 'fade',
+    transitionSpeed: 'fast',
+    width: 1200,
+    height: 700,
+    margin: 0,
+    plugins: [],
+  });
+</script>
+</body>
+</html>

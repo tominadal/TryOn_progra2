@@ -10,6 +10,8 @@ from app.domain.models.user import User
 from app.domain.repositories import garment_repo
 from app.services.auth_service import get_current_active_user
 from app.services.ai_strategy import GeminiTryOnStrategy, AIServiceError
+from app.services.strategy_decorators import LoggingStrategyDecorator, CachingStrategyDecorator
+from app.services.job_observers import LoggingJobObserver, StatsJobObserver
 from app.config.settings import settings
 from app.constants import RoleID
 import pandas as pd
@@ -88,22 +90,42 @@ def _garment_to_dict(g: Garment) -> dict:
 
 
 def process_catalog_background(job_id: int, file_content: bytes):
-    """Background task: parses Excel, calls AI strategy, and stores garments."""
+    """Background task: parses Excel, calls AI strategy (with Decorator chain), and stores garments.
+
+    Patrones aplicados:
+    - Observer: el job registra LoggingJobObserver y StatsJobObserver antes de procesar.
+      Cada cambio de JobStatus dispara notify_observers() en modelo Push.
+    - Decorator: la estrategia de IA está envuelta con LoggingStrategyDecorator(CachingStrategyDecorator(...))
+      para logging y caché sin modificar GeminiTryOnStrategy (Open/Closed Principle).
+    """
     db = SessionLocal()
     job = db.query(ProcessingJob).filter(ProcessingJob.id == job_id).first()
     if not job:
         db.close()
         return
 
+    # ── Observer: registrar observers antes de iniciar el procesamiento ──
+    logging_obs = LoggingJobObserver()
+    stats_obs = StatsJobObserver()
+    job.register_observer(logging_obs)
+    job.register_observer(stats_obs)
+
+    old_status = job.status
     job.status = JobStatus.PROCESSING
     db.commit()
+    job.notify_observers(old_status=old_status, new_status=job.status)
 
     try:
         df = pd.read_excel(io.BytesIO(file_content))
         # Re-validate columns inside the background task as well
         _validate_excel_columns(df)
 
-        strategy = GeminiTryOnStrategy()
+        # ── Decorator: envolvemos la estrategia de IA con Logging y Cache ──
+        strategy = LoggingStrategyDecorator(
+            CachingStrategyDecorator(
+                GeminiTryOnStrategy()
+            )
+        )
 
         for index, row in df.iterrows():
             garment_data = row.to_dict()
@@ -148,13 +170,25 @@ def process_catalog_background(job_id: int, file_content: bytes):
             # Single commit per garment (garment + asset atomic) — was previously 2 commits
             db.commit()
 
+        old_status = job.status
         job.status = JobStatus.READY
         db.commit()
+        job.notify_observers(
+            old_status=old_status,
+            new_status=job.status,
+            context={"processed_items": job.processed_items},
+        )
 
     except Exception as e:
+        old_status = job.status
         job.status = JobStatus.FAILED
         job.error_log = {"error": str(e)}
         db.commit()
+        job.notify_observers(
+            old_status=old_status,
+            new_status=job.status,
+            context={"error": str(e)},
+        )
     finally:
         db.close()
 
@@ -380,7 +414,8 @@ async def create_garment(
         if garment_in.generate_3d:
             # Process with AI wrapped in dedicated try...except for strict transactional integrity
             try:
-                strategy = GeminiTryOnStrategy()
+                # ── Decorator: envolver la estrategia de IA con Logging (no caché en dashboard) ──
+                strategy = LoggingStrategyDecorator(GeminiTryOnStrategy())
                 garment_data = {
                     "SKU": new_garment.sku,
                     "Name": new_garment.name,
