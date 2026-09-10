@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean, JSON
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.domain.models.base import Base
@@ -14,8 +14,8 @@ class Avatar(Base):
     height_cm = Column(Float, nullable=True)
     weight_kg = Column(Float, nullable=True)
 
-    # Body type: "Delgado", "Normal", "Atlético", "Robusto"
-    body_type = Column(String(50), nullable=True, default="Normal")
+    # Body type: advanced morph parameters stored as JSON dict (e.g. chestWidth, bellyWidth, etc.)
+    body_type = Column(JSON, nullable=True)
 
     # Muscle definition 0.0 (none) to 1.0 (very defined)
     muscle_definition = Column(Float, nullable=True, default=0.3)

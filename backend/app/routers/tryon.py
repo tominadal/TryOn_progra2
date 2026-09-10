@@ -6,47 +6,19 @@ import requests
 from fastapi import APIRouter, Depends, HTTPException, status
 from PIL import Image
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from typing import Optional
 
 from app.config.settings import settings
 from app.domain.database import get_db
 from app.domain.models.catalog import GarmentAsset
 from app.domain.repositories import avatar_repo
 from app.domain.models.user import User
+from app.domain.schemas.experience import AvatarCreate, AvatarResponse
 from app.services.auth_service import get_current_active_user
 
 router = APIRouter(prefix="/tryon", tags=["tryon"])
 
 
-class AvatarCreate(BaseModel):
-    avatar_3d_url: str
-    # Physical
-    height_cm: Optional[float] = None
-    weight_kg: Optional[float] = None
-    body_type: Optional[str] = None
-    muscle_definition: Optional[float] = None
-    # Skin & hair
-    skin_color: Optional[str] = None
-    hair_color: Optional[str] = None
-    hair_style: Optional[str] = None
-    # Face
-    beard_style: Optional[str] = None
-    beard_color: Optional[str] = None
-    eyebrow_style: Optional[str] = None
-    glasses: Optional[bool] = None
-    # Accessories
-    hat_style: Optional[str] = None
-    # Clothes
-    shirt_color: Optional[str] = None
-    shirt_style: Optional[str] = None
-    shoes_color: Optional[str] = None
-    # Extras
-    tattoo_left_arm: Optional[bool] = None
-    gender: Optional[str] = None
-
-
-@router.post("/avatar")
+@router.post("/avatar", response_model=AvatarResponse)
 async def create_avatar(
     data: AvatarCreate,
     db: Session = Depends(get_db),
@@ -57,7 +29,7 @@ async def create_avatar(
         "avatar_3d_url": data.avatar_3d_url,
         "height_cm": data.height_cm,
         "weight_kg": data.weight_kg,
-        "body_type": data.body_type,
+        "body_type": dict(data.body_type) if data.body_type is not None else None,
         "muscle_definition": data.muscle_definition,
         "skin_color": data.skin_color,
         "hair_color": data.hair_color,
@@ -77,31 +49,10 @@ async def create_avatar(
     payload = {k: v for k, v in payload.items() if v is not None}
 
     avatar = avatar_repo.upsert(db, current_user.id, payload)
-
-    return {
-        "id": avatar.id,
-        "avatar_3d_url": avatar.avatar_3d_url,
-        "skin_color": avatar.skin_color,
-        "gender": avatar.gender,
-        "glasses": bool(avatar.glasses),
-        "height_cm": avatar.height_cm,
-        "weight_kg": avatar.weight_kg,
-        "body_type": avatar.body_type,
-        "muscle_definition": avatar.muscle_definition,
-        "hair_style": avatar.hair_style,
-        "hair_color": avatar.hair_color,
-        "beard_style": avatar.beard_style,
-        "beard_color": avatar.beard_color,
-        "eyebrow_style": avatar.eyebrow_style,
-        "hat_style": avatar.hat_style,
-        "shirt_color": avatar.shirt_color,
-        "shirt_style": avatar.shirt_style,
-        "shoes_color": avatar.shoes_color,
-        "tattoo_left_arm": avatar.tattoo_left_arm,
-    }
+    return avatar
 
 
-@router.get("/avatar")
+@router.get("/avatar", response_model=AvatarResponse)
 def get_avatar(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -113,27 +64,7 @@ def get_avatar(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No avatar found. Please create one first.",
         )
-    return {
-        "id": avatar.id,
-        "avatar_3d_url": avatar.avatar_3d_url,
-        "skin_color": avatar.skin_color,
-        "gender": avatar.gender,
-        "glasses": bool(avatar.glasses),
-        "height_cm": avatar.height_cm,
-        "weight_kg": avatar.weight_kg,
-        "body_type": avatar.body_type,
-        "muscle_definition": avatar.muscle_definition,
-        "hair_style": avatar.hair_style,
-        "hair_color": avatar.hair_color,
-        "beard_style": avatar.beard_style,
-        "beard_color": avatar.beard_color,
-        "eyebrow_style": avatar.eyebrow_style,
-        "hat_style": avatar.hat_style,
-        "shirt_color": avatar.shirt_color,
-        "shirt_style": avatar.shirt_style,
-        "shoes_color": avatar.shoes_color,
-        "tattoo_left_arm": avatar.tattoo_left_arm,
-    }
+    return avatar
 
 
 @router.post("/preview/{garment_id}")
