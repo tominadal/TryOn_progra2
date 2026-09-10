@@ -4,13 +4,15 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
-from app.domain.database import get_db, SessionLocal
+from app.domain import database
+from app.domain.database import get_db
 from app.domain.models.catalog import ProcessingJob, JobStatus, Garment, GarmentAsset, GarmentImage
 from app.domain.models.user import User
 from app.domain.repositories import garment_repo
 from app.services.auth_service import get_current_active_user
-from app.services.ai_strategy import GeminiTryOnStrategy, AIServiceError
+from app.services.ai_strategy import VirtualTryOnStrategy, GeminiTryOnStrategy, AIServiceError
 from app.services.strategy_decorators import LoggingStrategyDecorator, CachingStrategyDecorator
+from app.dependencies import get_tryon_strategy, get_garment_tryon_strategy
 from app.services.job_observers import LoggingJobObserver, StatsJobObserver
 from app.config.settings import settings
 from app.constants import RoleID
@@ -98,7 +100,7 @@ def process_catalog_background(job_id: int, file_content: bytes):
     - Decorator: la estrategia de IA está envuelta con LoggingStrategyDecorator(CachingStrategyDecorator(...))
       para logging y caché sin modificar GeminiTryOnStrategy (Open/Closed Principle).
     """
-    db = SessionLocal()
+    db = database.SessionLocal()
     job = db.query(ProcessingJob).filter(ProcessingJob.id == job_id).first()
     if not job:
         db.close()
@@ -121,11 +123,7 @@ def process_catalog_background(job_id: int, file_content: bytes):
         _validate_excel_columns(df)
 
         # ── Decorator: envolvemos la estrategia de IA con Logging y Cache ──
-        strategy = LoggingStrategyDecorator(
-            CachingStrategyDecorator(
-                GeminiTryOnStrategy()
-            )
-        )
+        strategy = get_tryon_strategy(with_cache=True)
 
         for index, row in df.iterrows():
             garment_data = row.to_dict()
@@ -386,6 +384,7 @@ async def create_garment(
     garment_in: GarmentCreate,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
+    strategy: Optional[VirtualTryOnStrategy] = Depends(get_garment_tryon_strategy),
 ):
     """Upload a single garment manually via dashboard."""
     if current_user.role_id != RoleID.BRAND_MANAGER or not current_user.brand_id:
@@ -414,8 +413,7 @@ async def create_garment(
         if garment_in.generate_3d:
             # Process with AI wrapped in dedicated try...except for strict transactional integrity
             try:
-                # ── Decorator: envolver la estrategia de IA con Logging (no caché en dashboard) ──
-                strategy = LoggingStrategyDecorator(GeminiTryOnStrategy())
+                active_strategy = strategy or get_garment_tryon_strategy()
                 garment_data = {
                     "SKU": new_garment.sku,
                     "Name": new_garment.name,
@@ -435,7 +433,7 @@ async def create_garment(
                     "has_pleats": garment_in.has_pleats,
                     "image_url": garment_in.image_url or "",
                 }
-                asset_data = await run_in_threadpool(strategy.process_garment, garment_data)
+                asset_data = await run_in_threadpool(active_strategy.process_garment, garment_data)
                 metadata_json = asset_data["metadata_json"]
             except Exception as e:
                 db.rollback()

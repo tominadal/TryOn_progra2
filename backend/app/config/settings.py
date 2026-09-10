@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     # AI
     GEMINI_API_KEY: str = ""
+    USE_MOCK_AI: bool = False
 
     # File uploads
     MAX_UPLOAD_SIZE_MB: int = 10  # Maximum Excel upload size in MB

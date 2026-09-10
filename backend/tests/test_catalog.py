@@ -4,10 +4,12 @@ Tests for catalog ingestion: Excel upload, column validation, garment listing.
 import io
 import pandas as pd
 from fastapi.testclient import TestClient
+from app.config.settings import settings
 
 
-def test_upload_catalog(client: TestClient, db_session):
+def test_upload_catalog(client: TestClient, db_session, monkeypatch):
     """Brand user can upload a valid Excel file and receive a job_id."""
+    monkeypatch.setattr(settings, "USE_MOCK_AI", True)
     # Create user with brand_name — router auto-creates the Brand and marketplace
     res = client.post(
         "/api/v1/users/",
@@ -71,6 +73,8 @@ def test_create_garment_ai_failure_rolls_back_transaction(client: TestClient, db
     """
     from app.domain.models.catalog import Garment
     from app.services.ai_strategy import GeminiTryOnStrategy, AIServiceError
+
+    monkeypatch.setattr(settings, "USE_MOCK_AI", False)
 
     # Register brand user
     res = client.post(
@@ -170,6 +174,8 @@ def test_create_garment_success_via_threadpool(client: TestClient, db_session, m
     from app.domain.models.catalog import Garment
     from app.services.ai_strategy import GeminiTryOnStrategy
 
+    monkeypatch.setattr(settings, "USE_MOCK_AI", False)
+
     # Register brand user
     res = client.post(
         "/api/v1/users/",
@@ -228,5 +234,62 @@ def test_create_garment_success_via_threadpool(client: TestClient, db_session, m
     assert garment.is_processed is True
     assert garment.asset is not None
     assert garment.asset.metadata_json == {"confidence_score": 0.98, "fit_type": "Regular"}
+
+
+def test_create_garment_with_mock_ai(client: TestClient, db_session, monkeypatch):
+    """
+    create_garment using MockTryOnStrategy when USE_MOCK_AI is enabled.
+    Saves static 3D parameters to GarmentAsset without network calls.
+    """
+    from app.domain.models.catalog import Garment
+    monkeypatch.setattr(settings, "USE_MOCK_AI", True)
+
+    # Register brand user
+    res = client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_mock@example.com",
+            "password": "testpassword",
+            "full_name": "Brand Mock User",
+            "role_id": 2,
+            "brand_name": "Mock Test Brand",
+        },
+    )
+    assert res.status_code == 200
+    login_res = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_mock@example.com", "password": "testpassword"},
+    )
+    token = login_res.json()["access_token"]
+
+    payload = {
+        "name": "Mock AI Pant",
+        "price": 79.99,
+        "fit": "Regular",
+        "color": "Indigo",
+        "color_hex": "#1e3a8a",
+        "sizes": ["30", "32"],
+        "image_url": "http://example.com/mock_pant.jpg",
+        "generate_3d": True,
+    }
+
+    response = client.post(
+        "/api/v1/catalog/garment",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Mock AI Pant"
+
+    # Verify garment and asset in DB
+    garment = db_session.query(Garment).filter(Garment.id == data["id"]).first()
+    assert garment is not None
+    assert garment.is_processed is True
+    assert garment.asset is not None
+    assert garment.asset.metadata_json["source"] == "mock"
+    assert garment.asset.metadata_json["scale_x"] == 1.0
+    assert garment.asset.metadata_json["fit_label"] == "Regular"
+
 
 

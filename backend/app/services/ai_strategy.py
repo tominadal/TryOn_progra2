@@ -282,12 +282,38 @@ class MockTryOnStrategy(VirtualTryOnStrategy):
     """
 
     def process_garment(self, garment_data: dict) -> dict:
-        asset_url = f"https://mock-storage.com/mock_{uuid.uuid4().hex[:8]}.png"
+        image_url = (
+            garment_data.get("image_url")
+            or garment_data.get("ImageURL")
+            or f"https://mock-storage.com/mock_{uuid.uuid4().hex[:8]}.png"
+        )
+        fit_val = (
+            garment_data.get("Fit")
+            or garment_data.get("fit")
+            or "Regular"
+        )
+        color_val = garment_data.get("color_hex") or "#1e3a8a"
+
         return {
-            "ai_generated_image_url": asset_url,
+            "ai_generated_image_url": image_url,
             "metadata_json": {
+                "scale_x": 1.0,
+                "scale_y": 1.0,
+                "color_hex": color_val,
+                "accent_hex": color_val,
+                "roughness": 0.82,
+                "metalness": 0.1,
+                "fabric_weight": 0.6,
+                "stretch_factor": 0.4,
+                "opacity": 1.0,
+                "waist_rise": 0.5,
+                "taper": 0.0,
+                "distress": 0.0,
+                "has_cuff": False,
+                "has_pleats": False,
+                "fit_label": fit_val,
+                "garment_name": garment_data.get("Name") or garment_data.get("name") or "Mock Garment",
+                "fit": fit_val,
                 "source": "mock",
-                "garment_name": garment_data.get("Name", "Unknown"),
-                "fit": garment_data.get("Fit", "Unknown"),
             },
         }
