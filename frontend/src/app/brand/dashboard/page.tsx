@@ -84,20 +84,10 @@ export default function BrandDashboard() {
       const formData = new FormData();
       formData.append("file", productFile);
 
-      const uploadToken = localStorage.getItem("token") || "";
-      const uploadRes = await fetch("http://localhost:8000/api/v1/catalog/upload-image", {
+      const uploadData = await fetchApi("/catalog/upload-image", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${uploadToken}`
-        },
-        body: formData
+        body: formData,
       });
-
-      if (!uploadRes.ok) {
-        throw new Error("Error al subir la imagen al servidor.");
-      }
-      
-      const uploadData = await uploadRes.json();
       const realImageUrl = uploadData.url;
 
       // 2. Create garment entry with real image url
