@@ -162,6 +162,62 @@ class StatsJobObserver(IJobObserver):
         }
 
 
+class NotificationJobObserver(IJobObserver):
+    """
+    ConcreteObserver que simula el envio de notificaciones externas
+    (email, Slack, webhook) ante transiciones de estado criticas de un Job.
+
+    Este observer demuestra el Principio Abierto/Cerrado (OCP de SOLID):
+        - El sistema de notificaciones se AGREGO sin modificar ProcessingJob
+          (el Subject) ni los otros observers ya existentes.
+        - Si manana se quiere notificar por Telegram, se crea TelegramJobObserver
+          y se registra; ningun otro archivo cambia.
+
+    Analogia con el libro:
+        Como agregar un ForecastDisplay a WeatherStation: el Subject no sabe
+        cuantos ni quienes son sus observers. Solo los notifica.
+
+    Atributos:
+        _notify_on: conjunto de nombres de estado que disparan notificacion.
+                    Por defecto: READY y FAILED (estados terminales).
+    """
+
+    def __init__(self, notify_on: set[str] | None = None) -> None:
+        # Estados terminales que merecen notificacion externa
+        self._notify_on: set[str] = notify_on or {"READY", "FAILED"}
+
+    def update(
+        self,
+        job_id: int,
+        old_status,
+        new_status,
+        context: dict | None = None,
+    ) -> None:
+        new_name = new_status.value if hasattr(new_status, "value") else str(new_status)
+
+        if new_name not in self._notify_on:
+            return  # Transicion intermedia: no se notifica
+
+        # En produccion, aqui se llamaria a boto3, smtplib, slack_sdk, etc.
+        # Por ahora logueamos la intencion para no introducir dependencias externas.
+        if new_name == "READY":
+            processed = context.get("processed_items", "?") if context else "?"
+            logger.info(
+                "[Observer:Notification] NOTIFICACION: Job #%d completado exitosamente. "
+                "Prendas procesadas: %s. (En produccion: enviar email/Slack a la marca.)",
+                job_id,
+                processed,
+            )
+        elif new_name == "FAILED":
+            error = context.get("error", "error desconocido") if context else "error desconocido"
+            logger.warning(
+                "[Observer:Notification] ALERTA: Job #%d fallo. Motivo: %s. "
+                "(En produccion: notificar al equipo de soporte via PagerDuty/Slack.)",
+                job_id,
+                error,
+            )
+
+
 # ─── Subject Mixin ────────────────────────────────────────────────────────────
 
 class JobSubjectMixin:

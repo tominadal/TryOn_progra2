@@ -152,6 +152,43 @@ classDiagram
 
 ---
 
+### Factory Pattern — `strategy_factory.py`
+
+```mermaid
+classDiagram
+    class StrategyFactory {
+        -_settings: Settings
+        +__init__(settings: Settings)
+        +create_single_garment() VirtualTryOnStrategy
+        +create_bulk_catalog() VirtualTryOnStrategy
+        -_create_base() VirtualTryOnStrategy
+    }
+
+    class VirtualTryOnStrategy {
+        <<abstract>>
+        +process_garment(garment_data: dict) dict*
+    }
+
+    class GeminiTryOnStrategy {
+        +process_garment(garment_data: dict) dict
+    }
+
+    class MockTryOnStrategy {
+        +process_garment(garment_data: dict) dict
+    }
+
+    StrategyFactory ..> VirtualTryOnStrategy : crea (Product)
+    StrategyFactory ..> GeminiTryOnStrategy : instancia si USE_MOCK_AI=False
+    StrategyFactory ..> MockTryOnStrategy : instancia si USE_MOCK_AI=True
+    VirtualTryOnStrategy <|-- GeminiTryOnStrategy : implementa
+    VirtualTryOnStrategy <|-- MockTryOnStrategy : implementa
+```
+
+**Justificación:**
+El Factory centraliza la construcción de la cadena `Logging(Cache(Gemini|Mock))`. Los routers piden `create_bulk_catalog()` o `create_single_garment()` sin saber cuántos decoradores se apilan ni qué ConcreteProduct se usa. Cumple **SRP** (la lógica de construcción vive en un lugar) y **DIP** (los routers dependen de `VirtualTryOnStrategy`, no de `Gemini`).
+
+
+
 ### Decorator Pattern — `strategy_decorators.py`
 
 ```mermaid
@@ -239,4 +276,9 @@ classDiagram
 *   **Cart como entidad intermedia**: El `Cart` es una entidad propia porque tiene identidad propia, timestamps y puede persistir entre sesiones. Un `User` tiene exactamente un `Cart` (composición 1..1).
 *   **Strategy Pattern**: Permite que el backend de IA evolucione independientemente de los routers. Cambiar de Gemini a OpenAI requiere cero cambios fuera de `ai_strategy.py`.
 *   **Decorator Pattern**: Añade logging y caché a la estrategia de IA en runtime, sin modificar `GeminiTryOnStrategy` (Open/Closed Principle). Igual al ejemplo de Starbuzz Coffee del libro.
-*   **Observer Pattern**: Desacopla el sistema de notificaciones del procesamiento de jobs. Cualquier nuevo Observer (Slack, email, WebSocket) se agrega sin tocar `ProcessingJob` ni `process_catalog_background`.
+*   **Observer Pattern**: Desacopla el sistema de notificaciones del procesamiento de jobs. `NotificationJobObserver` fue agregado sin modificar `ProcessingJob` ni los observers existentes — demostración directa de OCP.
+*   **Factory Pattern** *(nuevo)*: `StrategyFactory` centraliza la construcción de la cadena de decoradores. Antes, `dependencies.py` armaba la cadena inline; ahora ese conocimiento vive en un único lugar (SRP). Los routers solo conocen `VirtualTryOnStrategy` (DIP).
+*   **SRP en `validators.py`** *(nuevo)*: La lógica de validación de magic bytes, columnas Excel y parseo de precios fue extraída a su propio módulo. `catalog.py` tiene ahora una sola razón para cambiar: la lógica de negocio del catálogo.
+
+> Para el mapeo completo de principios SOLID al código, ver [`patrones_solid.md`](patrones_solid.md).
+

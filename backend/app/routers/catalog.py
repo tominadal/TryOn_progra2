@@ -10,10 +10,10 @@ from app.domain.models.catalog import ProcessingJob, JobStatus, Garment, Garment
 from app.domain.models.user import User
 from app.domain.repositories import garment_repo
 from app.services.auth_service import get_current_active_user
-from app.services.ai_strategy import VirtualTryOnStrategy, GeminiTryOnStrategy, AIServiceError
-from app.services.strategy_decorators import LoggingStrategyDecorator, CachingStrategyDecorator
+from app.services.ai_strategy import VirtualTryOnStrategy, AIServiceError
 from app.dependencies import get_tryon_strategy, get_garment_tryon_strategy
-from app.services.job_observers import LoggingJobObserver, StatsJobObserver
+from app.services.job_observers import LoggingJobObserver, StatsJobObserver, NotificationJobObserver
+from app.routers.validators import is_valid_image, validate_excel_columns, parse_price
 from app.config.settings import settings
 from app.constants import RoleID
 import pandas as pd
@@ -21,36 +21,8 @@ import uuid
 import io
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
-
-# Required columns in the uploaded Excel file
-REQUIRED_COLUMNS = {"SKU", "Name", "Fit", "Size", "Color", "Price"}
-
-# Known image magic bytes for server-side validation (defeats falsified Content-Type headers)
-_IMAGE_SIGNATURES: list[tuple[bytes, str]] = [
-    (b"\xff\xd8\xff", "jpeg"),
-    (b"\x89PNG\r\n\x1a\n", "png"),
-    (b"GIF87a", "gif"),
-    (b"GIF89a", "gif"),
-    (b"RIFF", "webp"),   # full check: header[8:12] == b"WEBP"
-]
-
-
-def _is_valid_image(content: bytes) -> bool:
-    """Return True if the file content starts with a known image magic-byte signature."""
-    for sig, _ in _IMAGE_SIGNATURES:
-        if content[:len(sig)] == sig:
-            # Extra check for WEBP: RIFF????WEBP
-            if sig == b"RIFF":
-                return len(content) >= 12 and content[8:12] == b"WEBP"
-            return True
-    return False
-
-
-def _validate_excel_columns(df: pd.DataFrame) -> None:
-    """Raises ValueError if required columns are missing from the DataFrame."""
-    missing = REQUIRED_COLUMNS - set(df.columns)
-    if missing:
-        raise ValueError(f"Missing required columns: {', '.join(sorted(missing))}")
+# Nota: _is_valid_image, validate_excel_columns y parse_price viven en
+# app.routers.validators (SRP — un modulo, una responsabilidad).
 
 
 def _garment_to_dict(g: Garment) -> dict:
@@ -107,10 +79,15 @@ def process_catalog_background(job_id: int, file_content: bytes):
         return
 
     # ── Observer: registrar observers antes de iniciar el procesamiento ──
+    # Cada observer tiene UNA responsabilidad (SRP). Agregar NotificationJobObserver
+    # aqui demuestra OCP: nueva funcionalidad sin tocar ProcessingJob ni los
+    # observers ya existentes.
     logging_obs = LoggingJobObserver()
     stats_obs = StatsJobObserver()
+    notification_obs = NotificationJobObserver()   # Nuevo observer sin romper nada
     job.register_observer(logging_obs)
     job.register_observer(stats_obs)
+    job.register_observer(notification_obs)
 
     old_status = job.status
     job.status = JobStatus.PROCESSING
@@ -120,7 +97,7 @@ def process_catalog_background(job_id: int, file_content: bytes):
     try:
         df = pd.read_excel(io.BytesIO(file_content))
         # Re-validate columns inside the background task as well
-        _validate_excel_columns(df)
+        validate_excel_columns(df)
 
         # ── Decorator: envolvemos la estrategia de IA con Logging y Cache ──
         strategy = get_tryon_strategy(with_cache=True)
@@ -130,12 +107,7 @@ def process_catalog_background(job_id: int, file_content: bytes):
 
             # Validate price
             raw_price = garment_data.get("Price", 0)
-            try:
-                price = float(raw_price)
-                if price < 0:
-                    raise ValueError("Price cannot be negative")
-            except (TypeError, ValueError):
-                price = 0.0
+            price = parse_price(raw_price)  # Delegamos validacion a validators.py (SRP)
 
             garment = Garment(
                 sku=str(garment_data.get("SKU", f"UNK-{index}"))[:50],
@@ -230,7 +202,7 @@ def upload_catalog(
     # --- Validate Excel structure before enqueuing ---
     try:
         df = pd.read_excel(io.BytesIO(content))
-        _validate_excel_columns(df)
+        validate_excel_columns(df)  # SRP: logica de validacion en validators.py
         total_items = len(df)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -315,7 +287,7 @@ def upload_garment_image(
     content = file.file.read()
 
     # --- Security: validate real image format via magic bytes (defeats falsified Content-Type) ---
-    if not _is_valid_image(content):
+    if not is_valid_image(content):  # SRP: logica de validacion en validators.py
         raise HTTPException(status_code=400, detail="File must be a valid image (JPEG, PNG, GIF or WEBP)")
 
     # Ensure uploads directory exists

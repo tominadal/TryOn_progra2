@@ -156,3 +156,32 @@ sequenceDiagram
     Log->>Log: Loguea tiempo=0.1ms, source=cache
     Log-->>Router: descriptor_3D (sin llamar a Gemini API 💰)
 ```
+
+---
+
+## 5. Flujo de Factory — Construcción de la Cadena de Estrategia
+
+Este diagrama muestra cómo `StrategyFactory` desacopla la **creación** de la estrategia de su **uso** en los routers. Cumple el principio de Responsabilidad Única: `catalog.py` ya no sabe cuántos decoradores se apilan ni qué ConcreteProduct se instancia.
+
+```mermaid
+sequenceDiagram
+    participant Router as ⚙️ catalog.py
+    participant Deps as 🔌 dependencies.py
+    participant Factory as 🏭 StrategyFactory
+    participant Settings as ⚙️ Settings
+    participant GeminiOrMock as 🧠 Gemini | Mock
+
+    Router->>Deps: get_tryon_strategy(with_cache=True)
+    Deps->>Factory: create_bulk_catalog()
+    Factory->>Settings: USE_MOCK_AI?
+    Settings-->>Factory: False (producción)
+    Factory->>GeminiOrMock: GeminiTryOnStrategy()
+    Factory->>Factory: CachingStrategyDecorator(gemini)
+    Factory->>Factory: LoggingStrategyDecorator(cached)
+    Factory-->>Deps: LoggingDecorator(CacheDecorator(Gemini))
+    Deps-->>Router: VirtualTryOnStrategy (interfaz)
+
+    Note over Router: Router nunca sabe si es Gemini o Mock,
+    Note over Router: ni cuántos decoradores hay.
+    Router->>GeminiOrMock: strategy.process_garment(data)
+```
