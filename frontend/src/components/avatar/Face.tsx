@@ -1,5 +1,3 @@
-import * as THREE from "three";
-
 export function RealisticFace({
   skinColor,
   isFemale,

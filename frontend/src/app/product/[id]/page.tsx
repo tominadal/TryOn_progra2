@@ -13,19 +13,32 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Box } from "@react-three/drei";
 import { ParametricMannequin, ParametricPants } from "@/components/avatar";
 
-// ── Size Parsing Logic ───────────────────────────────────────────────────────
+// ── Size Parsing & Fit Diagnostic Logic ──────────────────────────────────────
 function parseSizeInches(size: string): number {
   if (!size) return 32;
-  const numMatch = size.match(/\d+/);
-  if (numMatch) {
-    const num = parseInt(numMatch[0]);
-    if (num >= 22 && num <= 54) return num;
-  }
   const upper = size.toUpperCase().trim();
   const letterMap: Record<string, number> = {
     "XXS": 26, "XS": 28, "S": 30, "M": 32, "L": 34, "XL": 36, "XXL": 38, "3XL": 40
   };
-  return letterMap[upper] ?? 32;
+  if (letterMap[upper] !== undefined) {
+    return letterMap[upper];
+  }
+
+  const numMatch = size.match(/\d+/);
+  if (numMatch) {
+    const num = parseInt(numMatch[0]);
+    // Standard European / Argentine waist size (e.g., 38, 40, 42, 44, 46, 48, 50)
+    // Talle 38 AR/EU ≈ 28-29 US, 40 ≈ 30-31 US, 42 ≈ 32-33 US, 44 ≈ 34 US, etc.
+    if (num >= 38 && num <= 60) {
+      return Math.round(num - 10);
+    }
+    // Standard US Jeans sizing in inches (e.g., 24, 26, 28, 30, 32, 34, 36)
+    if (num >= 22 && num < 38) {
+      return num;
+    }
+  }
+
+  return 32;
 }
 
 function calculateSizeScale(size: string): number {
@@ -33,6 +46,73 @@ function calculateSizeScale(size: string): number {
   const inches = parseSizeInches(size);
   // Realistic sizing scale: 2.5% volume difference per inch (~5% per standard size step)
   return 1.0 + (inches - 32) * 0.025;
+}
+
+interface FitDiagnosticResult {
+  garmentSizeInches: number;
+  avatarWaistInches: number;
+  fitDiff: number;
+  fitTightness: number;
+  isTooSmall: boolean;
+  isTooBig: boolean;
+  badgeText: string;
+  badgeClass: string;
+  dotClass: string;
+  detailTitle: string;
+  detailBody: string;
+}
+
+function calculateFitDiagnostic(
+  selectedSize: string,
+  avatarWeight: number,
+  morphs: { bellyWidth?: number; hipWidth?: number }
+): FitDiagnosticResult {
+  const garmentSizeInches = parseSizeInches(selectedSize);
+  const avatarWaistInches = Math.round(
+    32 +
+    (avatarWeight - 70) * 0.35 +
+    ((morphs.bellyWidth ?? 1.0) - 1.0) * 8 +
+    ((morphs.hipWidth ?? 1.0) - 1.0) * 6
+  );
+
+  const fitDiff = garmentSizeInches - avatarWaistInches;
+  const fitTightness = Math.max(-1.0, Math.min(1.0, fitDiff * 0.24));
+  const isTooSmall = fitTightness < -0.22;
+  const isTooBig = fitTightness > 0.22;
+
+  let badgeText = "✨ Calce Ideal";
+  let badgeClass = "bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 border-emerald-500/40";
+  let dotClass = "bg-emerald-500";
+  let detailTitle = "✨ Diagnóstico: Calce Recomendado";
+  let detailBody = `El talle ${selectedSize} se adapta con caída limpia a tus proporciones (~talle ${avatarWaistInches}), sin tirantez ni arrugas de holgura excesiva.`;
+
+  if (isTooSmall) {
+    badgeText = "⚠️ Talla Muy Ajustada (Chica)";
+    badgeClass = "bg-amber-500/20 text-amber-900 dark:text-amber-200 border-amber-500/40";
+    dotClass = "bg-amber-500";
+    detailTitle = "⚠️ Diagnóstico: Talla Ajustada / Pequeña";
+    detailBody = `Para tu complexión (~talle ${avatarWaistInches}), el talle ${selectedSize} ejerce tensión en cintura y muslos; la botamanga queda corta en tus tobillos. Se muestran líneas de tensión en el 3D.`;
+  } else if (isTooBig) {
+    badgeText = "⚠️ Talla Holgada (Grande)";
+    badgeClass = "bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-500/40";
+    dotClass = "bg-purple-500";
+    detailTitle = "⚠️ Diagnóstico: Talla Holgada / Grande";
+    detailBody = `Para tu complexión (~talle ${avatarWaistInches}), el talle ${selectedSize} queda suelto con holgura en cintura y exceso de tela acumulado sobre las zapatillas.`;
+  }
+
+  return {
+    garmentSizeInches,
+    avatarWaistInches,
+    fitDiff,
+    fitTightness,
+    isTooSmall,
+    isTooBig,
+    badgeText,
+    badgeClass,
+    dotClass,
+    detailTitle,
+    detailBody,
+  };
 }
 
 interface GarmentImage {
@@ -204,20 +284,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const aiSource    = product.metadata_json?.source ?? "";
 
   // ── Smart Fit Diagnostic ─────────────────────────────────────────────────
-  const garmentSizeInches = parseSizeInches(selectedSize);
-  const avatarWaistInches = Math.round(
-    32 +
-    (avatarWeight - 70) * 0.35 +
-    ((morphs.bellyWidth ?? 1.0) - 1.0) * 8 +
-    ((morphs.hipWidth ?? 1.0) - 1.0) * 6
-  );
-  // Difference between garment size and avatar waist:
-  // Negative = garment is smaller than avatar (tight)
-  // Positive = garment is larger than avatar (loose/baggy)
-  const fitDiff = garmentSizeInches - avatarWaistInches;
-  const fitTightness = Math.max(-1.0, Math.min(1.0, fitDiff * 0.24));
-  const isTooSmall = fitTightness < -0.22;
-  const isTooBig = fitTightness > 0.22;
+  const fitDiagnostic = calculateFitDiagnostic(selectedSize, avatarWeight, morphs);
+  const { fitTightness, isTooSmall, isTooBig } = fitDiagnostic;
 
   // Combine AI scale with Avatar size and weight
   const finalPantsScaleX = aiScaleX * sizeScaleMod * avatarScaleXZ;
@@ -330,17 +398,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </Canvas>
 
                   {/* Dynamic Fit Badge on top-left of Canvas */}
-                  <div className={`absolute top-4 left-4 flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-md shadow-md border transition-all ${
-                    isTooSmall
-                      ? "bg-amber-500/20 text-amber-900 dark:text-amber-200 border-amber-500/40"
-                      : isTooBig
-                      ? "bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-500/40"
-                      : "bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 border-emerald-500/40"
-                  }`}>
-                    <div className={`w-2 h-2 rounded-full animate-pulse ${
-                      isTooSmall ? "bg-amber-500" : isTooBig ? "bg-purple-500" : "bg-emerald-500"
-                    }`} />
-                    {isTooSmall ? "⚠️ Talla Muy Ajustada (Chica)" : isTooBig ? "⚠️ Talla Holgada (Grande)" : "✨ Calce Ideal"}
+                  <div className={`absolute top-4 left-4 flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-md shadow-md border transition-all ${fitDiagnostic.badgeClass}`}>
+                    <div className={`w-2 h-2 rounded-full animate-pulse ${fitDiagnostic.dotClass}`} />
+                    {fitDiagnostic.badgeText}
                   </div>
                   {/* Size indicator in TryOn */}
                   <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-bold text-white bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full">
@@ -542,21 +602,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       : "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200"
                   }`}>
                     <div className="flex items-center gap-2 font-bold mb-1.5">
-                      <span className={`w-2 h-2 rounded-full ${
-                        isTooSmall ? "bg-amber-500" : isTooBig ? "bg-purple-500" : "bg-emerald-500"
-                      }`} />
-                      {isTooSmall
-                        ? "⚠️ Diagnóstico: Talla Ajustada / Pequeña"
-                        : isTooBig
-                        ? "⚠️ Diagnóstico: Talla Holgada / Grande"
-                        : "✨ Diagnóstico: Calce Recomendado"}
+                      <span className={`w-2 h-2 rounded-full ${fitDiagnostic.dotClass}`} />
+                      {fitDiagnostic.detailTitle}
                     </div>
                     <p className="opacity-90 leading-relaxed">
-                      {isTooSmall
-                        ? `Para tu complexión (~talle ${avatarWaistInches}), el talle ${selectedSize} ejerce tensión en cintura y muslos; la botamanga queda corta en tus tobillos. Se muestran líneas de tensión en el 3D.`
-                        : isTooBig
-                        ? `Para tu complexión (~talle ${avatarWaistInches}), el talle ${selectedSize} queda suelto con holgura en cintura y exceso de tela acumulado sobre las zapatillas.`
-                        : `El talle ${selectedSize} se adapta con caída limpia a tus proporciones (~talle ${avatarWaistInches}), sin tirantez ni arrugas de holgura excesiva.`}
+                      {fitDiagnostic.detailBody}
                     </p>
                   </div>
                 )}

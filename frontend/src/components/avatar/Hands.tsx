@@ -1,5 +1,3 @@
-import * as THREE from "three";
-
 interface RealisticHandProps {
   isLeft: boolean;
   skinMat: {

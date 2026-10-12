@@ -10,9 +10,10 @@ interface ModernShoeProps {
   };
   isFemale: boolean;
   calfR: number;
+  yOffset?: number;
 }
 
-export function ModernShoe({ isLeft, shoeMat, isFemale, calfR }: ModernShoeProps) {
+export function ModernShoe({ isLeft, shoeMat, isFemale, calfR, yOffset = 0 }: ModernShoeProps) {
   const sideX = isLeft ? -1 : 1;
   const shoeWidth = isFemale ? 0.048 : 0.054;
   const shoeLength = isFemale ? 0.14 : 0.155;
@@ -22,7 +23,7 @@ export function ModernShoe({ isLeft, shoeMat, isFemale, calfR }: ModernShoeProps
   const laceMat = { color: "#ffffff", roughness: 0.7, metalness: 0.0 };
 
   return (
-    <group position={[0, -0.86, 0.035]} rotation={[0, sideX * 0.04, 0]}>
+    <group position={[0, -0.86 + yOffset, 0.035]} rotation={[0, sideX * 0.04, 0]}>
       {/* ── HIGH/MID PADDED ANKLE COLLAR ── */}
       <mesh position={[0, 0.045, -0.025]} rotation={[0.08, 0, 0]}>
         <cylinderGeometry args={[calfR * 0.88, calfR * 0.96, 0.065, 24]} />

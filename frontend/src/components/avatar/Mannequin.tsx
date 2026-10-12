@@ -95,6 +95,7 @@ export function ParametricMannequin({
   const hipFat = hipWidth || 1.0;
   const neckMod = neckThickness || 1.0;
   const breastMod = breastSize || 1.0;
+  const shoulderMod = shoulderWidth || 1.0;
 
   // Torso dimensions
   const baseChestR = isFemale ? 0.114 : 0.118 * muscFactor;
@@ -105,7 +106,7 @@ export function ParametricMannequin({
   const bellyScaleZ = (bellyDepth || 1.0) * (isFemale ? 1.0 : 1.25);
 
   const hipR_base = isFemale ? 0.142 * hipFat : 0.126 * hipFat;
-  const shoulderX = isFemale ? 0.125 * chestFat : 0.142 * chestFat * muscFactor;
+  const shoulderX = (isFemale ? 0.125 * chestFat : 0.142 * chestFat * muscFactor) * shoulderMod;
   const breastR = isFemale ? 0.062 * chestFat * breastMod : 0;
 
   const deltaChestR = chestR - baseChestR;

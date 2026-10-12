@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import * as THREE from "three";
 import { useTexture } from "@react-three/drei";
 
@@ -37,11 +38,15 @@ export function ParametricPants({
   fitTightness = 0.0,
 }: ParametricPantsProps) {
   const [denimTex] = useTexture(["/textures/denim.png"]);
-  if (denimTex) {
-    denimTex.wrapS = THREE.RepeatWrapping;
-    denimTex.wrapT = THREE.RepeatWrapping;
-    denimTex.repeat.set(2, 2);
-  }
+
+  useEffect(() => {
+    if (denimTex) {
+      denimTex.wrapS = THREE.RepeatWrapping;
+      denimTex.wrapT = THREE.RepeatWrapping;
+      denimTex.repeat.set(2, 2);
+      denimTex.needsUpdate = true;
+    }
+  }, [denimTex]);
 
   const accent = accentColor ?? color;
 
