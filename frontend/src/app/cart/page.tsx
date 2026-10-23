@@ -12,7 +12,8 @@ interface CartItem {
   cart_item_id: number;
   garment_id: number;
   quantity: number;
-  price: number;
+  unit_price: number;
+  subtotal: number;
   garment_details?: any; // We'll fetch this if needed, or rely on a robust cart API
 }
 
@@ -21,10 +22,12 @@ export default function CartPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    // Wait for the session restore (token -> /users/me) before deciding to redirect
+    if (authLoading) return;
     if (!user) {
       router.push("/login");
       return;
@@ -48,7 +51,7 @@ export default function CartPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   const handleCheckout = async () => {
     try {
@@ -82,7 +85,7 @@ export default function CartPage() {
             </div>
             <h2 className="text-xl font-medium mb-2">Tu carrito está vacío</h2>
             <p className="text-neutral-600 dark:text-neutral-400 mb-6">Parece que aún no has agregado ninguna prenda a tu carrito.</p>
-            <Link href="/" className="px-6 py-3 bg-blue-600 dark:bg-white text-white dark:text-black font-semibold rounded-full hover:bg-blue-700 dark:hover:bg-neutral-200 transition-colors">
+            <Link href="/marketplace" className="px-6 py-3 bg-blue-600 dark:bg-white text-white dark:text-black font-semibold rounded-full hover:bg-blue-700 dark:hover:bg-neutral-200 transition-colors">
               Empezar a Comprar
             </Link>
           </div>
@@ -99,7 +102,7 @@ export default function CartPage() {
                   <div className="flex-1 flex flex-col justify-center">
                     <h3 className="font-semibold text-lg">{item.garment_details?.name || `Prenda #${item.garment_id}`}</h3>
                     <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-2">Cant: {item.quantity}</p>
-                    <p className="font-medium">${(item.price || 0).toFixed(2)}</p>
+                    <p className="font-medium">${(item.unit_price || 0).toFixed(2)}</p>
                   </div>
                 </div>
               ))}

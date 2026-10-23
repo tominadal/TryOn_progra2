@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function AvatarPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +35,8 @@ export default function AvatarPage() {
   const [avatarTattoo, setAvatarTattoo] = useState(false);
 
   useEffect(() => {
+    // Wait for the session restore (token -> /users/me) before deciding to redirect
+    if (authLoading) return;
     if (!user) {
       router.push("/login");
       return;
@@ -65,7 +67,7 @@ export default function AvatarPage() {
         // No avatar yet — use defaults
       })
       .finally(() => setLoading(false));
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   const handleAvatarExported = async (
     url: string,

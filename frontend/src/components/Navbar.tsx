@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ShoppingCart, User as UserIcon, Settings, LogOut, Shirt } from "lucide-react";
@@ -8,11 +9,23 @@ import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
+const NAV_LINK_BASE =
+  "px-3 py-1.5 rounded-lg border transition-colors";
+const NAV_LINK_ACTIVE =
+  "bg-neutral-100 dark:bg-neutral-900 border-neutral-300 dark:border-neutral-700 text-black dark:text-white";
+const NAV_LINK_INACTIVE =
+  "border-transparent text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white";
+
 export function Navbar() {
   const { user, logout } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+
+  // "Marketplace" also covers product pages, which are part of the shopping flow
+  const isHome = pathname === "/";
+  const isMarketplace = pathname.startsWith("/marketplace") || pathname.startsWith("/product");
 
   useEffect(() => {
     if (user) {
@@ -38,9 +51,9 @@ export function Navbar() {
         </div>
 
         {/* Center: Links */}
-        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm font-medium">
-          <Link href="/" className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">Inicio</Link>
-          <Link href="/marketplace" className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors">Marketplace</Link>
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-2 text-sm font-medium">
+          <Link href="/" aria-current={isHome ? "page" : undefined} className={`${NAV_LINK_BASE} ${isHome ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE}`}>Inicio</Link>
+          <Link href="/marketplace" aria-current={isMarketplace ? "page" : undefined} className={`${NAV_LINK_BASE} ${isMarketplace ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE}`}>Marketplace</Link>
         </div>
 
         {/* Right Side: Actions */}

@@ -50,7 +50,7 @@ export default function Home() {
             </span>
             La Prueba Virtual con IA está activa
           </div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-400">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] pb-3 text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-400">
             El fin de las devoluciones por talle. <br/> Bienvenido al estándar del gemelo digital.
           </h1>
           <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mx-auto leading-relaxed">
