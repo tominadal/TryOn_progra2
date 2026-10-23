@@ -1,123 +1,204 @@
 import * as THREE from "three";
 
-export function RealisticFace({ skinColor, isFemale, eyebrowStyle }: {
+export function RealisticFace({
+  skinColor,
+  isFemale,
+  eyebrowStyle,
+}: {
   skinColor: string;
   isFemale: boolean;
   eyebrowStyle: string;
 }) {
-  const skinMat = { color: skinColor, roughness: 0.5, metalness: 0.05 };
-  const eyebrowThick = eyebrowStyle === "Grueso" ? 0.025 : eyebrowStyle === "Fino" ? 0.003 : 0.009;
-  // Base sphere radius — the OVAL is achieved via scale on the parent group
-  const headR = isFemale ? 0.128 : 0.134;
-  // Oval scale: narrower X (0.86), taller Y (1.0), slightly shallow Z (0.93)
-  const headScaleX = isFemale ? 0.84 : 0.86;
-  const headScaleZ = isFemale ? 0.91 : 0.93;
+  const skinMat = { color: skinColor, roughness: 0.62, metalness: 0.03 };
+  const shadowSkinMat = { color: skinColor, roughness: 0.75, metalness: 0.02 };
+  
+  const eyebrowThick = eyebrowStyle === "Grueso" ? 0.016 : eyebrowStyle === "Fino" ? 0.005 : 0.010;
+  
+  const headR = isFemale ? 0.126 : 0.132;
+  const headScaleX = isFemale ? 0.83 : 0.86;
+  const headScaleZ = isFemale ? 0.90 : 0.93;
 
   return (
-    // The outer scale makes the whole head oval (taller than wide)
     <group scale={[headScaleX, 1.0, headScaleZ]}>
-
-      {/* ── SKULL BASE ── */}
+      {/* ── CRANIUM / SKULL BASE ── */}
       <mesh>
         <sphereGeometry args={[headR, 48, 48]} />
         <meshStandardMaterial {...skinMat} />
       </mesh>
 
-      {/* ── JAW / CHIN — tapers downward ── */}
-      <mesh position={[0, -headR * 0.72, headR * 0.12]} scale={[0.85, 0.52, 0.78]}>
-        <sphereGeometry args={[headR * 0.58, 32, 24]} />
+      {/* Forehead softening cushion */}
+      <mesh position={[0, headR * 0.22, headR * 0.52]} scale={[0.82, 0.45, 0.52]}>
+        <sphereGeometry args={[headR * 0.72, 32, 24]} />
         <meshStandardMaterial {...skinMat} />
       </mesh>
 
-
-      {/* ── EARS — single flat ellipsoid, close to skull ── */}
+      {/* ── CHEEKBONES (Zygomatic Arches) ── */}
       {[-1, 1].map((side) => (
-        // position: pushed to the side of the skull; scale makes it a flat oval disc
         <mesh
-          key={side}
-          position={[side * headR * 0.96, -headR * 0.05, 0]}
-          scale={[0.18, 0.38, 0.28]}
+          key={`cheek-${side}`}
+          position={[side * headR * 0.54, -headR * 0.05, headR * 0.62]}
+          scale={[0.35, 0.42, 0.45]}
         >
-          <sphereGeometry args={[headR * 0.78, 24, 20]} />
+          <sphereGeometry args={[headR * 0.62, 24, 20]} />
           <meshStandardMaterial {...skinMat} />
         </mesh>
       ))}
 
-      {/* ── NOSE ── */}
-      <group position={[0, -headR * 0.13, headR * 0.94]}>
-        {/* Tip */}
-        <mesh scale={[1.0, 1.3, 0.9]}>
-          <sphereGeometry args={[isFemale ? 0.017 : 0.021, 16, 16]} />
-          <meshStandardMaterial {...skinMat} />
-        </mesh>
-        {/* Nasal bridge — runs up toward forehead */}
-        <mesh position={[0, 0.028, -0.006]}>
-          <capsuleGeometry args={[isFemale ? 0.0075 : 0.009, 0.036, 8, 16]} />
-          <meshStandardMaterial {...skinMat} />
-        </mesh>
-        {/* Nostrils */}
-        {[-1, 1].map((side) => (
-          <mesh key={side} position={[side * 0.015, -0.008, 0.004]} scale={[0.9, 0.7, 0.7]}>
-            <sphereGeometry args={[0.009, 12, 12]} />
+      {/* ── JAW / CHIN — Sculpted natural taper ── */}
+      {/* Lower jaw body */}
+      <mesh position={[0, -headR * 0.68, headR * 0.18]} scale={[isFemale ? 0.72 : 0.82, 0.46, 0.82]}>
+        <sphereGeometry args={[headR * 0.62, 32, 24]} />
+        <meshStandardMaterial {...skinMat} />
+      </mesh>
+      {/* Mentalis (Chin tip) */}
+      <mesh position={[0, -headR * 0.82, headR * 0.52]} scale={[isFemale ? 0.42 : 0.54, 0.38, 0.46]}>
+        <sphereGeometry args={[headR * 0.44, 24, 20]} />
+        <meshStandardMaterial {...skinMat} />
+      </mesh>
+
+      {/* ── EARS — Sculpted with Helix and Lobe ── */}
+      {[-1, 1].map((side) => (
+        <group key={`ear-${side}`} position={[side * headR * 0.98, -headR * 0.08, -headR * 0.04]}>
+          {/* Outer Helix rim */}
+          <mesh rotation={[0, 0, side * 0.12]} scale={[0.16, 0.44, 0.30]}>
+            <sphereGeometry args={[headR * 0.68, 24, 20]} />
             <meshStandardMaterial {...skinMat} />
           </mesh>
-        ))}
-      </group>
-
-      {/* ── EYES — whites + iris + pupil + upper lid ── */}
-      {[-1, 1].map((side) => (
-        <group key={side} position={[side * headR * 0.36, headR * 0.07, headR * 0.90]}>
-          {/* Eye white */}
-          <mesh scale={[1.35, 0.85, 0.45]}>
-            <sphereGeometry args={[0.021, 24, 24]} />
-            <meshStandardMaterial color="#f4ede8" roughness={0.25} />
+          {/* Inner concha cavity indentation */}
+          <mesh position={[-side * 0.005, 0.005, 0.008]} scale={[0.1, 0.26, 0.20]}>
+            <sphereGeometry args={[headR * 0.5, 16, 16]} />
+            <meshStandardMaterial {...shadowSkinMat} color="#8a5540" />
           </mesh>
-          {/* Iris */}
-          <mesh position={[0, 0, 0.011]} scale={[1.05, 1.0, 0.28]}>
-            <sphereGeometry args={[0.013, 20, 20]} />
-            <meshStandardMaterial color="#3b2507" roughness={0.2} />
-          </mesh>
-          {/* Pupil */}
-          <mesh position={[0, 0, 0.014]} scale={[1.05, 1.0, 0.18]}>
-            <sphereGeometry args={[0.007, 16, 16]} />
-            <meshStandardMaterial color="#060606" roughness={0.1} />
-          </mesh>
-          {/* Upper eyelid crease */}
-          <mesh position={[0, 0.013, 0.009]} scale={[1.55, 0.42, 0.42]} rotation={[0.28, 0, 0]}>
-            <sphereGeometry args={[0.020, 16, 8]} />
+          {/* Earlobe */}
+          <mesh position={[0, -headR * 0.20, 0.002]} scale={[0.18, 0.22, 0.22]}>
+            <sphereGeometry args={[headR * 0.36, 16, 16]} />
             <meshStandardMaterial {...skinMat} />
           </mesh>
         </group>
       ))}
 
-      {/* ── EYEBROWS ── */}
-      {[-1, 1].map((side) => (
-        <mesh
-          key={side}
-          position={[side * headR * 0.355, headR * 0.26, headR * 0.88]}
-          rotation={[0, 0, side * -0.18]}
-        >
-          <boxGeometry args={[0.036, eyebrowThick, 0.007]} />
-          <meshStandardMaterial color="#2d1a0e" roughness={0.9} />
+      {/* ── NOSE ── */}
+      <group position={[0, -headR * 0.14, headR * 0.94]}>
+        {/* Nasal Bridge (Tapered upper bone) */}
+        <mesh position={[0, 0.038, -0.012]} rotation={[0.14, 0, 0]}>
+          <cylinderGeometry args={[isFemale ? 0.0065 : 0.0085, isFemale ? 0.0085 : 0.011, 0.045, 16]} />
+          <meshStandardMaterial {...skinMat} />
         </mesh>
+        {/* Cartilage & Defined Nose Tip */}
+        <mesh position={[0, 0.002, 0.008]} scale={[1.0, 1.15, 1.25]}>
+          <sphereGeometry args={[isFemale ? 0.014 : 0.018, 20, 20]} />
+          <meshStandardMaterial {...skinMat} />
+        </mesh>
+        {/* Alar wings (Nostrils contour) */}
+        {[-1, 1].map((side) => (
+          <group key={`nostril-${side}`} position={[side * (isFemale ? 0.013 : 0.016), -0.006, 0.002]}>
+            <mesh scale={[0.95, 0.8, 0.85]}>
+              <sphereGeometry args={[isFemale ? 0.0085 : 0.0105, 16, 16]} />
+              <meshStandardMaterial {...skinMat} />
+            </mesh>
+            {/* Dark nostril hole suggestion */}
+            <mesh position={[0, -0.004, -0.002]} scale={[0.5, 0.3, 0.4]}>
+              <sphereGeometry args={[0.006, 10, 10]} />
+              <meshStandardMaterial color="#2a1208" roughness={0.9} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* ── EYES — Expressive & Lifelike ── */}
+      {[-1, 1].map((side) => (
+        <group key={`eye-${side}`} position={[side * headR * 0.36, headR * 0.065, headR * 0.89]}>
+          {/* Eyeball Sclera (White) */}
+          <mesh scale={[1.32, 0.88, 0.52]}>
+            <sphereGeometry args={[0.021, 28, 28]} />
+            <meshStandardMaterial color="#faf8f5" roughness={0.18} />
+          </mesh>
+          {/* Iris with deep warm hazel/chestnut tone */}
+          <mesh position={[0, 0, 0.0115]} scale={[1.08, 1.05, 0.24]}>
+            <sphereGeometry args={[0.0125, 24, 24]} />
+            <meshStandardMaterial color="#422817" roughness={0.25} />
+          </mesh>
+          {/* Pupil */}
+          <mesh position={[0, 0, 0.0142]} scale={[1.0, 1.0, 0.15]}>
+            <sphereGeometry args={[0.0065, 20, 20]} />
+            <meshStandardMaterial color="#080808" roughness={0.05} />
+          </mesh>
+          {/* Specular Catchlight (Gives soul and life to the gaze!) */}
+          <mesh position={[0.004, 0.005, 0.0155]}>
+            <sphereGeometry args={[0.0024, 12, 12]} />
+            <meshBasicMaterial color="#ffffff" />
+          </mesh>
+
+          {/* Upper Eyelid / Lash Line */}
+          <mesh position={[0, 0.012, 0.008]} scale={[1.42, 0.32, 0.42]} rotation={[0.22, 0, 0]}>
+            <sphereGeometry args={[0.021, 20, 12]} />
+            <meshStandardMaterial {...skinMat} />
+          </mesh>
+          {/* Dark Eyelash line contour */}
+          <mesh position={[0, 0.011, 0.011]} scale={[1.36, 0.12, 0.28]} rotation={[0.18, 0, 0]}>
+            <boxGeometry args={[0.032, 0.004, 0.01]} />
+            <meshStandardMaterial color="#1a0f08" roughness={0.8} />
+          </mesh>
+        </group>
       ))}
 
-      {/* ── MOUTH ── */}
-      <group position={[0, -headR * 0.40, headR * 0.92]}>
-        {/* Upper lip */}
-        <mesh position={[0, 0.007, 0]} scale={[1.7, 0.48, 0.48]}>
-          <sphereGeometry args={[0.017, 20, 10]} />
-          <meshStandardMaterial color={isFemale ? "#c46e6e" : "#b06050"} roughness={0.65} />
+      {/* ── EYEBROWS — Arched & Sculpted ── */}
+      {[-1, 1].map((side) => (
+        <group
+          key={`brow-${side}`}
+          position={[side * headR * 0.35, headR * 0.22, headR * 0.88]}
+          rotation={[0, 0, side * -0.16]}
+        >
+          {/* Inner brow arch */}
+          <mesh position={[-side * 0.008, 0, 0]} rotation={[0, 0, side * 0.08]}>
+            <boxGeometry args={[0.022, eyebrowThick, 0.006]} />
+            <meshStandardMaterial color="#24140a" roughness={0.85} />
+          </mesh>
+          {/* Outer brow tail (slight downward taper) */}
+          <mesh position={[side * 0.014, -0.004, -0.002]} rotation={[0, 0, side * -0.28]}>
+            <boxGeometry args={[0.020, eyebrowThick * 0.75, 0.005]} />
+            <meshStandardMaterial color="#24140a" roughness={0.85} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── MOUTH & LIPS ── */}
+      <group position={[0, -headR * 0.42, headR * 0.90]}>
+        {/* Philtrum (groove between nose and upper lip) */}
+        <mesh position={[0, 0.022, 0.003]} scale={[0.45, 0.8, 0.3]}>
+          <cylinderGeometry args={[0.008, 0.008, 0.016, 12]} />
+          <meshStandardMaterial {...skinMat} />
         </mesh>
-        {/* Lower lip — slightly fuller */}
-        <mesh position={[0, -0.01, 0.001]} scale={[1.9, 0.65, 0.62]}>
-          <sphereGeometry args={[0.015, 20, 10]} />
-          <meshStandardMaterial color={isFemale ? "#c46e6e" : "#b06050"} roughness={0.65} />
+
+        {/* Upper Lip — Cupid's Bow with dual crests */}
+        {[-1, 1].map((crest) => (
+          <mesh
+            key={`cupid-${crest}`}
+            position={[crest * 0.009, 0.006, 0.002]}
+            rotation={[0, 0, crest * -0.12]}
+            scale={[1.1, 0.52, 0.45]}
+          >
+            <sphereGeometry args={[0.012, 16, 12]} />
+            <meshStandardMaterial
+              color={isFemale ? "#b65656" : "#9e5548"}
+              roughness={0.52}
+            />
+          </mesh>
+        ))}
+
+        {/* Lower Lip — Fuller curved pillow */}
+        <mesh position={[0, -0.010, 0.003]} scale={[1.85, 0.68, 0.60]}>
+          <sphereGeometry args={[0.014, 24, 16]} />
+          <meshStandardMaterial
+            color={isFemale ? "#b65656" : "#9e5548"}
+            roughness={0.52}
+          />
         </mesh>
-        {/* Mouth line separator */}
-        <mesh position={[0, -0.001, 0.005]} scale={[1.5, 0.18, 0.3]}>
-          <sphereGeometry args={[0.012, 12, 8]} />
-          <meshStandardMaterial color="#7a3a30" roughness={0.9} />
+
+        {/* Subtle oral fissure / shadow line between lips */}
+        <mesh position={[0, -0.001, 0.006]} scale={[1.65, 0.12, 0.28]}>
+          <boxGeometry args={[0.028, 0.006, 0.008]} />
+          <meshStandardMaterial color="#4a1c14" roughness={0.9} />
         </mesh>
       </group>
     </group>
