@@ -35,11 +35,14 @@ Las líneas se escriben pensando en quien usa la plataforma, no en el código: q
 - **Talle y color en el carrito.** Cada prenda del carrito muestra el talle y el color elegidos (con una muestra del color). El pedido también los registra, así que ya se sabe qué talle y color se compró.
 - **Selector de cantidad (+/−)** en cada línea del carrito (API: `PATCH /api/v1/commerce/cart/{id}`).
 - Los pedidos (`GET /api/v1/commerce/orders`) incluyen el talle y el color de cada prenda.
+- **Centro de Ayuda** en `/ayuda`, con la estructura lista para las preguntas frecuentes: agrupadas por categoría, desplegables y con varios párrafos por respuesta. Mientras no haya preguntas cargadas muestra un aviso de "Estamos preparando las preguntas frecuentes". Las preguntas se agregan en `frontend/src/lib/faqs.ts`.
 
 ### Cambiado
 
 - **El mismo pantalón en otro talle o color es una línea aparte.** Antes, agregar la misma prenda dos veces las fusionaba en una sola línea y, al quitarla, se eliminaban todas. Ahora solo se suman las unidades si coinciden prenda, talle **y** color; en cualquier otro caso se puede quitar cada una por separado.
+- **Pie de página:** el ícono del globo ahora es el logo de **GitHub** y abre el repositorio del proyecto en una pestaña nueva. Los links "Marketplace" (antes llevaba al inicio) y "Gemelo Digital" funcionan, y "Centro de Ayuda" lleva a `/ayuda`.
 - En el marketplace, el filtro "Calce (Jeans)" pasa a llamarse **"Fit (Jeans)"**, igual que en las páginas de producto ("Straight Fit", "Mom Fit").
+- El selector **"Probar en"** (elección de avatar) ahora aparece solo cuando el Probador Virtual 3D está abierto. Antes se mostraba siempre, aunque no cumplía ninguna función fuera del probador y ocupaba espacio.
 - Las líneas del carrito se muestran siempre en el orden en que se agregaron.
 - Al sumar unidades a una línea existente, el tope es 99 en lugar de poder superarlo.
 

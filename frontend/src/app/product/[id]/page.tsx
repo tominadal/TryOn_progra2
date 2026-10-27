@@ -445,8 +445,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
             )}
 
-            {/* Avatar picker: who is trying the garment on */}
-            {avatars.length > 0 && (
+            {/* Avatar picker: who is trying the garment on (only useful inside the 3D fitting room) */}
+            {isTryOnActive && avatars.length > 0 && (
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-semibold">Probar en</span>
