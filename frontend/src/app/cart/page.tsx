@@ -8,7 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2 } from "lucide-react";
 
 interface CartItem {
   cart_item_id: number;
@@ -16,7 +16,17 @@ interface CartItem {
   quantity: number;
   unit_price: number;
   subtotal: number;
+  size?: string | null;
+  color?: string | null;
   garment_details?: any; // We'll fetch this if needed, or rely on a robust cart API
+}
+
+const MAX_ITEM_QUANTITY = 99;
+
+/** Swatch color for the chosen variant, looked up by name in the garment's palette. */
+function garmentColorHex(item: CartItem): string {
+  const palette: { name: string; hex: string }[] = item.garment_details?.available_colors ?? [];
+  return palette.find((c) => c.name === item.color)?.hex ?? "#a3a3a3";
 }
 
 export default function CartPage() {
@@ -25,6 +35,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
   
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -39,17 +50,23 @@ export default function CartPage() {
 
     fetchApi("/commerce/cart")
       .then(async (data) => {
-        // Hydrate cart items with garment details
-        const hydratedItems = await Promise.all(
-          data.items.map(async (item: any) => {
+        // Hydrate cart items with garment details (one request per distinct garment,
+        // since the same garment can appear in several lines: sizes / colors)
+        const garmentIds: number[] = [...new Set<number>(data.items.map((i: CartItem) => i.garment_id))];
+        const garments = new Map<number, any>();
+        await Promise.all(
+          garmentIds.map(async (id) => {
             try {
-              const garmentData = await fetchApi(`/catalog/garments/${item.garment_id}`);
-              return { ...item, garment_details: garmentData };
+              garments.set(id, await fetchApi(`/catalog/garments/${id}`));
             } catch {
-              return item;
+              // keep the line without details
             }
           })
         );
+        const hydratedItems = data.items.map((item: CartItem) => ({
+          ...item,
+          garment_details: garments.get(item.garment_id),
+        }));
         setItems(hydratedItems);
         setTotal(data.total);
       })
@@ -87,6 +104,32 @@ export default function CartPage() {
       toast.error(error.message || "No se pudo quitar la prenda");
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  const handleChangeQuantity = async (item: CartItem, quantity: number) => {
+    if (quantity < 1 || quantity > MAX_ITEM_QUANTITY) return;
+
+    setUpdatingId(item.cart_item_id);
+    try {
+      await fetchApi(`/commerce/cart/${item.cart_item_id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ quantity }),
+      });
+      const updated = items.map((i) =>
+        i.cart_item_id === item.cart_item_id
+          ? { ...i, quantity, subtotal: i.unit_price * quantity }
+          : i
+      );
+      setItems(updated);
+      setTotal(updated.reduce((acc, i) => acc + (i.subtotal || 0), 0));
+      window.dispatchEvent(new Event("cart:updated"));
+    } catch (err) {
+      const error = err as Error;
+      console.error(err);
+      toast.error(error.message || "No se pudo cambiar la cantidad");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -155,13 +198,66 @@ export default function CartPage() {
                   </div>
                   <div className="flex-1 flex flex-col justify-center min-w-0">
                     <h3 className="font-semibold text-lg">{item.garment_details?.name || `Prenda #${item.garment_id}`}</h3>
-                    <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-2">Cant: {item.quantity}</p>
-                    <p className="font-medium">{formatPrice(item.unit_price)}</p>
+
+                    {/* Chosen variant: lets you tell apart the same garment in different sizes/colors */}
+                    {(item.size || item.color) && (
+                      <div className="flex flex-wrap items-center gap-2 mt-1 mb-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        {item.size && (
+                          <span className="px-2 py-0.5 rounded-md border border-neutral-200 dark:border-neutral-700">
+                            Talle {item.size}
+                          </span>
+                        )}
+                        {item.color && (
+                          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-neutral-200 dark:border-neutral-700">
+                            <span
+                              className="w-3 h-3 rounded-full border border-neutral-300 dark:border-neutral-600"
+                              style={{ backgroundColor: garmentColorHex(item) }}
+                              aria-hidden="true"
+                            />
+                            {item.color}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center rounded-lg border border-neutral-200 dark:border-neutral-700">
+                        <button
+                          onClick={() => handleChangeQuantity(item, item.quantity - 1)}
+                          disabled={item.quantity <= 1 || updatingId === item.cart_item_id || clearing}
+                          aria-label="Una unidad menos"
+                          className="p-1.5 text-neutral-500 hover:text-black dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="px-2 text-sm font-medium tabular-nums min-w-8 text-center" aria-label={`Cantidad: ${item.quantity}`}>
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => handleChangeQuantity(item, item.quantity + 1)}
+                          disabled={item.quantity >= MAX_ITEM_QUANTITY || updatingId === item.cart_item_id || clearing}
+                          aria-label="Una unidad más"
+                          className="p-1.5 text-neutral-500 hover:text-black dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <p className="font-medium">
+                        {formatPrice(item.unit_price)}
+                        {item.quantity > 1 && (
+                          <span className="ml-2 text-xs font-normal text-neutral-500">
+                            c/u · {formatPrice(item.subtotal)}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
                   <button
                     onClick={() => handleRemoveItem(item)}
                     disabled={removingId === item.cart_item_id || clearing}
-                    aria-label={`Quitar ${item.garment_details?.name || `prenda ${item.garment_id}`} del carrito`}
+                    aria-label={`Quitar ${item.garment_details?.name || `prenda ${item.garment_id}`}${
+                      item.size || item.color ? ` (${[item.size && `talle ${item.size}`, item.color].filter(Boolean).join(", ")})` : ""
+                    } del carrito`}
                     title="Quitar del carrito"
                     className="self-start p-2 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >

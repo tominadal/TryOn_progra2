@@ -30,7 +30,27 @@ Las líneas se escriben pensando en quien usa la plataforma, no en el código: q
 
 ## [Sin publicar]
 
-_Sin cambios pendientes._
+### Añadido
+
+- **Talle y color en el carrito.** Cada prenda del carrito muestra el talle y el color elegidos (con una muestra del color). El pedido también los registra, así que ya se sabe qué talle y color se compró.
+- **Selector de cantidad (+/−)** en cada línea del carrito (API: `PATCH /api/v1/commerce/cart/{id}`).
+- Los pedidos (`GET /api/v1/commerce/orders`) incluyen el talle y el color de cada prenda.
+
+### Cambiado
+
+- **El mismo pantalón en otro talle o color es una línea aparte.** Antes, agregar la misma prenda dos veces las fusionaba en una sola línea y, al quitarla, se eliminaban todas. Ahora solo se suman las unidades si coinciden prenda, talle **y** color; en cualquier otro caso se puede quitar cada una por separado.
+- En el marketplace, el filtro "Calce (Jeans)" pasa a llamarse **"Fit (Jeans)"**, igual que en las páginas de producto ("Straight Fit", "Mom Fit").
+- Las líneas del carrito se muestran siempre en el orden en que se agregaron.
+- Al sumar unidades a una línea existente, el tope es 99 en lugar de poder superarlo.
+
+### Corregido
+
+- Al quitar una prenda del carrito que se había agregado más de una vez, se eliminaban todas las unidades. Ahora se puede quitar una línea concreta o bajar la cantidad de a una.
+- El navegador bloqueaba los cambios parciales (`PATCH`) por una restricción de CORS del backend; ahora está permitido.
+
+### Notas de actualización
+
+- Al reiniciar el backend, las tablas del carrito y de los pedidos se actualizan solas con las columnas de talle y color. Las líneas que ya estaban en el carrito quedan sin talle ni color.
 
 ---
 

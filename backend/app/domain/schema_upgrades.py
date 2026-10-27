@@ -10,6 +10,7 @@ Upgrades
 --------
 * multi-avatar: ``avatars.user_id`` stops being UNIQUE (a user can own several
   avatars) and ``avatars.name`` is added.
+* cart variants: ``cart_items`` and ``order_items`` get ``size`` and ``color``.
 """
 import logging
 
@@ -70,15 +71,45 @@ def _upgrade_avatars_postgres(conn: Connection) -> None:
     conn.execute(text("CREATE INDEX IF NOT EXISTS ix_avatars_user_id ON avatars (user_id)"))
 
 
+# table -> {column: SQL type}; nullable columns can be added with a plain ADD COLUMN
+_VARIANT_COLUMNS = {
+    "cart_items": {"size": "VARCHAR(20)", "color": "VARCHAR(50)"},
+    "order_items": {"size": "VARCHAR(20)", "color": "VARCHAR(50)"},
+}
+
+
+def _add_missing_columns(engine: Engine) -> bool:
+    """Add the nullable variant columns to databases created before they existed."""
+    inspector = inspect(engine)
+    changed = False
+    for table, columns in _VARIANT_COLUMNS.items():
+        if not inspector.has_table(table):
+            continue  # fresh database: create_all builds it with the columns
+        existing = {c["name"] for c in inspector.get_columns(table)}
+        for column, sql_type in columns.items():
+            if column in existing:
+                continue
+            with engine.begin() as conn:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {sql_type}"))
+            logger.info("[schema] added %s.%s", table, column)
+            changed = True
+    return changed
+
+
 def upgrade_schema(engine: Engine) -> bool:
     """Apply any pending upgrade. Returns True if something was changed."""
-    if not _avatars_need_upgrade(inspect(engine)):
-        return False
+    changed = False
 
-    with engine.begin() as conn:
-        if engine.dialect.name == "sqlite":
-            _rebuild_avatars_sqlite(conn)
-        else:
-            _upgrade_avatars_postgres(conn)
-    logger.info("[schema] avatars table upgraded for multiple avatars per user")
-    return True
+    if _avatars_need_upgrade(inspect(engine)):
+        with engine.begin() as conn:
+            if engine.dialect.name == "sqlite":
+                _rebuild_avatars_sqlite(conn)
+            else:
+                _upgrade_avatars_postgres(conn)
+        logger.info("[schema] avatars table upgraded for multiple avatars per user")
+        changed = True
+
+    if _add_missing_columns(engine):
+        changed = True
+
+    return changed
