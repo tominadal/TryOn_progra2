@@ -22,7 +22,7 @@ Conforme a las normativas establecidas para el proyecto final de la cátedra de 
 
 2.  **Rol: Consumidor Final (Customer)**:
     *   Realiza el registro en la plataforma e inicia sesión.
-    *   Configura el perfil fotográfico invocando `POST /api/v1/tryon/avatar`.
+    *   Configura uno o varios avatares (p. ej. uno por cada hijo) invocando `POST /api/v1/tryon/avatars`.
     *   Inicia la prueba virtual mediante `POST /api/v1/tryon/preview/{garment_id}`, recibiendo la URL del activo generado.
     *   Añade el artículo al carrito de compras utilizando `POST /api/v1/commerce/cart`.
     *   Consolida la transacción ejecutando `POST /api/v1/commerce/checkout`.

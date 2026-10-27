@@ -8,12 +8,12 @@ TryOnHub es una plataforma B2B2C de prueba virtual de indumentaria que permite a
 ## 2. Requerimientos Funcionales de Alto Nivel (RQ)
 * **RQ1: Gestión de Identidad y Autenticación:** Registro, login y emisión de credenciales seguras mediante tokens JWT con control de acceso según rol de usuario (Cliente o Marca).
   * *Endpoints:* `POST /api/v1/auth/login`, `POST /api/v1/users/`, `GET /api/v1/users/me`.
-* **RQ2: Parametrización y Persistencia del Gemelo Digital (Avatar):** Definición, actualización atómica (*upsert*) y recuperación de medidas antropométricas (altura, peso, complexión) y personalización estética del avatar 3D del usuario.
-  * *Endpoints:* `POST /api/v1/tryon/avatar`, `GET /api/v1/tryon/avatar`.
+* **RQ2: Parametrización y Persistencia del Gemelo Digital (Avatar):** Creación, actualización, recuperación y eliminación de uno o varios avatares 3D por usuario (por ejemplo, un padre con un avatar por cada hijo), con nombre propio, medidas antropométricas (altura, peso, complexión) y personalización estética.
+  * *Endpoints:* `GET/POST /api/v1/tryon/avatars`, `GET/PUT/DELETE /api/v1/tryon/avatars/{avatar_id}`.
 * **RQ3: Ingesta de Prendas e Inferencia Paramétrica 3D:** Carga individual de fotografías de prendas y análisis automatizado mediante IA (Gemini Vision / Mock) para extraer descriptores tridimensionales y metadatos de calce.
   * *Endpoints:* `POST /api/v1/catalog/upload-image`, `POST /api/v1/catalog/garment`.
 * **RQ4: Renderizado y Probador Virtual 3D:** Provisión de metadatos geométricos y parámetros anatómicos para la deformación de mallas en el cliente WebGL, junto con generación de composiciones 2D alternativas.
-  * *Endpoints:* `GET /api/v1/catalog/garments/{garment_id}`, `GET /api/v1/tryon/avatar`, `POST /api/v1/tryon/preview/{garment_id}`.
+  * *Endpoints:* `GET /api/v1/catalog/garments/{garment_id}`, `GET /api/v1/tryon/avatars`, `POST /api/v1/tryon/preview/{garment_id}?avatar_id=`.
 * **RQ5: Procesamiento Masivo y Caché de Catálogos:** Ingesta asíncrona de lotes de prendas mediante planillas Excel con notificación de estados a observadores y reutilización de descriptores mediante caché de imágenes.
   * *Endpoints:* `POST /api/v1/catalog/upload`, `GET /api/v1/catalog/jobs/{job_id}`.
 
@@ -37,10 +37,10 @@ TryOnHub es una plataforma B2B2C de prueba virtual de indumentaria que permite a
 * **Disparador (Trigger):** El usuario hace clic en el botón "Guardar Avatar" en el módulo de personalización.
 * **Secuencia de acciones principal:**
   1. El cliente modifica los controles visuales de medidas (altura, peso, complexión) y rasgos estéticos (color de piel, cabello, accesorios).
-  2. El frontend envía una solicitud `POST /api/v1/tryon/avatar` con el cuerpo JSON estructurado según el esquema `AvatarCreate` y el encabezado `Authorization: Bearer <token>`.
+  2. El frontend envía una solicitud `POST /api/v1/tryon/avatars` (nuevo avatar) o `PUT /api/v1/tryon/avatars/{id}` (avatar existente) con el cuerpo JSON estructurado según el esquema `AvatarCreate` y el encabezado `Authorization: Bearer <token>`.
   3. El backend autentica la sesión del usuario mediante la dependencia `get_current_active_user`.
-  4. El repositorio `avatar_repo` ejecuta una operación *upsert*: si el usuario ya posee un avatar actualiza sus valores; si no existe, crea una nueva entidad vinculada a su identificador.
-  5. El backend retorna código `200 OK` con el objeto `AvatarResponse` serializado.
+  4. El repositorio `avatar_repo` crea un avatar nuevo vinculado al usuario (hasta un máximo de 10) o actualiza parcialmente uno propio, verificando que el avatar pertenezca al usuario autenticado.
+  5. El backend retorna `201 Created` (alta) o `200 OK` (actualización) con el objeto `AvatarResponse` serializado.
   6. El frontend actualiza el estado local y re-renderiza el avatar 3D en el lienzo WebGL con las nuevas proporciones anatómicas.
 * **Secuencias de acciones alternativas:**
   1. **HTTP 401 Unauthorized:** Si el token JWT expiró o no fue enviado, el backend aborta la solicitud y el frontend redirige al cliente a la pantalla de login.

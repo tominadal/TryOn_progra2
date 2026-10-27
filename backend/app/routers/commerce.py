@@ -98,6 +98,25 @@ def add_to_cart(
     return {"message": "Item added to cart"}
 
 
+@router.delete("/cart", status_code=status.HTTP_200_OK)
+def clear_cart(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Remove every item from the current user's cart. Safe to call on an empty cart."""
+    cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
+    if not cart:
+        return {"message": "Cart cleared", "removed": 0}
+
+    removed = (
+        db.query(CartItem)
+        .filter(CartItem.cart_id == cart.id)
+        .delete(synchronize_session=False)
+    )
+    db.commit()
+    return {"message": "Cart cleared", "removed": removed}
+
+
 @router.delete("/cart/{item_id}", status_code=status.HTTP_200_OK)
 def remove_from_cart(
     item_id: int,

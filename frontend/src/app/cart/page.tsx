@@ -4,15 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/api";
+import { formatPrice } from "@/lib/format";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 
 interface CartItem {
   cart_item_id: number;
   garment_id: number;
   quantity: number;
-  price: number;
+  unit_price: number;
+  subtotal: number;
   garment_details?: any; // We'll fetch this if needed, or rely on a robust cart API
 }
 
@@ -20,11 +23,15 @@ export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [clearing, setClearing] = useState(false);
+  const [removingId, setRemovingId] = useState<number | null>(null);
   
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    // Wait for the session restore (token -> /users/me) before deciding to redirect
+    if (authLoading) return;
     if (!user) {
       router.push("/login");
       return;
@@ -48,7 +55,7 @@ export default function CartPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [user, router]);
+  }, [user, authLoading, router]);
 
   const handleCheckout = async () => {
     try {
@@ -56,11 +63,49 @@ export default function CartPage() {
       toast.success(`¡Pedido realizado con éxito! ID de Pedido: ${result.order_id}`);
       setItems([]);
       setTotal(0);
+      window.dispatchEvent(new Event("cart:updated"));
       router.push("/");
     } catch (err) {
       const error = err as Error;
       console.error(err);
       toast.error(error.message || "Error al procesar el pago");
+    }
+  };
+
+  const handleRemoveItem = async (item: CartItem) => {
+    setRemovingId(item.cart_item_id);
+    try {
+      await fetchApi(`/commerce/cart/${item.cart_item_id}`, { method: "DELETE" });
+      const remaining = items.filter((i) => i.cart_item_id !== item.cart_item_id);
+      setItems(remaining);
+      setTotal(remaining.reduce((acc, i) => acc + (i.subtotal || 0), 0));
+      window.dispatchEvent(new Event("cart:updated"));
+      toast.success("Prenda quitada del carrito");
+    } catch (err) {
+      const error = err as Error;
+      console.error(err);
+      toast.error(error.message || "No se pudo quitar la prenda");
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
+  const handleClearCart = async () => {
+    if (!window.confirm("¿Vaciar el carrito? Se quitarán todas las prendas.")) return;
+
+    setClearing(true);
+    try {
+      await fetchApi("/commerce/cart", { method: "DELETE" });
+      setItems([]);
+      setTotal(0);
+      window.dispatchEvent(new Event("cart:updated"));
+      toast.success("Carrito vaciado");
+    } catch (err) {
+      const error = err as Error;
+      console.error(err);
+      toast.error(error.message || "No se pudo vaciar el carrito");
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -73,7 +118,19 @@ export default function CartPage() {
       <Navbar />
 
       <main className="pt-24 pb-12 px-6 max-w-4xl mx-auto min-h-screen">
-        <h1 className="text-3xl font-bold mb-8">Tu Carrito</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">Tu Carrito</h1>
+          {items.length > 0 && (
+            <button
+              onClick={handleClearCart}
+              disabled={clearing}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Trash2 className="w-4 h-4" />
+              {clearing ? "Vaciando..." : "Vaciar carrito"}
+            </button>
+          )}
+        </div>
 
         {items.length === 0 ? (
           <div className="text-center py-20 bg-white dark:bg-neutral-900/40 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-sm dark:shadow-none transition-colors duration-300">
@@ -82,7 +139,7 @@ export default function CartPage() {
             </div>
             <h2 className="text-xl font-medium mb-2">Tu carrito está vacío</h2>
             <p className="text-neutral-600 dark:text-neutral-400 mb-6">Parece que aún no has agregado ninguna prenda a tu carrito.</p>
-            <Link href="/" className="px-6 py-3 bg-blue-600 dark:bg-white text-white dark:text-black font-semibold rounded-full hover:bg-blue-700 dark:hover:bg-neutral-200 transition-colors">
+            <Link href="/marketplace" className="px-6 py-3 bg-blue-600 dark:bg-white text-white dark:text-black font-semibold rounded-full hover:bg-blue-700 dark:hover:bg-neutral-200 transition-colors">
               Empezar a Comprar
             </Link>
           </div>
@@ -96,11 +153,20 @@ export default function CartPage() {
                       <img src={item.garment_details.image} alt={item.garment_details.name} className="w-full h-full object-cover" />
                     )}
                   </div>
-                  <div className="flex-1 flex flex-col justify-center">
+                  <div className="flex-1 flex flex-col justify-center min-w-0">
                     <h3 className="font-semibold text-lg">{item.garment_details?.name || `Prenda #${item.garment_id}`}</h3>
                     <p className="text-neutral-600 dark:text-neutral-400 text-sm mb-2">Cant: {item.quantity}</p>
-                    <p className="font-medium">${(item.price || 0).toFixed(2)}</p>
+                    <p className="font-medium">{formatPrice(item.unit_price)}</p>
                   </div>
+                  <button
+                    onClick={() => handleRemoveItem(item)}
+                    disabled={removingId === item.cart_item_id || clearing}
+                    aria-label={`Quitar ${item.garment_details?.name || `prenda ${item.garment_id}`} del carrito`}
+                    title="Quitar del carrito"
+                    className="self-start p-2 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -110,7 +176,7 @@ export default function CartPage() {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-600 dark:text-neutral-400">
                   <span>Envío</span>
@@ -119,7 +185,7 @@ export default function CartPage() {
                 <hr className="border-neutral-200 dark:border-neutral-800" />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
               </div>
               <button 

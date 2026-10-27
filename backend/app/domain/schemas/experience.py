@@ -1,10 +1,13 @@
 import json
 from datetime import datetime
 from typing import Any, Dict, Optional
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class AvatarBase(BaseModel):
+    # Display name (a user can have several avatars)
+    name: Optional[str] = Field(None, max_length=50)
+
     # Physical dimensions
     height_cm: Optional[float] = None
     weight_kg: Optional[float] = None
@@ -38,6 +41,18 @@ class AvatarBase(BaseModel):
     tattoo_left_arm: Optional[bool] = None
     gender: Optional[str] = None
 
+    @field_validator("name", mode="before")
+    @classmethod
+    def validate_name(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
+        if not isinstance(v, str):
+            raise ValueError("name must be a string")
+        v = v.strip()
+        if not v:
+            raise ValueError("name must not be empty")
+        return v
+
     @field_validator("body_type", mode="before")
     @classmethod
     def validate_body_type(cls, v: Any) -> Optional[Dict[str, float]]:
@@ -54,6 +69,7 @@ class AvatarBase(BaseModel):
 
 
 class AvatarCreate(AvatarBase):
+    name: str = Field("Mi avatar", max_length=50)
     avatar_3d_url: str
 
 

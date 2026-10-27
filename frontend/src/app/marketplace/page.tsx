@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { fetchApi } from "@/lib/api";
+import { formatPrice } from "@/lib/format";
 import { Navbar } from "@/components/Navbar";
 import { Search, Filter, Grid3X3, List, Star } from "lucide-react";
 
@@ -50,9 +51,9 @@ export default function MarketplacePage() {
     const matchesFit = selectedFits.length === 0 || selectedFits.some(fit => g.fit.toLowerCase().includes(fit.toLowerCase()));
     
     let matchesPrice = true;
-    if (selectedPrice === "under_50") matchesPrice = g.price < 50;
-    else if (selectedPrice === "50_to_100") matchesPrice = g.price >= 50 && g.price <= 100;
-    else if (selectedPrice === "over_100") matchesPrice = g.price > 100;
+    if (selectedPrice === "under_70k") matchesPrice = g.price < 70000;
+    else if (selectedPrice === "70k_to_100k") matchesPrice = g.price >= 70000 && g.price <= 100000;
+    else if (selectedPrice === "over_100k") matchesPrice = g.price > 100000;
 
     return matchesSearch && matchesFit && matchesPrice;
   });
@@ -104,13 +105,13 @@ export default function MarketplacePage() {
                 <input type="radio" name="price" checked={selectedPrice === "all"} onChange={() => setSelectedPrice("all")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> Todos
               </label>
               <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="radio" name="price" checked={selectedPrice === "under_50"} onChange={() => setSelectedPrice("under_50")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> Menos de $50
+                <input type="radio" name="price" checked={selectedPrice === "under_70k"} onChange={() => setSelectedPrice("under_70k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> Menos de $70.000
               </label>
               <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="radio" name="price" checked={selectedPrice === "50_to_100"} onChange={() => setSelectedPrice("50_to_100")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> $50 - $100
+                <input type="radio" name="price" checked={selectedPrice === "70k_to_100k"} onChange={() => setSelectedPrice("70k_to_100k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> $70.000 - $100.000
               </label>
               <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="radio" name="price" checked={selectedPrice === "over_100"} onChange={() => setSelectedPrice("over_100")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> Más de $100
+                <input type="radio" name="price" checked={selectedPrice === "over_100k"} onChange={() => setSelectedPrice("over_100k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> Más de $100.000
               </label>
             </div>
           </div>
@@ -184,7 +185,7 @@ export default function MarketplacePage() {
                       )}
                     </div>
                     <div className="flex justify-between items-center mt-6">
-                      <span className="text-2xl font-black">${garment.price}</span>
+                      <span className="text-2xl font-black">{formatPrice(garment.price)}</span>
                       <span className="text-sm font-bold px-4 py-2 bg-neutral-100 dark:bg-neutral-800 rounded-xl text-neutral-700 dark:text-neutral-300 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                         Comprar &rarr;
                       </span>

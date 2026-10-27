@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { fetchApi } from "@/lib/api";
+import { formatPrice } from "@/lib/format";
+import { SavedAvatar, getStoredAvatarId, parseMorphs, pickAvatar, storeAvatarId } from "@/lib/avatars";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
-import { ShoppingCart, Ruler, Palette, CheckCircle2, Info } from "lucide-react";
+import { ShoppingCart, Ruler, Palette, CheckCircle2, Info, User as UserIcon } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Box } from "@react-three/drei";
 import { ParametricMannequin, ParametricPants } from "@/components/avatar";
@@ -73,7 +75,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   // Try-On state
   const [isTryOnActive, setIsTryOnActive] = useState(false);
-  const [avatarData, setAvatarData] = useState<any>(null);
+  // The user can own several avatars (e.g. one per child): they pick one to try clothes on
+  const [avatars, setAvatars] = useState<SavedAvatar[]>([]);
+  const [selectedAvatarId, setSelectedAvatarId] = useState<number | null>(null);
+  const avatarData = pickAvatar(avatars, selectedAvatarId);
 
   // Selection state
   const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
@@ -101,8 +106,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   useEffect(() => {
     if (user) {
-      fetchApi("/tryon/avatar")
-        .then((d) => { if (d) setAvatarData(d); })
+      fetchApi("/tryon/avatars")
+        .then((list: SavedAvatar[]) => {
+          setAvatars(list);
+          setSelectedAvatarId(pickAvatar(list, getStoredAvatarId())?.id ?? null);
+        })
         .catch(() => {});
     }
   }, [user]);
@@ -119,11 +127,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           color: selectedColor?.name,
         }),
       });
+      window.dispatchEvent(new Event("cart:updated"));
       toast.success("¡Añadido al carrito!");
     } catch (err) {
       const error = err as Error;
       toast.error(error.message || "Error al añadir al carrito");
     }
+  };
+
+  const handleSelectAvatar = (avatar: SavedAvatar) => {
+    setSelectedAvatarId(avatar.id);
+    storeAvatarId(avatar.id);
   };
 
   const handleTryOnToggle = () => {
@@ -158,7 +172,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const avatarShoesColor = avatarData?.shoes_color || "#0f0f0f";
   const avatarGender = avatarData?.gender || "Hombre";
   const avatarGlasses = Boolean(avatarData?.glasses);
-  const avatarBodyType = avatarData?.body_type || "Normal";
   const avatarMuscle = avatarData?.muscle_definition ?? 0.3;
   const avatarBeardStyle = avatarData?.beard_style || "Ninguna";
   const avatarBeardColor = avatarData?.beard_color || "#2d1a0e";
@@ -168,12 +181,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const avatarTattoo = Boolean(avatarData?.tattoo_left_arm);
 
   // Parse advanced morphs
-  let morphs: any = {};
-  try {
-    morphs = JSON.parse(avatarBodyType);
-  } catch (e) {
-    // Legacy string
-  }
+  const morphs = parseMorphs(avatarData?.body_type);
 
   // ── Selected color drives TryOn pants color ──────────────────────────────
   // Use selected variant color; fall back to AI-detected color from the real image
@@ -419,7 +427,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="mb-2">
               <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mb-1">Acme Denim · {product.fit} Fit</p>
               <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2">{product.name}</h1>
-              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">${product.price.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatPrice(product.price)}</p>
             </div>
 
             {/* Description */}
@@ -434,6 +442,39 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-6">
                 <Info className="w-3.5 h-3.5" />
                 {product.material}
+              </div>
+            )}
+
+            {/* Avatar picker: who is trying the garment on */}
+            {avatars.length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold">Probar en</span>
+                  <Link href="/avatar" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                    Gestionar avatares
+                  </Link>
+                </div>
+                <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Avatar para el probador">
+                  {avatars.map((avatar) => {
+                    const active = avatar.id === avatarData?.id;
+                    return (
+                      <button
+                        key={avatar.id}
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => handleSelectAvatar(avatar)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-colors ${
+                          active
+                            ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700 dark:text-blue-400"
+                            : "bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300 dark:hover:border-neutral-700"
+                        }`}
+                      >
+                        <UserIcon className="w-4 h-4" />
+                        {avatar.name}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
