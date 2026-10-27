@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
-from pydantic import BaseModel, Field
+from typing import Optional
+
+from pydantic import BaseModel, Field, field_validator
 from app.domain.database import get_db
 from app.domain.models.commerce import Cart, CartItem, Order, OrderItem, OrderStatus
 from app.domain.models.catalog import Garment
@@ -9,10 +11,27 @@ from app.services.auth_service import get_current_active_user
 
 router = APIRouter(prefix="/commerce", tags=["commerce"])
 
+MAX_ITEM_QUANTITY = 99
+
 
 class AddToCartRequest(BaseModel):
     garment_id: int = Field(..., gt=0, description="ID of the garment to add")
     quantity: int = Field(1, ge=1, le=99, description="Number of units (1-99)")
+    size: Optional[str] = Field(None, max_length=20, description="Chosen size, e.g. 32")
+    color: Optional[str] = Field(None, max_length=50, description="Chosen color name")
+
+    @field_validator("size", "color", mode="before")
+    @classmethod
+    def blank_to_none(cls, v):
+        """Trim; empty strings mean 'no choice' so they merge with missing values."""
+        if isinstance(v, str):
+            v = v.strip()
+            return v or None
+        return v
+
+
+class UpdateQuantityRequest(BaseModel):
+    quantity: int = Field(..., ge=1, le=99, description="New number of units (1-99)")
 
 
 @router.get("/cart")
@@ -33,7 +52,7 @@ def get_cart(
 
     items = []
     total = 0.0
-    for item in cart.items:
+    for item in sorted(cart.items, key=lambda i: i.id):  # stable order for the UI
         garment = item.garment  # already loaded — no extra query
         price = garment.price if garment else 0.0
         items.append(
@@ -41,6 +60,8 @@ def get_cart(
                 "cart_item_id": item.id,
                 "garment_id": item.garment_id,
                 "garment_name": garment.name if garment else "Unknown",
+                "size": item.size,
+                "color": item.color,
                 "quantity": item.quantity,
                 "unit_price": round(price, 2),
                 "subtotal": round(price * item.quantity, 2),
@@ -78,19 +99,27 @@ def add_to_cart(
         db.commit()
         db.refresh(cart)
 
-    # Check if the garment is already in the cart — update quantity if so
+    # The same garment in the same size AND color is one line (quantities add up);
+    # any other variant is a separate line so it can be removed on its own.
     existing_item = (
         db.query(CartItem)
-        .filter(CartItem.cart_id == cart.id, CartItem.garment_id == request.garment_id)
+        .filter(
+            CartItem.cart_id == cart.id,
+            CartItem.garment_id == request.garment_id,
+            CartItem.size == request.size,
+            CartItem.color == request.color,
+        )
         .first()
     )
     if existing_item:
-        existing_item.quantity += request.quantity
+        existing_item.quantity = min(existing_item.quantity + request.quantity, MAX_ITEM_QUANTITY)
     else:
         item = CartItem(
             cart_id=cart.id,
             garment_id=request.garment_id,
             quantity=request.quantity,
+            size=request.size,
+            color=request.color,
         )
         db.add(item)
 
@@ -115,6 +144,30 @@ def clear_cart(
     )
     db.commit()
     return {"message": "Cart cleared", "removed": removed}
+
+
+@router.patch("/cart/{item_id}", status_code=status.HTTP_200_OK)
+def update_cart_item_quantity(
+    item_id: int,
+    request: UpdateQuantityRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Set the quantity of one cart line (use DELETE to remove the line)."""
+    cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
+    item = None
+    if cart:
+        item = (
+            db.query(CartItem)
+            .filter(CartItem.id == item_id, CartItem.cart_id == cart.id)
+            .first()
+        )
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cart item not found")
+
+    item.quantity = request.quantity
+    db.commit()
+    return {"message": "Quantity updated", "quantity": item.quantity}
 
 
 @router.delete("/cart/{item_id}", status_code=status.HTTP_200_OK)
@@ -180,6 +233,8 @@ def checkout(
             garment_id=item.garment_id,
             price=price,
             quantity=item.quantity,
+            size=item.size,
+            color=item.color,
         )
         total += price * item.quantity
         db.add(order_item)
@@ -217,6 +272,8 @@ def get_orders(
                 {
                     "garment_id": oi.garment_id,
                     "garment_name": garment.name if garment else "Unknown",
+                    "size": oi.size,
+                    "color": oi.color,
                     "quantity": oi.quantity,
                     "unit_price": round(oi.price, 2),
                     "subtotal": round(oi.price * oi.quantity, 2),

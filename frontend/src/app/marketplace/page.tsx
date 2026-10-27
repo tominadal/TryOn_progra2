@@ -81,7 +81,7 @@ export default function MarketplacePage() {
           </div>
           
           <div className="space-y-4">
-            <h3 className="font-semibold flex items-center gap-2"><Filter className="w-4 h-4" /> Calce (Jeans)</h3>
+            <h3 className="font-semibold flex items-center gap-2"><Filter className="w-4 h-4" /> Fit (Jeans)</h3>
             <div className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400 font-medium">
               <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
                 <input type="checkbox" checked={selectedFits.includes("Straight")} onChange={() => handleFitChange("Straight")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500" /> Straight / Recto
