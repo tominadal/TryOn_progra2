@@ -96,7 +96,8 @@ erDiagram
     %% ── Avatar (Experiencia) ─────────────────────────────────────────────
     AVATARS {
         int     id                PK
-        int     user_id           FK UK
+        int     user_id           FK
+        string  name
         float   height_cm
         float   weight_kg
         string  body_type         "Delgado|Normal|Atlético|Robusto"
@@ -163,7 +164,7 @@ erDiagram
 
     ROLES           ||--o{ USERS           : "asigna"
 
-    USERS           ||--o| AVATARS         : "posee (1:1)"
+    USERS           ||--o{ AVATARS         : "posee (1:N)"
     USERS           ||--o| CARTS           : "tiene (1:1)"
     USERS           ||--o{ ORDERS          : "realiza"
 
@@ -184,7 +185,7 @@ erDiagram
 | Brand → Garment | 1:N | Una marca publica múltiples prendas |
 | Garment → GarmentImage | 1:N | Un jean tiene múltiples fotos (FRONT/SIDE/BACK) |
 | Garment → GarmentAsset | 1:1 | Cada prenda tiene UN asset IA generado |
-| User → Avatar | 1:1 | Cada usuario tiene UN gemelo digital |
+| User → Avatar | 1:N | Cada usuario puede tener varios gemelos digitales (p. ej. un padre con avatares para sus hijos), cada uno con su nombre |
 | User → Cart | 1:1 | Cada usuario tiene UN carrito activo |
 | Cart → CartItem | 1:N | Un carrito contiene múltiples ítems |
 | Order → OrderItem | 1:N | Una orden contiene múltiples líneas |

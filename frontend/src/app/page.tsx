@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { fetchApi } from "@/lib/api";
+import { formatPrice } from "@/lib/format";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
@@ -147,7 +148,7 @@ export default function Home() {
                         <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium mb-1 uppercase tracking-wider">TryOnHub Exclusive</p>
                         <h3 className="text-xl font-bold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{garment.name}</h3>
                       </div>
-                      <span className="text-xl font-black">${garment.price}</span>
+                      <span className="text-xl font-black">{formatPrice(garment.price)}</span>
                     </div>
                   </div>
                 </Link>

@@ -92,3 +92,75 @@ def test_checkout_success(client: TestClient, db_session):
     assert data["message"] == "Order placed successfully"
     assert "order_id" in data
     assert data["total"] == round(59.99 * 2, 2)
+
+
+def test_clear_cart_removes_all_items(client: TestClient, db_session):
+    """DELETE /commerce/cart empties the cart and leaves it usable."""
+    garment = _create_processed_garment(db_session)
+    token = _get_token(client, "clear@example.com")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    client.post("/api/v1/commerce/cart", headers=headers, json={"garment_id": garment.id, "quantity": 3})
+    assert len(client.get("/api/v1/commerce/cart", headers=headers).json()["items"]) == 1
+
+    res = client.delete("/api/v1/commerce/cart", headers=headers)
+    assert res.status_code == 200
+    assert res.json()["removed"] == 1
+
+    cart = client.get("/api/v1/commerce/cart", headers=headers).json()
+    assert cart["items"] == []
+    assert cart["total"] == 0.0
+
+
+def test_clear_cart_is_idempotent_on_empty_cart(client: TestClient):
+    """Clearing a cart that is empty (or was never created) is not an error."""
+    token = _get_token(client, "clearempty@example.com")
+    res = client.delete("/api/v1/commerce/cart", headers={"Authorization": f"Bearer {token}"})
+    assert res.status_code == 200
+    assert res.json()["removed"] == 0
+
+
+def test_clear_cart_requires_auth(client: TestClient):
+    res = client.delete("/api/v1/commerce/cart")
+    assert res.status_code == 401
+
+
+def test_remove_single_item_from_cart(client: TestClient, db_session):
+    """DELETE /commerce/cart/{item_id} removes only that item."""
+    from app.domain.models.catalog import Garment
+
+    garment = _create_processed_garment(db_session)
+    other = Garment(sku="COMM-002", name="Second Jean", brand_id=garment.brand_id, price=10.0, is_processed=True)
+    db_session.add(other)
+    db_session.commit()
+    db_session.refresh(other)
+
+    token = _get_token(client, "removeone@example.com")
+    headers = {"Authorization": f"Bearer {token}"}
+    client.post("/api/v1/commerce/cart", headers=headers, json={"garment_id": garment.id, "quantity": 1})
+    client.post("/api/v1/commerce/cart", headers=headers, json={"garment_id": other.id, "quantity": 2})
+
+    items = client.get("/api/v1/commerce/cart", headers=headers).json()["items"]
+    target = next(i for i in items if i["garment_id"] == garment.id)
+
+    res = client.delete(f"/api/v1/commerce/cart/{target['cart_item_id']}", headers=headers)
+    assert res.status_code == 200
+
+    cart = client.get("/api/v1/commerce/cart", headers=headers).json()
+    assert [i["garment_id"] for i in cart["items"]] == [other.id]
+    assert cart["total"] == 20.0
+
+
+def test_remove_item_of_another_user_returns_404(client: TestClient, db_session):
+    """A user cannot remove items from someone else's cart."""
+    garment = _create_processed_garment(db_session)
+    owner = {"Authorization": f"Bearer {_get_token(client, 'owner@example.com')}"}
+    intruder = {"Authorization": f"Bearer {_get_token(client, 'intruder@example.com')}"}
+
+    client.post("/api/v1/commerce/cart", headers=owner, json={"garment_id": garment.id, "quantity": 1})
+    item_id = client.get("/api/v1/commerce/cart", headers=owner).json()["items"][0]["cart_item_id"]
+
+    # The intruder has no cart at all, and must not be able to touch the owner's item
+    res = client.delete(f"/api/v1/commerce/cart/{item_id}", headers=intruder)
+    assert res.status_code == 404
+    assert len(client.get("/api/v1/commerce/cart", headers=owner).json()["items"]) == 1

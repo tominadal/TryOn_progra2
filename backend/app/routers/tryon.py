@@ -1,6 +1,7 @@
 import os
 import uuid
 from io import BytesIO
+from typing import List, Optional
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -11,65 +12,92 @@ from app.config.settings import settings
 from app.domain.database import get_db
 from app.domain.models.catalog import GarmentAsset
 from app.domain.repositories import avatar_repo
+from app.constants import MAX_AVATARS_PER_USER
+from app.domain.models.experience import Avatar
 from app.domain.models.user import User
-from app.domain.schemas.experience import AvatarCreate, AvatarResponse
+from app.domain.schemas.experience import AvatarCreate, AvatarResponse, AvatarUpdate
 from app.services.auth_service import get_current_active_user
 
 router = APIRouter(prefix="/tryon", tags=["tryon"])
 
 
-@router.post("/avatar", response_model=AvatarResponse)
-async def create_avatar(
+def _avatar_payload(data) -> dict:
+    """Pydantic model -> dict for the repository (None dropped, glasses stored as 0/1)."""
+    payload = data.model_dump(exclude_none=True)
+    if "glasses" in payload:
+        payload["glasses"] = 1 if payload["glasses"] else 0
+    return payload
+
+
+def _get_owned_avatar(db: Session, user: User, avatar_id: int) -> Avatar:
+    avatar = avatar_repo.get_for_user(db, user.id, avatar_id)
+    if not avatar:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Avatar not found")
+    return avatar
+
+
+@router.get("/avatars", response_model=List[AvatarResponse])
+def list_avatars(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """List all avatars of the current user (oldest first). Empty list if none."""
+    return avatar_repo.list_by_user(db, current_user.id)
+
+
+@router.post("/avatars", response_model=AvatarResponse, status_code=status.HTTP_201_CREATED)
+def create_avatar(
     data: AvatarCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """Create or update the 3D avatar for the current user."""
-    payload = {
-        "avatar_3d_url": data.avatar_3d_url,
-        "height_cm": data.height_cm,
-        "weight_kg": data.weight_kg,
-        "body_type": dict(data.body_type) if data.body_type is not None else None,
-        "muscle_definition": data.muscle_definition,
-        "skin_color": data.skin_color,
-        "hair_color": data.hair_color,
-        "hair_style": data.hair_style,
-        "beard_style": data.beard_style,
-        "beard_color": data.beard_color,
-        "eyebrow_style": data.eyebrow_style,
-        "glasses": 1 if data.glasses else 0 if data.glasses is not None else None,
-        "hat_style": data.hat_style,
-        "shirt_color": data.shirt_color,
-        "shirt_style": data.shirt_style,
-        "shoes_color": data.shoes_color,
-        "tattoo_left_arm": data.tattoo_left_arm,
-        "gender": data.gender,
-    }
-    # Remove None values so upsert only updates provided fields
-    payload = {k: v for k, v in payload.items() if v is not None}
-
-    avatar = avatar_repo.upsert(db, current_user.id, payload)
-    return avatar
+    """Create a new avatar for the current user (up to MAX_AVATARS_PER_USER)."""
+    if avatar_repo.count_by_user(db, current_user.id) >= MAX_AVATARS_PER_USER:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"You can have at most {MAX_AVATARS_PER_USER} avatars",
+        )
+    return avatar_repo.create_for_user(db, current_user.id, _avatar_payload(data))
 
 
-@router.get("/avatar", response_model=AvatarResponse)
+@router.get("/avatars/{avatar_id}", response_model=AvatarResponse)
 def get_avatar(
+    avatar_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """Retrieve the avatar of the current user."""
-    avatar = avatar_repo.get_by_user(db, current_user.id)
-    if not avatar:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No avatar found. Please create one first.",
-        )
-    return avatar
+    """Retrieve one of the current user's avatars."""
+    return _get_owned_avatar(db, current_user, avatar_id)
+
+
+@router.put("/avatars/{avatar_id}", response_model=AvatarResponse)
+def update_avatar(
+    avatar_id: int,
+    data: AvatarUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Partially update one of the current user's avatars."""
+    avatar = _get_owned_avatar(db, current_user, avatar_id)
+    return avatar_repo.update_fields(db, avatar, _avatar_payload(data))
+
+
+@router.delete("/avatars/{avatar_id}", status_code=status.HTTP_200_OK)
+def delete_avatar(
+    avatar_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Delete one of the current user's avatars."""
+    if not avatar_repo.delete_for_user(db, current_user.id, avatar_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Avatar not found")
+    return {"message": "Avatar deleted"}
 
 
 @router.post("/preview/{garment_id}")
 def generate_preview(
     garment_id: int,
+    avatar_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
@@ -77,7 +105,10 @@ def generate_preview(
     Generate a virtual try-on composite image by overlaying a garment
     asset on the user's avatar photo using Pillow.
     """
-    avatar = avatar_repo.get_by_user(db, current_user.id)
+    if avatar_id is not None:
+        avatar = _get_owned_avatar(db, current_user, avatar_id)
+    else:
+        avatar = avatar_repo.get_first_by_user(db, current_user.id)
     if not avatar:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

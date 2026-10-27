@@ -28,15 +28,22 @@ export function Navbar() {
   const isMarketplace = pathname.startsWith("/marketplace") || pathname.startsWith("/product");
 
   useEffect(() => {
-    if (user) {
+    if (!user) return;
+
+    const refreshCartCount = () => {
       fetchApi("/commerce/cart")
         .then((cart) => {
-          if (cart.items) {
-            setCartCount(cart.items.reduce((acc: number, item: any) => acc + item.quantity, 0));
-          }
+          setCartCount(
+            cart.items ? cart.items.reduce((acc: number, item: any) => acc + item.quantity, 0) : 0
+          );
         })
         .catch(() => setCartCount(0));
-    }
+    };
+
+    refreshCartCount();
+    // Other pages dispatch "cart:updated" after changing the cart (clear, checkout)
+    window.addEventListener("cart:updated", refreshCartCount);
+    return () => window.removeEventListener("cart:updated", refreshCartCount);
   }, [user]);
 
   return (

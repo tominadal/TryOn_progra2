@@ -164,8 +164,11 @@ app/
 | GET | `/api/v1/catalog/jobs/{id}` | Autenticado | Consulta de estado de procesamiento |
 | GET | `/api/v1/catalog/garments` | Público | Listado de prendas activas |
 | GET | `/api/v1/catalog/garments/{id}` | Público | Detalle de prenda específica |
-| POST | `/api/v1/tryon/avatar` | Autenticado | Registro y actualización del avatar del usuario |
-| GET | `/api/v1/tryon/avatar` | Autenticado | Recuperación de los datos del avatar |
+| GET | `/api/v1/tryon/avatars` | Autenticado | Lista los avatares del usuario |
+| POST | `/api/v1/tryon/avatars` | Autenticado | Crea un avatar (máx. 10 por usuario) |
+| GET | `/api/v1/tryon/avatars/{id}` | Autenticado | Datos de un avatar propio |
+| PUT | `/api/v1/tryon/avatars/{id}` | Autenticado | Actualización parcial de un avatar propio |
+| DELETE | `/api/v1/tryon/avatars/{id}` | Autenticado | Elimina un avatar propio |
 | POST | `/api/v1/tryon/preview/{id}` | Autenticado | Generación de la experiencia Virtual Try-On |
 | GET | `/api/v1/commerce/cart` | Autenticado | Visualización del carrito de compras |
 | POST | `/api/v1/commerce/cart` | Autenticado | Adición de productos al carrito |

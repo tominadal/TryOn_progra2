@@ -18,6 +18,7 @@ from app.domain.models.organization import Marketplace, Brand
 from app.domain.models.catalog import Garment, GarmentAsset, GarmentImage
 from app.domain.models.experience import Avatar
 from app.domain.models.commerce import Cart, CartItem, Order, OrderItem
+from app.domain.schema_upgrades import upgrade_schema
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -48,7 +49,7 @@ SAMPLE_JEANS = [
             "lavado medio y tiro regular. Confeccionado en denim de 12 oz "
             "100% algodón con un acabado duradero y cómodo para todo el día."
         ),
-        "price": 109.99,
+        "price": 89900.00,
         "available_sizes": ["28", "30", "32", "34", "36"],
         "available_colors": [
             {"name": "Azul Clásico", "hex": "#1e3a8a"},
@@ -70,7 +71,7 @@ SAMPLE_JEANS = [
             "elasticidad que ofrece libertad de movimiento sin perder definición. "
             "Cierre oculto, tiro bajo y acabado satinado premium."
         ),
-        "price": 95.50,
+        "price": 79900.00,
         "available_sizes": ["26", "28", "30", "32", "34"],
         "available_colors": [
             {"name": "Negro Profundo", "hex": "#111827"},
@@ -92,7 +93,7 @@ SAMPLE_JEANS = [
             "en el muslo que se estrecha en el tobillo. Lavado desgastado con "
             "efecto vintage, rasgados manuales y acabado eco-friendly."
         ),
-        "price": 129.00,
+        "price": 109900.00,
         "available_sizes": ["28", "30", "32", "34", "36"],
         "available_colors": [
             {"name": "Celeste Desgastado", "hex": "#93c5fd"},
@@ -114,7 +115,7 @@ SAMPLE_JEANS = [
             "corte recto por encima de la rodilla y bajos deshilachados "
             "para un look casual."
         ),
-        "price": 75.00,
+        "price": 64900.00,
         "available_sizes": ["28", "30", "32", "34", "36", "38"],
         "available_colors": [
             {"name": "Azul Medio", "hex": "#3b82f6"},
@@ -134,7 +135,7 @@ SAMPLE_JEANS = [
             "y cierre frontal con botones. El tejido rígido asegura una estructura "
             "que estiliza la figura."
         ),
-        "price": 85.00,
+        "price": 69900.00,
         "available_sizes": ["26", "28", "30", "32", "34"],
         "available_colors": [
             {"name": "Azul Clásico", "hex": "#1e3a8a"},
@@ -154,7 +155,7 @@ SAMPLE_JEANS = [
             "ajustado hasta la rodilla y luego se abre en una espectacular "
             "campana. Stretch para una silueta perfecta."
         ),
-        "price": 125.00,
+        "price": 104900.00,
         "available_sizes": ["26", "28", "30", "32", "34"],
         "available_colors": [
             {"name": "Azul Lavado", "hex": "#60a5fa"},
@@ -174,6 +175,7 @@ def seed():
     )
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+    upgrade_schema(engine)  # old DBs: allow several avatars per user
     Base.metadata.create_all(bind=engine)
     print("Tables created/verified.")
 
