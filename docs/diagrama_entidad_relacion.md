@@ -26,6 +26,7 @@ erDiagram
     AVATAR {
         int id PK
         int user_id FK
+        string name
         float height_cm
         float weight_kg
         string body_type
@@ -90,7 +91,7 @@ erDiagram
     }
 
     USER }|--|| ROLE : "pertenece a"
-    USER ||--o| AVATAR : "posee"
+    USER ||--o{ AVATAR : "posee (1:N)"
     USER }o--o| BRAND : "administra (si es marca)"
     USER }o--o| MARKETPLACE : "administra (si es dueño)"
     BRAND }|--|| MARKETPLACE : "publica en"
