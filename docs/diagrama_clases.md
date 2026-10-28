@@ -98,7 +98,7 @@ classDiagram
 
     %% Asociaciones de dominio
     User "1" --> "1" Role : tiene
-    User "1" --> "0..1" Avatar : posee
+    User "1" --> "0..*" Avatar : posee
     User "1" --> "0..1" Cart : tiene
     User "1" --> "*" Order : realiza
     User "1" --> "0..1" Brand : administra (si es marca)

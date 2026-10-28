@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { fetchApi } from "@/lib/api";
+import { formatPrice } from "@/lib/format";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
@@ -50,7 +51,7 @@ export default function Home() {
             </span>
             La Prueba Virtual con IA está activa
           </div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-400">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] pb-3 text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-400">
             El fin de las devoluciones por talle. <br/> Bienvenido al estándar del gemelo digital.
           </h1>
           <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mx-auto leading-relaxed">
@@ -147,7 +148,7 @@ export default function Home() {
                         <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium mb-1 uppercase tracking-wider">TryOnHub Exclusive</p>
                         <h3 className="text-xl font-bold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{garment.name}</h3>
                       </div>
-                      <span className="text-xl font-black">${garment.price}</span>
+                      <span className="text-xl font-black">{formatPrice(garment.price)}</span>
                     </div>
                   </div>
                 </Link>

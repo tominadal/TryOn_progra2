@@ -47,7 +47,7 @@ def test_create_and_get_avatar_with_dict_body_type(client: TestClient):
 
     # Create avatar with dictionary body_type
     create_res = client.post(
-        "/api/v1/tryon/avatar",
+        "/api/v1/tryon/avatars",
         headers=headers,
         json={
             "avatar_3d_url": "https://example.com/avatar.glb",
@@ -58,14 +58,14 @@ def test_create_and_get_avatar_with_dict_body_type(client: TestClient):
             "glasses": True,
         },
     )
-    assert create_res.status_code == 200
+    assert create_res.status_code == 201
     created_data = create_res.json()
     assert created_data["body_type"] == morphs
     assert created_data["glasses"] is True
     assert created_data["height_cm"] == 175.5
 
     # Retrieve avatar via GET
-    get_res = client.get("/api/v1/tryon/avatar", headers=headers)
+    get_res = client.get(f"/api/v1/tryon/avatars/{created_data['id']}", headers=headers)
     assert get_res.status_code == 200
     fetched_data = get_res.json()
     assert fetched_data["body_type"] == morphs
@@ -98,18 +98,18 @@ def test_create_avatar_with_stringified_json_body_type(client: TestClient):
 
     # Send stringified JSON as body_type (like frontend does)
     create_res = client.post(
-        "/api/v1/tryon/avatar",
+        "/api/v1/tryon/avatars",
         headers=headers,
         json={
             "avatar_3d_url": "https://example.com/avatar.glb",
             "body_type": json.dumps(morphs),
         },
     )
-    assert create_res.status_code == 200
+    assert create_res.status_code == 201
     assert create_res.json()["body_type"] == morphs
 
     # GET returns it as a parsed dict
-    get_res = client.get("/api/v1/tryon/avatar", headers=headers)
+    get_res = client.get(f"/api/v1/tryon/avatars/{create_res.json()['id']}", headers=headers)
     assert get_res.status_code == 200
     assert get_res.json()["body_type"] == morphs
 
@@ -128,7 +128,7 @@ def test_create_avatar_invalid_body_type_rejected(client: TestClient):
 
     # Invalid string (not valid JSON)
     res_bad_str = client.post(
-        "/api/v1/tryon/avatar",
+        "/api/v1/tryon/avatars",
         headers=headers,
         json={
             "avatar_3d_url": "https://example.com/avatar.glb",
@@ -139,7 +139,7 @@ def test_create_avatar_invalid_body_type_rejected(client: TestClient):
 
     # Invalid value type (not float)
     res_bad_val = client.post(
-        "/api/v1/tryon/avatar",
+        "/api/v1/tryon/avatars",
         headers=headers,
         json={
             "avatar_3d_url": "https://example.com/avatar.glb",

@@ -73,7 +73,7 @@ sequenceDiagram
     DB-->>FastApi: Devuelve Metadata 3D (Fit, Escala, Color)
     FastApi-->>NextJS: Retorna JSON de la Prenda
 
-    NextJS->>FastApi: GET /api/v1/tryon/avatar
+    NextJS->>FastApi: GET /api/v1/tryon/avatars
     FastApi->>DB: query Avatar (del current_user)
     DB-->>FastApi: Devuelve JSON de anatomía (Morphs)
     FastApi-->>NextJS: Retorna JSON del Avatar

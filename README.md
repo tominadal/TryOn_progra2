@@ -2,6 +2,8 @@
 
 Este repositorio contiene el código fuente de **TryOnHub**, un sistema de comercio electrónico avanzado con capacidades de prueba virtual tridimensional (Virtual Try-On), desarrollado como proyecto académico para la cátedra de Programación II.
 
+> 📋 Novedades y cambios de cada versión: **[CHANGELOG.md](CHANGELOG.md)**
+
 ## 🚀 Características Principales
 
 - **Flujo B2B2C Completo**: Sistema multirrol donde las Marcas (B2B) suben fotos reales de sus prendas y los Consumidores (B2C) las prueban en sus gemelos digitales.

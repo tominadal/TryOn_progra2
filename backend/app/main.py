@@ -1,4 +1,6 @@
+import logging
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -6,9 +8,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from app.config.settings import settings
+from app.domain import database
+from app.domain.schema_upgrades import upgrade_schema
 from app.routers import auth, users, catalog, tryon, commerce
 
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Bring databases created with an older schema up to date (idempotent)
+    try:
+        upgrade_schema(database.engine)
+    except Exception:
+        logger.exception("Schema upgrade failed; the app will start anyway")
+    yield
+
 app = FastAPI(
+    lifespan=lifespan,
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description=(
@@ -25,7 +42,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 

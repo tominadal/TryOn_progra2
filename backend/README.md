@@ -164,12 +164,17 @@ app/
 | GET | `/api/v1/catalog/jobs/{id}` | Autenticado | Consulta de estado de procesamiento |
 | GET | `/api/v1/catalog/garments` | Público | Listado de prendas activas |
 | GET | `/api/v1/catalog/garments/{id}` | Público | Detalle de prenda específica |
-| POST | `/api/v1/tryon/avatar` | Autenticado | Registro y actualización del avatar del usuario |
-| GET | `/api/v1/tryon/avatar` | Autenticado | Recuperación de los datos del avatar |
+| GET | `/api/v1/tryon/avatars` | Autenticado | Lista los avatares del usuario |
+| POST | `/api/v1/tryon/avatars` | Autenticado | Crea un avatar (máx. 10 por usuario) |
+| GET | `/api/v1/tryon/avatars/{id}` | Autenticado | Datos de un avatar propio |
+| PUT | `/api/v1/tryon/avatars/{id}` | Autenticado | Actualización parcial de un avatar propio |
+| DELETE | `/api/v1/tryon/avatars/{id}` | Autenticado | Elimina un avatar propio |
 | POST | `/api/v1/tryon/preview/{id}` | Autenticado | Generación de la experiencia Virtual Try-On |
 | GET | `/api/v1/commerce/cart` | Autenticado | Visualización del carrito de compras |
-| POST | `/api/v1/commerce/cart` | Autenticado | Adición de productos al carrito |
-| DELETE | `/api/v1/commerce/cart/{item_id}` | Autenticado | Eliminación de productos del carrito |
+| POST | `/api/v1/commerce/cart` | Autenticado | Adición de productos al carrito, con talle y color (misma prenda + talle + color suma unidades; otra variante es otra línea) |
+| PATCH | `/api/v1/commerce/cart/{item_id}` | Autenticado | Cambia la cantidad de una línea del carrito |
+| DELETE | `/api/v1/commerce/cart/{item_id}` | Autenticado | Elimina una línea del carrito |
+| DELETE | `/api/v1/commerce/cart` | Autenticado | Vacía el carrito |
 | POST | `/api/v1/commerce/checkout` | Autenticado | Procesamiento de la compra |
 | GET | `/api/v1/commerce/orders` | Autenticado | Historial de órdenes de compra |
 | GET | `/health` | Público | Verificación de estado del sistema |

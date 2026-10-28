@@ -34,6 +34,8 @@ class User(Base):
     marketplace = relationship("Marketplace", back_populates="users")
     
     # Cascade deletes
-    avatar = relationship("Avatar", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    avatars = relationship(
+        "Avatar", back_populates="user", cascade="all, delete-orphan", order_by="Avatar.id"
+    )
     cart = relationship("Cart", back_populates="user", uselist=False, cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")

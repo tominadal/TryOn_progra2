@@ -28,6 +28,10 @@ class CartItem(Base):
     cart_id = Column(Integer, ForeignKey("carts.id", ondelete="CASCADE"), nullable=False)
     garment_id = Column(Integer, ForeignKey("garments.id", ondelete="CASCADE"), nullable=False)
     quantity = Column(Integer, default=1)
+
+    # Chosen variant. The same garment in another size/color is a separate cart line.
+    size = Column(String(20), nullable=True)
+    color = Column(String(50), nullable=True)
     
     cart = relationship("Cart", back_populates="items")
     garment = relationship("Garment")
@@ -54,6 +58,10 @@ class OrderItem(Base):
     garment_id = Column(Integer, ForeignKey("garments.id", ondelete="SET NULL"), nullable=True)
     price = Column(Float, nullable=False)
     quantity = Column(Integer, default=1)
+
+    # Variant snapshot copied from the cart line at checkout
+    size = Column(String(20), nullable=True)
+    color = Column(String(50), nullable=True)
     
     order = relationship("Order", back_populates="items")
     garment = relationship("Garment")

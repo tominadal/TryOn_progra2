@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Upload, Plus, Package, Box, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/api";
+import { formatPrice } from "@/lib/format";
 
 interface Garment {
   id: number;
@@ -188,12 +189,12 @@ export default function BrandDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">Precio ($)</label>
+                  <label className="block text-sm font-semibold mb-1">Precio (ARS)</label>
                   <input 
                     type="number" 
                     value={productPrice}
                     onChange={(e) => setProductPrice(e.target.value)}
-                    placeholder="Ej. 89.99"
+                    placeholder="Ej. 89900"
                     className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 outline-none focus:border-blue-500 transition-colors"
                   />
                 </div>
@@ -450,7 +451,7 @@ export default function BrandDashboard() {
                           {g.name}
                         </td>
                         <td className="px-6 py-4 text-neutral-500">{g.sku}</td>
-                        <td className="px-6 py-4 font-semibold">${g.price}</td>
+                        <td className="px-6 py-4 font-semibold">{formatPrice(g.price)}</td>
                         <td className="px-6 py-4">
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                             <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
