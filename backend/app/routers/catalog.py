@@ -364,6 +364,13 @@ async def create_garment(
 
     try:
         count = db.query(Garment).count()
+        initial_colors = []
+        if garment_in.color:
+            initial_colors.append({
+                "name": garment_in.color,
+                "hex": garment_in.color_hex or "#1e3a8a",
+            })
+
         new_garment = Garment(
             brand_id=current_user.brand_id,
             sku=f"BRAND-{current_user.brand_id}-{count + 1}",
@@ -374,16 +381,15 @@ async def create_garment(
             price=garment_in.price,
             material=garment_in.material,
             description=garment_in.description,
-            is_processed=garment_in.generate_3d,
-            available_sizes=garment_in.sizes,
-            available_colors=[],
+            is_processed=True,
+            available_sizes=garment_in.sizes or ["S", "M", "L", "XL"],
+            available_colors=initial_colors,
         )
         db.add(new_garment)
         db.flush() # Flush instead of commit to get ID but keep in transaction
 
         metadata_json = {}
         if garment_in.generate_3d:
-            # Process with AI wrapped in dedicated try...except for strict transactional integrity
             try:
                 active_strategy = strategy or get_garment_tryon_strategy()
                 garment_data = {
@@ -413,13 +419,39 @@ async def create_garment(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=f"No se pudo generar modelo 3D: {str(e)}",
                 )
+        else:
+            metadata_json = {
+                "scale_x": 1.0,
+                "scale_y": 1.0,
+                "color_hex": garment_in.color_hex or "#1e3a8a",
+                "accent_hex": garment_in.color_hex or "#1e3a8a",
+                "roughness": 0.82,
+                "metalness": 0.05,
+                "waist_rise": garment_in.waist_rise or "Tiro Medio",
+                "texture": garment_in.texture or "Denim Clásico",
+                "elasticity": garment_in.elasticity or "Rígido",
+                "fit_label": garment_in.fit or "Regular",
+                "has_cuffs": bool(garment_in.has_cuffs),
+                "has_pleats": bool(garment_in.has_pleats),
+                "distress_level": garment_in.distress_level or 0,
+                "source": "manual_parametric",
+            }
 
         asset = GarmentAsset(
             garment_id=new_garment.id,
             ai_generated_image_url=garment_in.image_url,
+            status="COMPLETED",
             metadata_json=metadata_json,
         )
         db.add(asset)
+
+        if garment_in.image_url:
+            db.add(GarmentImage(
+                garment_id=new_garment.id,
+                image_url=garment_in.image_url,
+                image_type="FRONT",
+                sort_order=0,
+            ))
 
         # Now commit both successfully
         db.commit()

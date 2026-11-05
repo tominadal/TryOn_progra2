@@ -392,10 +392,13 @@ export default function BrandDashboard() {
                     onChange={(e) => setGenerate3D(e.target.checked)}
                     className="w-5 h-5 rounded border-blue-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <div>
+                  <div className="flex-1">
                     <p className="font-bold text-sm text-blue-900 dark:text-blue-300">Activar Probador Virtual 3D</p>
                     <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">Generar automáticamente el gemelo digital paramétrico para este producto.</p>
                   </div>
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${generate3D ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'}`}>
+                    {generate3D ? "Activado" : "Desactivado"}
+                  </span>
                 </label>
 
                 <button 
@@ -453,8 +456,8 @@ export default function BrandDashboard() {
                         <td className="px-6 py-4 text-neutral-500">{g.sku}</td>
                         <td className="px-6 py-4 font-semibold">{formatPrice(g.price)}</td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${g.is_processed ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${g.is_processed ? "bg-green-500" : "bg-amber-500 animate-pulse"}`}></span>
                             {g.is_processed ? "Completado" : "Procesando"}
                           </span>
                         </td>

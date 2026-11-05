@@ -15,3 +15,8 @@ Thumbs.db
 # Cache de pytest y mypy
 .pytest_cache/
 .mypy_cache/
+
+# Subidas dinámicas en desarrollo local
+backend/static/uploads/*
+!backend/static/uploads/.gitkeep
+
