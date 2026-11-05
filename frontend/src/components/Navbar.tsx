@@ -34,7 +34,9 @@ export function Navbar() {
       fetchApi("/commerce/cart")
         .then((cart) => {
           setCartCount(
-            cart.items ? cart.items.reduce((acc: number, item: any) => acc + item.quantity, 0) : 0
+            cart.items
+              ? cart.items.reduce((acc: number, item: { quantity: number }) => acc + item.quantity, 0)
+              : 0
           );
         })
         .catch(() => setCartCount(0));

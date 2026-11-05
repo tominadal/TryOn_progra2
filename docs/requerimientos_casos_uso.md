@@ -47,20 +47,28 @@ Los requerimientos no funcionales describen **cómo debe comportarse el sistema*
 | Método | Endpoint | Recurso | Descripción | Código exitoso |
 |--------|----------|---------|-------------|----------------|
 | `POST` | `/api/v1/auth/login` | Sesión | Autentica y devuelve JWT | `200 OK` |
-| `POST` | `/api/v1/users/` | Usuario | Registra nuevo usuario | `201 Created` |
+| `POST` | `/api/v1/users/` | Usuario | Registra nuevo usuario | `200 OK` |
 | `GET`  | `/api/v1/users/me` | Usuario | Perfil del usuario autenticado | `200 OK` |
-| `POST` | `/api/v1/tryon/avatar` | Avatar | Crea o actualiza el avatar (upsert) | `200 OK` |
-| `GET`  | `/api/v1/tryon/avatar` | Avatar | Recupera el avatar del usuario | `200 OK` |
-| `POST` | `/api/v1/tryon/preview/{id}` | Composición | Genera imagen virtual try-on | `200 OK` |
+| `GET`  | `/api/v1/tryon/avatars` | Avatares | Lista los avatares del usuario | `200 OK` |
+| `POST` | `/api/v1/tryon/avatars` | Avatar | Crea un nuevo avatar (máx. 10) | `201 Created` |
+| `GET`  | `/api/v1/tryon/avatars/{id}` | Avatar | Recupera un avatar propio por ID | `200 OK` |
+| `PUT`  | `/api/v1/tryon/avatars/{id}` | Avatar | Actualiza parcialmente un avatar propio | `200 OK` |
+| `DELETE` | `/api/v1/tryon/avatars/{id}` | Avatar | Elimina un avatar propio | `200 OK` |
+| `POST` | `/api/v1/tryon/preview/{id}` | Composición | Genera imagen virtual try-on (`?avatar_id=`) | `200 OK` |
 | `POST` | `/api/v1/catalog/upload-image` | Imagen | Sube imagen de prenda al servidor | `200 OK` |
-| `POST` | `/api/v1/catalog/garment` | Prenda | Publica prenda con análisis 3D IA | `200 OK` |
+| `POST` | `/api/v1/catalog/garment` | Prenda | Publica prenda con análisis 3D IA o manual | `200 OK` |
 | `GET`  | `/api/v1/catalog/garments` | Prendas | Lista prendas procesadas (con filtro `?fit=`) | `200 OK` |
 | `GET`  | `/api/v1/catalog/garments/{id}` | Prenda | Detalle de prenda + metadata 3D | `200 OK` |
 | `POST` | `/api/v1/catalog/upload` | Job | Ingesta masiva de Excel (async) | `202 Accepted` |
 | `GET`  | `/api/v1/catalog/jobs/{id}` | Job | Estado del procesamiento masivo | `200 OK` |
 | `GET`  | `/api/v1/catalog/brand` | Catálogo | Catálogo de la marca autenticada | `200 OK` |
-| `POST` | `/api/v1/commerce/cart` | CarritoÍtem | Agrega prenda al carrito | `200 OK` |
-| `POST` | `/api/v1/commerce/checkout` | Orden | Crea orden desde el carrito | `200 OK` |
+| `GET`  | `/api/v1/commerce/cart` | Carrito | Recupera el carrito del usuario con subtotal | `200 OK` |
+| `POST` | `/api/v1/commerce/cart` | CarritoÍtem | Agrega prenda con talle y color al carrito | `201 Created` |
+| `PATCH` | `/api/v1/commerce/cart/{id}` | CarritoÍtem | Actualiza la cantidad (1–99) de una línea | `200 OK` |
+| `DELETE` | `/api/v1/commerce/cart/{id}` | CarritoÍtem | Elimina una línea específica del carrito | `200 OK` |
+| `DELETE` | `/api/v1/commerce/cart` | Carrito | Vacía por completo el carrito del usuario | `200 OK` |
+| `POST` | `/api/v1/commerce/checkout` | Orden | Crea orden desde el carrito (snapshot pricing) | `201 Created` |
+| `GET`  | `/api/v1/commerce/orders` | Órdenes | Historial de órdenes con talle y color | `200 OK` |
 
 **Uso de códigos HTTP en TryOnHub:**
 

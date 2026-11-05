@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
-import { Upload, Plus, Package, Box, Activity } from "lucide-react";
+import { Upload, Package, Box } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
@@ -44,6 +45,16 @@ export default function BrandDashboard() {
   const [garments, setGarments] = useState<Garment[]>([]);
   const [loadingGarments, setLoadingGarments] = useState(true);
 
+  const loadGarments = useCallback(() => {
+    fetchApi("/catalog/brand")
+      .then((data) => setGarments(data))
+      .catch((err) => {
+        console.error("Failed to load garments", err);
+        toast.error("Error al cargar los productos.");
+      })
+      .finally(() => setLoadingGarments(false));
+  }, []);
+
   // Redirigir si no es rol de marca
   useEffect(() => {
     if (user && user.role_id !== 2) {
@@ -51,20 +62,7 @@ export default function BrandDashboard() {
     } else if (user) {
       loadGarments();
     }
-  }, [user, router]);
-
-  const loadGarments = async () => {
-    try {
-      setLoadingGarments(true);
-      const data = await fetchApi("/catalog/brand");
-      setGarments(data);
-    } catch (err) {
-      console.error("Failed to load garments", err);
-      toast.error("Error al cargar los productos.");
-    } finally {
-      setLoadingGarments(false);
-    }
-  };
+  }, [user, router, loadGarments]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -409,10 +407,10 @@ export default function BrandDashboard() {
                   {isUploading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin"></div>
-                      Procesando Modelo 3D...
+                      {generate3D ? "Procesando Modelo 3D..." : "Subiendo Producto..."}
                     </>
                   ) : (
-                    <>Subir y Generar 3D</>
+                    <>{generate3D ? "Subir y Generar 3D" : "Publicar Producto"}</>
                   )}
                 </button>
               </form>
@@ -449,7 +447,7 @@ export default function BrandDashboard() {
                       <tr key={g.id} className="border-b border-neutral-100 dark:border-neutral-800/50 hover:bg-neutral-50 dark:hover:bg-neutral-900/50 transition-colors">
                         <td className="px-6 py-4 font-medium flex items-center gap-3">
                           <div className="w-10 h-10 bg-neutral-200 dark:bg-neutral-800 rounded-lg overflow-hidden">
-                            {g.image ? <img src={g.image} className="w-full h-full object-cover" /> : <Box className="w-5 h-5 m-2 text-neutral-400" />}
+                            {g.image ? <img src={g.image} alt={g.name} className="w-full h-full object-cover" /> : <Box className="w-5 h-5 m-2 text-neutral-400" />}
                           </div>
                           {g.name}
                         </td>
@@ -461,7 +459,11 @@ export default function BrandDashboard() {
                             {g.is_processed ? "Completado" : "Procesando"}
                           </span>
                         </td>
-                        <td className="px-6 py-4"><button className="text-blue-600 hover:underline">Editar</button></td>
+                        <td className="px-6 py-4">
+                          <Link href={`/product/${g.id}`} className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                            Ver en tienda &rarr;
+                          </Link>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

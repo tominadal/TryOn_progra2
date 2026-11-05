@@ -292,4 +292,66 @@ def test_create_garment_with_mock_ai(client: TestClient, db_session, monkeypatch
     assert garment.asset.metadata_json["fit_label"] == "Regular"
 
 
+def test_create_garment_manual_parametric_without_ai(client: TestClient, db_session):
+    """
+    create_garment when generate_3d=False persists deterministic manual_parametric
+    metadata, color swatch, and GarmentImage without invoking AI strategy.
+    """
+    from app.domain.models.catalog import Garment
+
+    res = client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_manual@example.com",
+            "password": "testpassword",
+            "full_name": "Brand Manual User",
+            "role_id": 2,
+            "brand_name": "Manual Test Brand",
+        },
+    )
+    assert res.status_code == 200
+    login_res = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_manual@example.com", "password": "testpassword"},
+    )
+    token = login_res.json()["access_token"]
+
+    payload = {
+        "name": "Manual Parametric Wide Jean",
+        "price": 94900,
+        "fit": "Wide Leg",
+        "color": "Azul Oscuro",
+        "color_hex": "#1e3a8a",
+        "sizes": ["38", "40", "42"],
+        "image_url": "/products/jean_classic.png",
+        "generate_3d": False,
+        "waist_rise": "Tiro Alto",
+        "has_cuffs": True,
+        "has_pleats": False,
+        "distress_level": 40,
+    }
+
+    response = client.post(
+        "/api/v1/catalog/garment",
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload,
+    )
+    assert response.status_code == 200
+    data = response.json()
+
+    garment = db_session.query(Garment).filter(Garment.id == data["id"]).first()
+    assert garment is not None
+    assert garment.is_processed is True
+    assert garment.available_colors == [{"name": "Azul Oscuro", "hex": "#1e3a8a"}]
+    assert len(garment.images) == 1
+    assert garment.asset is not None
+    meta = garment.asset.metadata_json
+    assert meta["source"] == "manual_parametric"
+    assert meta["waist_rise"] == 0.85
+    assert meta["has_cuff"] is True
+    assert meta["distress"] == 0.4
+    assert meta["taper"] == -0.35
+
+
+
 

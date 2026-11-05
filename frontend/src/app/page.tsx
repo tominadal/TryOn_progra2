@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
 import { fetchApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 
@@ -19,7 +17,6 @@ interface Garment {
 }
 
 export default function Home() {
-  const { user, logout } = useAuth();
   const [jeans, setJeans] = useState<Garment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +52,7 @@ export default function Home() {
             El fin de las devoluciones por talle. <br/> Bienvenido al estándar del gemelo digital.
           </h1>
           <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mx-auto leading-relaxed">
-            No somos un "probador mejorado". Somos una forma radicalmente diferente de comprar. Crea tu clon 3D paramétrico y ten la certeza absoluta de cómo te quedará la ropa antes de pagarla.
+            No somos un &ldquo;probador mejorado&rdquo;. Somos una forma radicalmente diferente de comprar. Crea tu clon 3D paramétrico y ten la certeza absoluta de cómo te quedará la ropa antes de pagarla.
           </p>
           <div className="pt-8 flex justify-center gap-4">
             <Link href="/marketplace" className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-500 transition-all active:scale-95 shadow-lg shadow-blue-500/30">

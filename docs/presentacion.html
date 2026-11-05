@@ -192,10 +192,10 @@
         <h1>Try<span>On</span>Hub</h1>
         <p class="subtitle">Plataforma de prueba virtual 3D de indumentaria. La IA analiza fotos reales de prendas y genera parámetros 3D únicos para tu avatar digital.</p>
         <div class="pills">
-          <span class="pill green">3 Patrones de Diseño</span>
+          <span class="pill green">4 Patrones de Diseño GoF + SOLID</span>
           <span class="pill purple">FastAPI + Next.js</span>
           <span class="pill pink">Gemini 2.5 Flash Vision</span>
-          <span class="pill">27 Tests Unitarios</span>
+          <span class="pill">82 Tests Automatizados</span>
         </div>
       </div>
     </section>
@@ -309,10 +309,43 @@
           </div>
         </div>
         <div class="stats-row" style="margin-top:20px">
-          <div class="stat-box"><div class="stat-num">27</div><div class="stat-label">Tests unitarios</div></div>
-          <div class="stat-box"><div class="stat-num">3</div><div class="stat-label">Patrones de diseño</div></div>
-          <div class="stat-box"><div class="stat-num">8</div><div class="stat-label">Endpoints REST</div></div>
-          <div class="stat-box"><div class="stat-num">CI/CD</div><div class="stat-label">GitHub Actions</div></div>
+          <div class="stat-box"><div class="stat-num">82</div><div class="stat-label">Tests automatizados</div></div>
+          <div class="stat-box"><div class="stat-num">4 + 5</div><div class="stat-label">Patrones GoF + SOLID</div></div>
+          <div class="stat-box"><div class="stat-num">18</div><div class="stat-label">Endpoints RESTful</div></div>
+          <div class="stat-box"><div class="stat-num">CI/CD</div><div class="stat-label">GitHub Actions + Docker</div></div>
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
+         SLIDE 5B — DIAGRAMA DE CLASES UML
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>📐 Diagrama de Clases <span>UML</span> (Dominio + Patrones)</h2>
+        <div class="two-col">
+          <div class="pattern-diagram" style="font-size:0.68rem">
+            <span class="hl">User</span> "1" ──&gt; "1" <span class="hl2">Role</span> (ADMIN | BRAND | CUSTOMER)<br>
+            <span class="hl">User</span> "1" ──&gt; "0..10" <span class="hl2">Avatar</span> (height_cm, body_type JSON)<br>
+            <span class="hl">User</span> "1" ──&gt; "0..1" <span class="hl2">Cart</span> "1" *──&gt; "*" <span class="hl3">CartItem</span> (size, color, qty)<br>
+            <span class="hl">User</span> "1" ──&gt; "*" <span class="hl2">Order</span> "1" *──&gt; "*" <span class="hl3">OrderItem</span> (snapshot price)<br>
+            <span class="hl">Brand</span> "1" ──&gt; "*" <span class="hl2">Garment</span> "1" *──&gt; "1" <span class="hl4">GarmentAsset</span> (metadata_json)<br>
+            <span class="hl">Brand</span> "1" ──&gt; "*" <span class="hl2">ProcessingJob</span> &lt;|── <span class="hl">JobSubjectMixin</span>
+          </div>
+          <div class="pattern-diagram" style="font-size:0.68rem">
+            <span class="hl3">StrategyFactory</span> ..&gt; <span class="hl2">VirtualTryOnStrategy</span> &lt;&lt;ABC&gt;&gt;<br>
+            &nbsp;├── <span class="hl2">GeminiTryOnStrategy</span> (Vision AI)<br>
+            &nbsp;├── <span class="hl2">MockTryOnStrategy</span> (Tests / Local)<br>
+            &nbsp;└── <span class="hl3">StrategyDecorator</span> o──&gt; <span class="hl2">VirtualTryOnStrategy</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="hl3">LoggingStrategyDecorator</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="hl3">CachingStrategyDecorator</span> (MD5)<br><br>
+            <span class="hl">JobSubjectMixin</span> "1" ──&gt; "*" <span class="hl2">IJobObserver</span> &lt;&lt;ABC&gt;&gt;<br>
+            &nbsp;├── <span class="hl">LoggingJobObserver</span> | <span class="hl">StatsJobObserver</span> | <span class="hl">NotificationJobObserver</span>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <strong>Convenciones UML de cátedra:</strong> tipos primitivos modelados como atributos, relaciones estructurales como asociaciones con multiplicidad explícita (<code>1:N</code> en Avatares, composición en Carrito/Órdenes y delegación en Decorator).
         </div>
         <p class="slide-label">TryOnHub — Programación II 2026</p>
       </div>
@@ -324,8 +357,8 @@
     <section>
       <div class="slide-section">
         <div class="section-num">02</div>
-        <h2>Patrones de Diseño</h2>
-        <p>Tres patrones aplicados con sentido real en el dominio del problema, basados en Head First Design Patterns.</p>
+        <h2>Patrones de Diseño y SOLID</h2>
+        <p>Cuatro patrones GoF (Strategy, Factory, Decorator, Observer) y los 5 principios SOLID aplicados en el dominio real.</p>
       </div>
     </section>
 
@@ -450,6 +483,38 @@ job.notify_observers(old, new, ctx={<span class="st">"processed_items"</span>: 1
     </section>
 
     <!-- ══════════════════════════════════════════════════
+         SLIDE 9B — FACTORY PATTERN + SOLID
+    ══════════════════════════════════════════════════ -->
+    <section>
+      <div class="slide-content">
+        <h2>🏭 Patrón <span>Factory</span> &amp; Principios <span>SOLID</span></h2>
+        <div class="two-col-6-4">
+          <div>
+            <div class="pattern-diagram">
+              <span class="hl2">StrategyFactory</span> (Creator — <code>strategy_factory.py</code>)<br>
+              &nbsp;├── <span class="fn">create_single_garment()</span> → Logging(Gemini|Mock)<br>
+              &nbsp;└── <span class="fn">create_bulk_catalog()</span> → Logging(Cache(Gemini|Mock))<br><br>
+              <span class="hl">Principios SOLID en acción:</span><br>
+              &nbsp;• <strong>S (SRP):</strong> <code>validators.py</code> valida, <code>StrategyFactory</code> ensambla.<br>
+              &nbsp;• <strong>O (OCP):</strong> <code>NotificationJobObserver</code> añadido sin tocar Subject.<br>
+              &nbsp;• <strong>L (LSP):</strong> Decorators sustituibles por <code>VirtualTryOnStrategy</code>.<br>
+              &nbsp;• <strong>I (ISP):</strong> Interfaces mínimas de 1 método (<code>update</code>, <code>process_garment</code>).<br>
+              &nbsp;• <strong>D (DIP):</strong> Inyección vía <code>Depends(get_garment_tryon_strategy)</code>.
+            </div>
+          </div>
+          <div>
+            <ul class="checklist" style="margin-top:0">
+              <li><span class="ci">🏭</span><div><strong>Desacoplamiento creacional:</strong> los routers piden la estrategia sin conocer cómo se apilan los decoradores.</div></li>
+              <li><span class="ci">💉</span><div><strong>Dependency Inversion:</strong> fácil override en tests con <code>dependency_overrides</code>.</div></li>
+              <li><span class="ci">🧼</span><div><strong>Single Responsibility:</strong> validaciones de magic bytes y Excel separadas en <code>validators.py</code>.</div></li>
+            </ul>
+          </div>
+        </div>
+        <p class="slide-label">TryOnHub — Programación II 2026</p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════
          SLIDE 10 — CONTRIBUCIONES DEL EQUIPO
     ══════════════════════════════════════════════════ -->
     <section>
@@ -458,23 +523,32 @@ job.notify_observers(old, new, ctx={<span class="st">"processed_items"</span>: 1
         <div class="cards col2">
           <div class="card purple">
             <div class="card-icon">🧑‍💻</div>
-            <div class="card-title">Tomás — eltanook</div>
+            <div class="card-title">Tomás Nadal — tominadal</div>
             <div class="card-body">
-              Motor 3D paramétrico completo (React Three Fiber). Pipeline de IA con Gemini Vision. Arquitectura Strategy + Decorator + Observer. Brand Dashboard con upload individual. Autenticación JWT. Documentación UML. 16 commits.
+              Arquitectura general Backend/Frontend, pipeline IA con Gemini Vision, patrones Strategy + Decorator + Observer + Factory, refactor SOLID, Dashboard de Marca y documentación académica UML.
             </div>
           </div>
           <div class="card green">
             <div class="card-icon">🧑‍💻</div>
-            <div class="card-title">Facundo Latini — faculatini</div>
+            <div class="card-title">Lucio Lourido — LucioLourido</div>
             <div class="card-body">
-              <strong>fix(backend):</strong> Eliminó fallback silencioso de Gemini, implementó rollback explícito y <code>AIServiceError</code> para integridad transaccional.<br><br>
-              <strong>perf(backend):</strong> Delegó la inferencia pesada de IA a <code>run_in_threadpool</code> (async FastAPI).<br><br>
-              <strong>Tests:</strong> +165 líneas de tests de integridad transaccional y threadpool. 3 commits.
+              Soporte multi-avatar (1:N hasta 10 gemelos digitales por usuario), migración automática idempotente de esquemas, mejoras integrales del carrito (variantes talle/color, cantidades +/-, vaciado), precios en ARS y Centro de Ayuda.
             </div>
           </div>
-        </div>
-        <div class="highlight-box" style="margin-top:14px">
-          El trabajo de Facu es complementario: reforzó la robustez transaccional y la performance async del pipeline de IA que Tomás implementó. Ambos cambios son críticos para producción.
+          <div class="card yellow">
+            <div class="card-icon">🧑‍💻</div>
+            <div class="card-title">Facundo Latini — faculatini</div>
+            <div class="card-body">
+              Integridad transaccional atómica con <code>rollback()</code> explícito y <code>AIServiceError</code>, ejecución asíncrona no bloqueante mediante <code>run_in_threadpool</code> y suite de tests de concurrencia y fallos IA.
+            </div>
+          </div>
+          <div class="card pink">
+            <div class="card-icon">🧑‍💻</div>
+            <div class="card-title">Tomás Carambia — CarambiaTomas</div>
+            <div class="card-body">
+              Evolución del motor de avatares 3D en React Three Fiber: modelado anatómico de manos (<code>Hands.tsx</code>), calzado paramétrico (<code>Shoes.tsx</code>) y refinamiento visual del maniquí y rostro.
+            </div>
+          </div>
         </div>
         <p class="slide-label">TryOnHub — Programación II 2026</p>
       </div>
@@ -485,31 +559,31 @@ job.notify_observers(old, new, ctx={<span class="st">"processed_items"</span>: 1
     ══════════════════════════════════════════════════ -->
     <section>
       <div class="slide-content">
-        <h2>🧪 Testing — <span>27 Tests Unitarios</span></h2>
+        <h2>🧪 Testing — <span>82 Tests Automatizados</span></h2>
         <div class="cards col3" style="font-size:0.78rem">
           <div class="card">
-            <div class="card-title">Auth & Users (4)</div>
-            <div class="card-body">Registro, login, email duplicado, <code>/me</code> con y sin auth.</div>
+            <div class="card-title">Auth, Users &amp; RBAC (11)</div>
+            <div class="card-body">Registro cliente/marca, login JWT, email duplicado, contraseñas débiles, protección 401/403.</div>
           </div>
           <div class="card">
-            <div class="card-title">Catalog (6)</div>
-            <div class="card-body">Upload Excel válido, columnas faltantes, tipo inválido (CSV), rollback ante fallo de IA, éxito con threadpool, AIServiceError.</div>
+            <div class="card-title">Catalog &amp; IA (16)</div>
+            <div class="card-body">Upload Excel válido/inválido, magic bytes de imagen, rollback ante fallo IA, threadpool, carga manual paramétrica y MockStrategy.</div>
           </div>
           <div class="card">
-            <div class="card-title">Commerce (3)</div>
-            <div class="card-body">Add to cart, checkout vacío, checkout exitoso.</div>
+            <div class="card-title">Commerce &amp; Carrito (14)</div>
+            <div class="card-body">Variantes por talle/color, ajuste de cantidades PATCH, eliminación individual, vaciado de carrito y snapshot pricing en checkout.</div>
           </div>
           <div class="card green">
-            <div class="card-title">Patrones — Decorator (6)</div>
-            <div class="card-body">Logging delega, conforma interfaz, llama inner 1 vez. Caching: hit, miss, source=cache, clear_cache. Cadena completa.</div>
+            <div class="card-title">Multi-Avatar 1:N (12)</div>
+            <div class="card-body">CRUD de hasta 10 avatares por usuario, aislamiento entre cuentas, validación de morphs JSON y migración automática de DB.</div>
           </div>
           <div class="card green">
-            <div class="card-title">Patrones — Observer (8)</div>
-            <div class="card-body">Logging.update(), StatsObs: READY/FAILED/intermedio, summary(). Mixin: register, remove, error no rompe, no duplicados.</div>
+            <div class="card-title">Patrones GoF &amp; Factory (17)</div>
+            <div class="card-body">StrategyFactory, LoggingDecorator, CachingDecorator (HIT/MISS/MD5), Observer Push (Logging, Stats, Notification).</div>
           </div>
           <div class="card">
-            <div class="card-title">Extra (11)</div>
-            <div class="card-body">Health, strategy interface, password débil, auth errónea, carrito vacío, prenda no encontrada, 404, 401.</div>
+            <div class="card-title">Validadores &amp; Edge Cases (12)</div>
+            <div class="card-body">Tests unitarios puros de <code>validators.py</code> (SRP), healthcheck, manejo de excepciones centralizado y límites de payload.</div>
           </div>
         </div>
         <p class="slide-label">TryOnHub — Programación II 2026</p>

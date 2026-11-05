@@ -49,8 +49,8 @@ export function Footer() {
           <ul className="space-y-3 text-sm text-neutral-500 dark:text-neutral-400">
             <li><Link href="/marketplace" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Marketplace</Link></li>
             <li><Link href="/avatar" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Gemelo Digital</Link></li>
-            <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Para Marcas</Link></li>
-            <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Precios</Link></li>
+            <li><Link href="/register" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Para Marcas</Link></li>
+            <li><Link href="/marketplace" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Precios</Link></li>
           </ul>
         </div>
 
@@ -58,9 +58,8 @@ export function Footer() {
         <div>
           <h3 className="font-semibold mb-4 text-black dark:text-white">Recursos</h3>
           <ul className="space-y-3 text-sm text-neutral-500 dark:text-neutral-400">
-            <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Documentación</Link></li>
-            <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Referencia API</Link></li>
-            <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Blog</Link></li>
+            <li><a href={`${GITHUB_URL}#readme`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Documentación</a></li>
+            <li><a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Referencia API</a></li>
             <li><Link href="/ayuda" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Centro de Ayuda</Link></li>
           </ul>
         </div>

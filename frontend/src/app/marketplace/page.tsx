@@ -5,7 +5,8 @@ import Link from "next/link";
 import { fetchApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import { Navbar } from "@/components/Navbar";
-import { Search, Filter, Grid3X3, List, Star } from "lucide-react";
+import { Footer } from "@/components/Footer";
+import { Search, Filter, Grid3X3, List } from "lucide-react";
 
 interface Garment {
   id: number;
@@ -197,6 +198,7 @@ export default function MarketplacePage() {
           )}
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

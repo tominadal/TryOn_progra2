@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment, ContactShadows, useTexture } from "@react-three/drei";
-import { User, Palette, Shirt, Check, Glasses, Smile, Sparkles, Scissors, PenTool, Accessibility, Dumbbell } from "lucide-react";
-import * as THREE from "three";
+import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
+import { User, Shirt, Scissors, Dumbbell } from "lucide-react";
 
 interface AvatarCreatorNativeProps {
 
@@ -130,7 +129,7 @@ export function AvatarCreatorNative({
       'parametric',
       skinColor,
       heightCm,
-      70, // dummy weight
+      initialWeight,
       shirtColor,
       shoesColor,
       hairStyle,

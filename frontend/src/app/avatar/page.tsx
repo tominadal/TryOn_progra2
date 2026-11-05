@@ -14,6 +14,7 @@ import {
 } from "@/lib/avatars";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { AvatarCreatorNative } from "@/components/AvatarCreatorNative";
 import { toast } from "sonner";
 
@@ -281,6 +282,7 @@ export default function AvatarPage() {
           />
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

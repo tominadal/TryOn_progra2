@@ -31,7 +31,7 @@ Hemos estructurado la documentación en `docs/` con el estándar de la cátedra:
 | **3. SQLAlchemy ORM** | ✅ | Modelos relacionales con SQLAlchemy, migraciones Alembic y soporte SQLite/PostgreSQL |
 | **4. Documentación y Casos de Uso** | ✅ | Requerimientos formales, Casos de Uso, Historias de Usuario, Swagger UI interactivo |
 | **5. Contenedor Docker** | ✅ | `backend/Dockerfile` optimizado y `docker-compose.yml` para despliegue reproducible |
-| **6. Funciones de Testing** | ✅ | **57 tests automatizados** (supera ampliamente el mínimo de 10) con `pytest` y `httpx` |
+| **6. Funciones de Testing** | ✅ | **82 tests automatizados** (supera ampliamente el mínimo de 10) con `pytest` y `httpx` |
 | **7. CI/CD con GitHub Actions** | ✅ | Workflow en `.github/workflows/main.yml` que valida la suite en cada commit |
 | **8. Patrones de Diseño GoF** | ✅ | Factory, Strategy, Decorator, Observer y Repository |
 | **9. Presentación y Defensa UML** | ✅ | `presentacion.html`, `diagrama_clases.md` y `diagrama_secuencia.md` |

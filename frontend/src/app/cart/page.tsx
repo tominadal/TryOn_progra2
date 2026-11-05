@@ -7,8 +7,16 @@ import { fetchApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import { Minus, Plus, Trash2 } from "lucide-react";
+
+interface GarmentDetails {
+  id: number;
+  name: string;
+  image?: string | null;
+  available_colors?: { name: string; hex: string }[];
+}
 
 interface CartItem {
   cart_item_id: number;
@@ -18,7 +26,7 @@ interface CartItem {
   subtotal: number;
   size?: string | null;
   color?: string | null;
-  garment_details?: any; // We'll fetch this if needed, or rely on a robust cart API
+  garment_details?: GarmentDetails;
 }
 
 const MAX_ITEM_QUANTITY = 99;
@@ -53,7 +61,7 @@ export default function CartPage() {
         // Hydrate cart items with garment details (one request per distinct garment,
         // since the same garment can appear in several lines: sizes / colors)
         const garmentIds: number[] = [...new Set<number>(data.items.map((i: CartItem) => i.garment_id))];
-        const garments = new Map<number, any>();
+        const garments = new Map<number, GarmentDetails>();
         await Promise.all(
           garmentIds.map(async (id) => {
             try {
@@ -294,6 +302,7 @@ export default function CartPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

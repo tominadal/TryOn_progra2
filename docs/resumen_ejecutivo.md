@@ -19,19 +19,6 @@ TryOnHub es una plataforma de **comercio electrónico B2B2C (Business-to-Busines
 
 ---
 
-## 📂 ¿Qué hay en cada carpeta? (Estructura)
-
-*   `📁 backend/` **(El Motor Inteligente y API):** 
-    Desarrollado en **Python con FastAPI**. Aquí vive la lógica de negocio pesada, el manejo de la base de datos relacional (SQLite con SQLAlchemy/Alembic) y, lo más importante, el **pipeline que se conecta a la IA de Gemini** para analizar las imágenes que suben las marcas y devolver un JSON con parámetros 3D.
-*   `📁 frontend/` **(La Interfaz y Motor 3D Web):** 
-    Desarrollado en **React y Next.js 14**. Usa TailwindCSS para una estética moderna (glassmorphism). Aquí se implementa todo el motor gráfico en el navegador utilizando **React Three Fiber (WebGL)**. Contiene el componente vital `AvatarCreatorNative`, que es el vestidor virtual del cliente.
-*   `📁 docs/` **(Documentación Académica):** 
-    Contiene la documentación formal de UML y arquitectura. Diagramas de Entidad-Relación de la base de datos, Diagramas de Secuencia (cómo viaja la información entre Front, Back e IA), y Diagramas de Clases de dominio.
-*   `📄 reprocess_garments.py` **(Script Auxiliar):** 
-    Un script suelto en Python para re-procesar por lotes las prendas que pudieron haber fallado o necesitan actualizarse contra la IA, sin necesidad de hacerlo manualmente en la UI.
-
----
-
 ## 🧠 ¿Por qué se tomaron estas decisiones técnicas?
 
 > [!NOTE]

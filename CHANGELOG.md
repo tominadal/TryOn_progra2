@@ -35,21 +35,28 @@ Las líneas se escriben pensando en quien usa la plataforma, no en el código: q
 - **Talle y color en el carrito.** Cada prenda del carrito muestra el talle y el color elegidos (con una muestra del color). El pedido también los registra, así que ya se sabe qué talle y color se compró.
 - **Selector de cantidad (+/−)** en cada línea del carrito (API: `PATCH /api/v1/commerce/cart/{id}`).
 - Los pedidos (`GET /api/v1/commerce/orders`) incluyen el talle y el color de cada prenda.
-- **Centro de Ayuda** en `/ayuda`, con la estructura lista para las preguntas frecuentes: agrupadas por categoría, desplegables y con varios párrafos por respuesta. Mientras no haya preguntas cargadas muestra un aviso de "Estamos preparando las preguntas frecuentes". Las preguntas se agregan en `frontend/src/lib/faqs.ts`.
+- **Centro de Ayuda** en `/ayuda` con preguntas frecuentes agrupadas por categoría (`Gemelos Digitales`, `Probador Virtual 3D`, `Compras y Carrito` y `Marcas B2B`), desplegables y con varios párrafos por respuesta (`frontend/src/lib/faqs.ts`).
+- **Carga manual paramétrica en el Dashboard de Marca.** Permite publicar prendas con metadatos 3D determinísticos (escala, tiro numérico, ahusamiento, textura, elasticidad y desgaste) aun cuando se desactiva la inferencia automática de IA (`generate_3d=False`).
+- **Guía de Talles interactiva** en la página de producto (`/product/{id}`), con tabla de equivalencias entre talles por letra, pulgadas US, talles AR/EU y medidas en centímetros.
+- **Presentación de defensa actualizada** (`docs/presentacion.html`) con diagrama UML de clases, los 4 patrones GoF + SOLID, los 4 integrantes del equipo y las 82 pruebas automatizadas.
 
 ### Cambiado
 
 - **El mismo pantalón en otro talle o color es una línea aparte.** Antes, agregar la misma prenda dos veces las fusionaba en una sola línea y, al quitarla, se eliminaban todas. Ahora solo se suman las unidades si coinciden prenda, talle **y** color; en cualquier otro caso se puede quitar cada una por separado.
-- **Pie de página:** el ícono del globo ahora es el logo de **GitHub** y abre el repositorio del proyecto en una pestaña nueva. Los links "Marketplace" (antes llevaba al inicio) y "Gemelo Digital" funcionan, y "Centro de Ayuda" lleva a `/ayuda`.
+- **Pie de página:** el ícono del globo ahora es el logo de **GitHub** y abre el repositorio del proyecto en una pestaña nueva. Los links "Marketplace" (antes llevaba al inicio) y "Gemelo Digital" funcionan, y "Centro de Ayuda" lleva a `/ayuda`. Se incorporó el pie de página en todas las vistas principales (`/marketplace`, `/cart`, `/avatar`).
 - En el marketplace, el filtro "Calce (Jeans)" pasa a llamarse **"Fit (Jeans)"**, igual que en las páginas de producto ("Straight Fit", "Mom Fit").
 - El selector **"Probar en"** (elección de avatar) ahora aparece solo cuando el Probador Virtual 3D está abierto. Antes se mostraba siempre, aunque no cumplía ninguna función fuera del probador y ocupaba espacio.
 - Las líneas del carrito se muestran siempre en el orden en que se agregaron.
 - Al sumar unidades a una línea existente, el tope es 99 en lugar de poder superarlo.
+- **CI/CD en GitHub Actions:** el workflow `.github/workflows/main.yml` ahora se ejecuta tanto en la rama `master` como en `main`.
 
 ### Corregido
 
 - Al quitar una prenda del carrito que se había agregado más de una vez, se eliminaban todas las unidades. Ahora se puede quitar una línea concreta o bajar la cantidad de a una.
 - El navegador bloqueaba los cambios parciales (`PATCH`) por una restricción de CORS del backend; ahora está permitido.
+- Eliminada URL hardcodeada `http://localhost:8000` en la página de inicio de sesión (`/login`), unificando las peticiones a través de `fetchApi`.
+- Normalizado el valor de `waist_rise` en el probador 3D para aceptar tanto valores numéricos (`0.0–1.0`) como etiquetas de texto (`"Tiro Alto"`, `"Tiro Medio"`, `"Tiro Bajo"`), evitando valores `NaN` en la geometría de `ParametricPants`.
+- Corregidos todos los errores de ESLint y React 19 Compiler (`react-hooks/immutability`, `react-hooks/set-state-in-effect` y tipado estricto en TypeScript).
 
 ### Notas de actualización
 

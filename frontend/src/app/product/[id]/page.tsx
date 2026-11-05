@@ -127,6 +127,22 @@ interface ColorOption {
   hex: string;
 }
 
+interface GarmentMetadata {
+  scale_x?: number;
+  scale_y?: number;
+  color_hex?: string;
+  accent_hex?: string;
+  roughness?: number;
+  taper?: number;
+  waist_rise?: number | string;
+  distress?: number;
+  has_cuff?: boolean;
+  has_cuffs?: boolean;
+  has_pleats?: boolean;
+  fit_label?: string;
+  source?: string;
+}
+
 interface Garment {
   id: number;
   name: string;
@@ -141,7 +157,7 @@ interface Garment {
   material?: string;
   available_sizes: string[];
   available_colors: ColorOption[];
-  metadata_json?: any;
+  metadata_json?: GarmentMetadata;
 }
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -166,6 +182,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   // Gallery
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
 
   const [notFound, setNotFound] = useState(false);
 
@@ -251,14 +268,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const avatarHairColor = avatarData?.hair_color || "#1a0a00";
   const avatarShoesColor = avatarData?.shoes_color || "#0f0f0f";
   const avatarGender = avatarData?.gender || "Hombre";
-  const avatarGlasses = Boolean(avatarData?.glasses);
   const avatarMuscle = avatarData?.muscle_definition ?? 0.3;
-  const avatarBeardStyle = avatarData?.beard_style || "Ninguna";
-  const avatarBeardColor = avatarData?.beard_color || "#2d1a0e";
   const avatarEyebrow = avatarData?.eyebrow_style || "Normal";
-  const avatarHat = avatarData?.hat_style || "Ninguno";
-  const avatarShirtStyle = avatarData?.shirt_style || "Basic";
-  const avatarTattoo = Boolean(avatarData?.tattoo_left_arm);
 
   // Parse advanced morphs
   const morphs = parseMorphs(avatarData?.body_type);
@@ -283,13 +294,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const aiScaleY    = product.metadata_json?.scale_y    ?? 1.0;
   const aiRoughness = product.metadata_json?.roughness  ?? 0.82;
   const aiTaper     = product.metadata_json?.taper      ?? 0.0;  // negative=wide, positive=skinny
-  const aiWaistRise = product.metadata_json?.waist_rise ?? 0.5;
-  const aiDistress  = product.metadata_json?.distress   ?? 0.0;
-  const aiHasCuff   = product.metadata_json?.has_cuff   ?? false;
-  const aiHasPleats = product.metadata_json?.has_pleats ?? false;
+  const rawWaistRise = product.metadata_json?.waist_rise;
+  const aiWaistRise = typeof rawWaistRise === "number"
+    ? rawWaistRise
+    : typeof rawWaistRise === "string"
+    ? (rawWaistRise.toLowerCase().includes("alto") ? 0.85 : rawWaistRise.toLowerCase().includes("bajo") ? 0.2 : 0.5)
+    : 0.5;
+  const aiHasCuff   = Boolean(product.metadata_json?.has_cuff ?? product.metadata_json?.has_cuffs ?? false);
   // fit_label from Vision takes precedence over text field
   const aiFitLabel  = product.metadata_json?.fit_label  ?? product.fit ?? "Regular";
   const aiSource    = product.metadata_json?.source ?? "";
+  const formattedFit = product.fit?.toLowerCase().includes("fit") ? product.fit : `${product.fit || "Regular"} Fit`;
 
   // ── Smart Fit Diagnostic ─────────────────────────────────────────────────
   const fitDiagnostic = calculateFitDiagnostic(selectedSize, avatarWeight, morphs);
@@ -485,7 +500,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {/* Header */}
             <div className="mb-2">
-              <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mb-1">Acme Denim · {product.fit} Fit</p>
+              <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mb-1">Acme Denim · {formattedFit}</p>
               <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2">{product.name}</h1>
               <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatPrice(product.price)}</p>
             </div>
@@ -615,10 +630,39 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <Ruler className="w-4 h-4 text-neutral-500" />
                     <h3 className="font-semibold text-sm">Talle</h3>
                   </div>
-                  <button className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
-                    Guía de Talles
+                  <button
+                    type="button"
+                    onClick={() => setShowSizeGuide((v) => !v)}
+                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {showSizeGuide ? "Ocultar Guía de Talles" : "Guía de Talles"}
                   </button>
                 </div>
+                {showSizeGuide && (
+                  <div className="mb-4 p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs animate-in fade-in duration-200">
+                    <p className="font-bold mb-2 text-neutral-700 dark:text-neutral-200">Equivalencia de Talles (Jeans)</p>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-neutral-300 dark:border-neutral-700 text-neutral-500">
+                            <th className="py-1.5 pr-3">Letra</th>
+                            <th className="py-1.5 pr-3">US (Pulg.)</th>
+                            <th className="py-1.5 pr-3">AR / EU</th>
+                            <th className="py-1.5 pr-3">Cintura (cm)</th>
+                            <th className="py-1.5">Cadera (cm)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                          <tr><td className="py-1.5 font-semibold">XS</td><td>26 - 28</td><td>36 - 38</td><td>68 - 73</td><td>88 - 93</td></tr>
+                          <tr><td className="py-1.5 font-semibold">S</td><td>29 - 30</td><td>38 - 40</td><td>74 - 78</td><td>94 - 98</td></tr>
+                          <tr><td className="py-1.5 font-semibold">M</td><td>31 - 32</td><td>42</td><td>79 - 84</td><td>99 - 104</td></tr>
+                          <tr><td className="py-1.5 font-semibold">L</td><td>33 - 34</td><td>44</td><td>85 - 90</td><td>105 - 110</td></tr>
+                          <tr><td className="py-1.5 font-semibold">XL</td><td>36 - 38</td><td>46 - 48</td><td>91 - 98</td><td>111 - 118</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
                 <div className="flex gap-2 flex-wrap">
                   {product.available_sizes.map((s) => (
                     <button
@@ -658,7 +702,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="grid grid-cols-2 gap-3 mt-2">
               <div className="p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl">
                 <p className="text-xs text-neutral-400 mb-1">Corte</p>
-                <p className="font-bold text-sm">{product.fit || "Regular"} Fit</p>
+                <p className="font-bold text-sm">{formattedFit}</p>
               </div>
               <div className="p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl">
                 <p className="text-xs text-neutral-400 mb-1">Talle seleccionado</p>

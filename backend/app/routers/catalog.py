@@ -128,13 +128,33 @@ def process_catalog_background(job_id: int, file_content: bytes):
             garment_data["image_url"] = garment_data.get("ImageURL") or garment_data.get("Image") or ""
             asset_data = strategy.process_garment(garment_data)
 
+            meta = asset_data.get("metadata_json") or {}
+            if garment.color:
+                garment.available_colors = [
+                    {
+                        "name": garment.color,
+                        "hex": meta.get("color_hex", "#1e3a8a"),
+                    }
+                ]
+
             asset = GarmentAsset(
                 garment_id=garment.id,
                 ai_generated_image_url=asset_data["ai_generated_image_url"],
-                metadata_json=asset_data["metadata_json"],
+                status="COMPLETED",
+                metadata_json=meta,
             )
             garment.is_processed = True
             db.add(asset)
+
+            if garment_data["image_url"]:
+                db.add(
+                    GarmentImage(
+                        garment_id=garment.id,
+                        image_url=garment_data["image_url"],
+                        image_type="FRONT",
+                        sort_order=0,
+                    )
+                )
 
             job.processed_items += 1
             # Single commit per garment (garment + asset atomic) — was previously 2 commits
@@ -420,20 +440,41 @@ async def create_garment(
                     detail=f"No se pudo generar modelo 3D: {str(e)}",
                 )
         else:
+            rise_label = (garment_in.waist_rise or "Tiro Medio").lower()
+            waist_rise_val = 0.85 if "alto" in rise_label else (0.2 if "bajo" in rise_label else 0.5)
+            fit_lower = (garment_in.fit or "Regular").lower()
+            fit_presets = {
+                "skinny":  (0.90, 1.00, 0.40),
+                "slim":    (0.94, 1.00, 0.25),
+                "regular": (1.00, 1.00, 0.00),
+                "mom":     (1.10, 0.98, 0.10),
+                "wide":    (1.20, 1.03, -0.35),
+                "relaxed": (1.15, 1.00, -0.15),
+                "flared":  (1.05, 1.05, -0.40),
+            }
+            scale_x, scale_y, taper = next(
+                (vals for key, vals in fit_presets.items() if key in fit_lower),
+                (1.0, 1.0, 0.0),
+            )
+            distress_raw = max(0, min(100, garment_in.distress_level or 0))
             metadata_json = {
-                "scale_x": 1.0,
-                "scale_y": 1.0,
+                "scale_x": scale_x,
+                "scale_y": scale_y,
                 "color_hex": garment_in.color_hex or "#1e3a8a",
                 "accent_hex": garment_in.color_hex or "#1e3a8a",
                 "roughness": 0.82,
                 "metalness": 0.05,
-                "waist_rise": garment_in.waist_rise or "Tiro Medio",
+                "waist_rise": waist_rise_val,
+                "waist_rise_label": garment_in.waist_rise or "Tiro Medio",
+                "taper": taper,
                 "texture": garment_in.texture or "Denim Clásico",
                 "elasticity": garment_in.elasticity or "Rígido",
                 "fit_label": garment_in.fit or "Regular",
+                "has_cuff": bool(garment_in.has_cuffs),
                 "has_cuffs": bool(garment_in.has_cuffs),
                 "has_pleats": bool(garment_in.has_pleats),
-                "distress_level": garment_in.distress_level or 0,
+                "distress": round(distress_raw / 100.0, 2),
+                "distress_level": distress_raw,
                 "source": "manual_parametric",
             }
 

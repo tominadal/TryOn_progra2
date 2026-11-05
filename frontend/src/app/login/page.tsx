@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { fetchApi } from "@/lib/api";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,19 +37,10 @@ function LoginForm() {
       formData.append("password", password);
       formData.append("remember_me", "true");
 
-      const data = await fetch("http://localhost:8000/api/v1/auth/login", {
+      const json = await fetchApi("/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
         body: formData,
       });
-
-      if (!data.ok) {
-        throw new Error("Invalid credentials");
-      }
-      
-      const json = await data.json();
       await login(json.access_token);
       toast.success("¡Bienvenido de nuevo!");
       router.push("/");
