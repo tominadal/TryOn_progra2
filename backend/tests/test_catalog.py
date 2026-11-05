@@ -353,5 +353,432 @@ def test_create_garment_manual_parametric_without_ai(client: TestClient, db_sess
     assert meta["taper"] == -0.35
 
 
+def test_delete_garment_by_owning_brand(client: TestClient, db_session):
+    """
+    Brand manager can delete their own garment via DELETE /api/v1/catalog/garments/{id}.
+    Also cleans up any CartItem referencing the deleted garment.
+    """
+    from app.domain.models.catalog import Garment, GarmentAsset, GarmentImage
+    from app.domain.models.commerce import CartItem
+
+    # Register brand user
+    res = client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_del_owner@example.com",
+            "password": "testpassword",
+            "full_name": "Brand Delete Owner",
+            "role_id": 2,
+            "brand_name": "Delete Owner Brand",
+        },
+    )
+    assert res.status_code == 200
+    login_res = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_del_owner@example.com", "password": "testpassword"},
+    )
+    brand_token = login_res.json()["access_token"]
+
+    # Create garment
+    create_res = client.post(
+        "/api/v1/catalog/garment",
+        headers={"Authorization": f"Bearer {brand_token}"},
+        json={
+            "name": "Garment To Delete",
+            "price": 65000,
+            "fit": "Regular",
+            "color": "Negro",
+            "color_hex": "#111827",
+            "sizes": ["S", "M", "L"],
+            "image_url": "/products/jean_classic.png",
+            "generate_3d": False,
+        },
+    )
+    assert create_res.status_code == 200
+    garment_id = create_res.json()["id"]
+
+    # Add garment to cart as customer
+    cust_res = client.post(
+        "/api/v1/users/",
+        json={
+            "email": "customer_cart_del@example.com",
+            "password": "testpassword",
+            "full_name": "Cart Customer",
+            "role_id": 3,
+        },
+    )
+    assert cust_res.status_code == 200
+    cust_login = client.post(
+        "/api/v1/auth/login",
+        data={"username": "customer_cart_del@example.com", "password": "testpassword"},
+    )
+    cust_token = cust_login.json()["access_token"]
+
+    add_cart_res = client.post(
+        "/api/v1/commerce/cart",
+        headers={"Authorization": f"Bearer {cust_token}"},
+        json={"garment_id": garment_id, "quantity": 1, "size": "M"},
+    )
+    assert add_cart_res.status_code in (200, 201)
+
+    # Delete garment as owning brand
+    del_res = client.delete(
+        f"/api/v1/catalog/garments/{garment_id}",
+        headers={"Authorization": f"Bearer {brand_token}"},
+    )
+    assert del_res.status_code == 200
+    assert del_res.json()["id"] == garment_id
+
+    # Verify garment, asset, images, and cart items are gone
+    get_res = client.get(f"/api/v1/catalog/garments/{garment_id}")
+    assert get_res.status_code == 404
+    assert db_session.query(Garment).filter(Garment.id == garment_id).first() is None
+    assert db_session.query(GarmentAsset).filter(GarmentAsset.garment_id == garment_id).first() is None
+    assert db_session.query(GarmentImage).filter(GarmentImage.garment_id == garment_id).first() is None
+    assert db_session.query(CartItem).filter(CartItem.garment_id == garment_id).first() is None
+
+
+def test_delete_garment_forbidden_for_other_brand_or_customer(client: TestClient):
+    """
+    Deleting a garment owned by another brand or as a customer returns 403 Forbidden.
+    Deleting a non-existent garment returns 404 Not Found.
+    """
+    # Brand A creates a garment
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_a_sec@example.com",
+            "password": "testpassword",
+            "full_name": "Brand A",
+            "role_id": 2,
+            "brand_name": "Brand A Sec",
+        },
+    )
+    token_a = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_a_sec@example.com", "password": "testpassword"},
+    ).json()["access_token"]
+
+    garment_id = client.post(
+        "/api/v1/catalog/garment",
+        headers={"Authorization": f"Bearer {token_a}"},
+        json={
+            "name": "Protected Garment",
+            "price": 75000,
+            "fit": "Skinny",
+            "color": "Azul",
+            "color_hex": "#1e3a8a",
+            "sizes": ["M"],
+            "image_url": "/products/jean_classic.png",
+            "generate_3d": False,
+        },
+    ).json()["id"]
+
+    # Brand B attempts to delete Brand A's garment -> 403
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_b_sec@example.com",
+            "password": "testpassword",
+            "full_name": "Brand B",
+            "role_id": 2,
+            "brand_name": "Brand B Sec",
+        },
+    )
+    token_b = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_b_sec@example.com", "password": "testpassword"},
+    ).json()["access_token"]
+
+    res_b = client.delete(
+        f"/api/v1/catalog/garments/{garment_id}",
+        headers={"Authorization": f"Bearer {token_b}"},
+    )
+    assert res_b.status_code == 403
+
+    # Customer attempts to delete -> 403
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "cust_sec@example.com",
+            "password": "testpassword",
+            "full_name": "Customer Sec",
+            "role_id": 3,
+        },
+    )
+    token_cust = client.post(
+        "/api/v1/auth/login",
+        data={"username": "cust_sec@example.com", "password": "testpassword"},
+    ).json()["access_token"]
+
+    res_cust = client.delete(
+        f"/api/v1/catalog/garments/{garment_id}",
+        headers={"Authorization": f"Bearer {token_cust}"},
+    )
+    assert res_cust.status_code == 403
+
+    # Non-existent garment -> 404
+    res_404 = client.delete(
+        "/api/v1/catalog/garments/999999",
+        headers={"Authorization": f"Bearer {token_a}"},
+    )
+    assert res_404.status_code == 404
+
+
+def test_update_garment_commercial_and_parametric_fields(client: TestClient):
+    """
+    Brand Manager owner can update garment commercial & physical fields (PUT)
+    without invoking AI (regenerate_3d=False) and parametric 3D metadata updates deterministically.
+    """
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_edit@example.com",
+            "password": "testpassword",
+            "full_name": "Brand Edit",
+            "role_id": 2,
+            "brand_name": "Edit Brand",
+        },
+    )
+    token = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_edit@example.com", "password": "testpassword"},
+    ).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    garment_id = client.post(
+        "/api/v1/catalog/garment",
+        headers=headers,
+        json={
+            "name": "Original Regular Jean",
+            "price": 60000,
+            "fit": "Regular",
+            "color": "Azul",
+            "color_hex": "#1e3a8a",
+            "sizes": ["S", "M"],
+            "image_url": "/products/jean_classic.png",
+            "generate_3d": False,
+        },
+    ).json()["id"]
+
+    put_res = client.put(
+        f"/api/v1/catalog/garments/{garment_id}",
+        headers=headers,
+        json={
+            "name": "Updated Wide Leg Jean",
+            "price": 82500,
+            "fit": "Wide Leg",
+            "color": "Negro Carbón",
+            "color_hex": "#111827",
+            "sizes": ["M", "L", "XL"],
+            "material": "Denim 14oz",
+            "description": "Edición actualizada",
+            "waist_rise": "Tiro Alto",
+            "distress_level": 45,
+            "has_cuffs": True,
+            "has_pleats": True,
+            "regenerate_3d": False,
+        },
+    )
+    assert put_res.status_code == 200, put_res.text
+    updated = put_res.json()
+    assert updated["name"] == "Updated Wide Leg Jean"
+    assert updated["price"] == 82500.0
+    assert updated["fit"] == "Wide Leg"
+    assert updated["color"] == "Negro Carbón"
+    assert updated["available_sizes"] == ["M", "L", "XL"]
+    assert updated["available_colors"][0]["hex"] == "#111827"
+
+    meta = updated["metadata_json"]
+    assert meta["scale_x"] == 1.2
+    assert meta["taper"] == -0.35
+    assert meta["waist_rise"] == 0.85
+    assert meta["distress"] == 0.45
+    assert meta["has_cuff"] is True
+    assert meta["has_pleats"] is True
+
+
+def test_update_garment_with_regenerate_3d_success_and_rollback(client: TestClient):
+    """
+    When regenerate_3d=True, PUT invokes the AI strategy. If the AI strategy fails,
+    the transaction rolls back and preserves the original garment data.
+    """
+    from app.main import app
+    from app.dependencies import get_garment_tryon_strategy
+    from app.services.ai_strategy import VirtualTryOnStrategy, AIServiceError, MockTryOnStrategy
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_edit_ai@example.com",
+            "password": "testpassword",
+            "full_name": "Brand Edit AI",
+            "role_id": 2,
+            "brand_name": "Edit AI Brand",
+        },
+    )
+    token = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_edit_ai@example.com", "password": "testpassword"},
+    ).json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    garment_id = client.post(
+        "/api/v1/catalog/garment",
+        headers=headers,
+        json={
+            "name": "Before AI Edit",
+            "price": 70000,
+            "fit": "Regular",
+            "color": "Azul",
+            "color_hex": "#1e3a8a",
+            "sizes": ["M"],
+            "image_url": "/products/jean_classic.png",
+            "generate_3d": False,
+        },
+    ).json()["id"]
+
+    # 1. Successful AI regeneration (injecting MockTryOnStrategy for fast deterministic test)
+    from app.services.ai_strategy import MockTryOnStrategy
+    app.dependency_overrides[get_garment_tryon_strategy] = lambda: MockTryOnStrategy()
+    try:
+        res_ok = client.put(
+            f"/api/v1/catalog/garments/{garment_id}",
+            headers=headers,
+            json={
+                "name": "After AI Regeneration",
+                "price": 78000,
+                "fit": "Skinny",
+                "regenerate_3d": True,
+            },
+        )
+        assert res_ok.status_code == 200
+        assert res_ok.json()["name"] == "After AI Regeneration"
+        assert res_ok.json()["metadata_json"]["source"] == "mock"
+    finally:
+        app.dependency_overrides.pop(get_garment_tryon_strategy, None)
+
+    # 2. Failed AI regeneration -> atomic rollback
+    class FailingStrategy(VirtualTryOnStrategy):
+        def process_garment(self, garment_data: dict) -> dict:
+            raise AIServiceError("Simulated AI failure during update")
+
+    app.dependency_overrides[get_garment_tryon_strategy] = lambda: FailingStrategy()
+    try:
+        res_fail = client.put(
+            f"/api/v1/catalog/garments/{garment_id}",
+            headers=headers,
+            json={
+                "name": "Should Not Persist",
+                "price": 99999,
+                "regenerate_3d": True,
+            },
+        )
+        assert res_fail.status_code == 500
+    finally:
+        app.dependency_overrides.pop(get_garment_tryon_strategy, None)
+
+    # Verify original name and price were preserved
+    persisted = client.get(f"/api/v1/catalog/garments/{garment_id}").json()
+    assert persisted["name"] == "After AI Regeneration"
+    assert persisted["price"] == 78000.0
+
+
+def test_update_garment_forbidden_for_other_brand_or_customer(client: TestClient):
+    """
+    Another brand or a customer cannot edit a garment they do not own (403),
+    and editing a non-existent garment returns 404.
+    """
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_owner_put@example.com",
+            "password": "testpassword",
+            "full_name": "Owner Put",
+            "role_id": 2,
+            "brand_name": "Owner Put Brand",
+        },
+    )
+    token_owner = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_owner_put@example.com", "password": "testpassword"},
+    ).json()["access_token"]
+
+    garment_id = client.post(
+        "/api/v1/catalog/garment",
+        headers={"Authorization": f"Bearer {token_owner}"},
+        json={
+            "name": "Immutable By Others",
+            "price": 50000,
+            "fit": "Regular",
+            "color": "Azul",
+            "color_hex": "#1e3a8a",
+            "sizes": ["M"],
+            "image_url": "/products/jean_classic.png",
+            "generate_3d": False,
+        },
+    ).json()["id"]
+
+    # Other brand -> 403
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_intruder_put@example.com",
+            "password": "testpassword",
+            "full_name": "Intruder Put",
+            "role_id": 2,
+            "brand_name": "Intruder Put Brand",
+        },
+    )
+    token_intruder = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_intruder_put@example.com", "password": "testpassword"},
+    ).json()["access_token"]
+
+    res_403 = client.put(
+        f"/api/v1/catalog/garments/{garment_id}",
+        headers={"Authorization": f"Bearer {token_intruder}"},
+        json={"name": "Hacked"},
+    )
+    assert res_403.status_code == 403
+
+    # Non-existent -> 404
+    res_404 = client.put(
+        "/api/v1/catalog/garments/999999",
+        headers={"Authorization": f"Bearer {token_owner}"},
+        json={"name": "Ghost"},
+    )
+    assert res_404.status_code == 404
+
+
+def test_get_observer_notifications_endpoint(client: TestClient):
+    """Brand Manager can fetch live Observer telemetry and notifications via GET /catalog/notifications."""
+    client.post(
+        "/api/v1/users/",
+        json={
+            "email": "brand_obs@example.com",
+            "password": "testpassword",
+            "full_name": "Brand Obs",
+            "role_id": 2,
+            "brand_name": "Observer Brand",
+        },
+    )
+    token = client.post(
+        "/api/v1/auth/login",
+        data={"username": "brand_obs@example.com", "password": "testpassword"},
+    ).json()["access_token"]
+
+    res = client.get(
+        "/api/v1/catalog/notifications",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert "stats" in body
+    assert "notifications" in body
+    assert "jobs_completed" in body["stats"]
+
+
+
+
 
 

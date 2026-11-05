@@ -3,46 +3,35 @@ Observer Pattern implementation for ProcessingJob status changes.
 
 Observer Pattern (GoF) — igual al ejemplo de WeatherStation de Head First Design Patterns:
     El 'Subject' es ProcessingJob (a través del mixin JobSubjectMixin).
-    Los 'ConcreteObservers' son LoggingJobObserver y StatsJobObserver.
+    Los 'ConcreteObservers' son LoggingJobObserver, StatsJobObserver y NotificationJobObserver.
 
 Jerarquía:
     IJobObserver (ABC)              ← Observer abstracto
     ├── LoggingJobObserver          ← ConcreteObserver: audit trail de cambios de estado
-    └── StatsJobObserver            ← ConcreteObserver: contadores en memoria
+    ├── StatsJobObserver            ← ConcreteObserver: contadores en memoria
+    └── NotificationJobObserver     ← ConcreteObserver: historial de alertas/notificaciones
 
     JobSubjectMixin                 ← Mixin para agregar comportamiento Subject a ProcessingJob
         + register_observer(obs)
         + remove_observer(obs)
         + notify_observers(old_status, new_status, context)
 
-Justificación de diseño (Oral Defense):
-    Igual que WeatherData notifica a CurrentConditionsDisplay y StatisticsDisplay,
-    ProcessingJob notifica a todos sus Observers cuando cambia de estado
-    (UPLOADED → PROCESSING → READY / FAILED).
-    El sistema de logging y el de estadísticas están DESACOPLADOS del procesamiento.
-    Añadir un nuevo Observer (ej: SlackObserver, WebSocketObserver) requiere cero
-    modificaciones en el Subject.
-
-Modelo Push (como se enseña en clase):
-    notify_observers empuja todos los datos relevantes a cada Observer.
-    El Observer no necesita una referencia al Subject para consultar estado.
-
-Uso en catalog.py (process_catalog_background):
-    job = ProcessingJob(...)     # Ahora es también un Subject
-    logging_obs = LoggingJobObserver()
-    stats_obs = StatsJobObserver()
-    job.register_observer(logging_obs)
-    job.register_observer(stats_obs)
-
-    # Al cambiar estado:
-    old = job.status
-    job.status = JobStatus.READY
-    job.notify_observers(old_status=old, new_status=job.status)
-    # → LoggingJobObserver.update() loguea el cambio
-    # → StatsJobObserver.update() incrementa contador de jobs exitosos
+Comparativa Modelo Push vs. Modelo Pull (Material de Cátedra — Patron_Observer.pdf):
+    - Modelo Push (implementado aquí):
+      El Subject envía en `update(job_id, old_status, new_status, context)` todos los
+      datos relevantes del evento. Ventaja crítica en nuestro dominio: ProcessingJob es
+      una entidad ORM asociada a una sesión de base de datos efímera (`SessionLocal()`
+      en BackgroundTasks). Al empujar valores primitivos/diccionarios, los Observers
+      pueden almacenar estadísticas y notificaciones en memoria sin sufrir errores de
+      `DetachedInstanceError` de SQLAlchemy cuando la sesión se cierra.
+    - Modelo Pull (alternativa clásica vista en WeatherStation):
+      El Subject envía `update(subject)` y cada Observer invoca getters (`subject.get_status()`).
+      Es preferible cuando el Subject vive en memoria con múltiples atributos y cada
+      Observer necesita un subconjunto distinto de propiedades.
 """
 import logging
 from abc import ABC, abstractmethod
+from datetime import datetime, timezone
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -56,7 +45,7 @@ class IJobObserver(ABC):
     Todo Observer concreto debe implementar update().
 
     Firma push: recibe todos los datos que necesita directamente,
-    sin necesidad de consultar el Subject.
+    sin necesidad de consultar el Subject ni depender de su sesión ORM.
     """
 
     @abstractmethod
@@ -74,7 +63,7 @@ class IJobObserver(ABC):
             job_id:     ID del ProcessingJob que cambió.
             old_status: El JobStatus anterior.
             new_status: El JobStatus nuevo.
-            context:    Información adicional opcional (ej: processed_items, error).
+            context:    Información adicional opcional (ej: processed_items, error, brand_id).
         """
         pass
 
@@ -85,9 +74,6 @@ class LoggingJobObserver(IJobObserver):
     """
     ConcreteObserver que registra cada transición de estado del Job
     como un audit trail en el sistema de logging.
-
-    Análogo a CurrentConditionsDisplay en la WeatherStation del libro:
-    recibe datos del Subject y los presenta (en este caso, al log).
     """
 
     def update(
@@ -115,11 +101,6 @@ class StatsJobObserver(IJobObserver):
 
     Análogo a StatisticsDisplay en la WeatherStation del libro:
     acumula datos históricos de las notificaciones recibidas.
-
-    Atributos:
-        jobs_completed: Número de jobs que llegaron a estado READY.
-        jobs_failed:    Número de jobs que llegaron a estado FAILED.
-        total_garments_processed: Suma de prendas procesadas exitosamente.
     """
 
     def __init__(self) -> None:
@@ -164,58 +145,85 @@ class StatsJobObserver(IJobObserver):
 
 class NotificationJobObserver(IJobObserver):
     """
-    ConcreteObserver que simula el envio de notificaciones externas
-    (email, Slack, webhook) ante transiciones de estado criticas de un Job.
+    ConcreteObserver que registra y almacena notificaciones ante transiciones
+    de estado críticas de un Job (cumpliendo RQ5 y demostrando OCP).
 
-    Este observer demuestra el Principio Abierto/Cerrado (OCP de SOLID):
-        - El sistema de notificaciones se AGREGO sin modificar ProcessingJob
-          (el Subject) ni los otros observers ya existentes.
-        - Si manana se quiere notificar por Telegram, se crea TelegramJobObserver
-          y se registra; ningun otro archivo cambia.
-
-    Analogia con el libro:
-        Como agregar un ForecastDisplay a WeatherStation: el Subject no sabe
-        cuantos ni quienes son sus observers. Solo los notifica.
-
-    Atributos:
-        _notify_on: conjunto de nombres de estado que disparan notificacion.
-                    Por defecto: READY y FAILED (estados terminales).
+    Mantiene un historial acotado en memoria (`notifications`) consultable vía API
+    por el Dashboard de Marca para visualizar las alertas generadas en tiempo real.
     """
 
+    MAX_HISTORY = 50
+
     def __init__(self, notify_on: set[str] | None = None) -> None:
-        # Estados terminales que merecen notificacion externa
         self._notify_on: set[str] = notify_on or {"READY", "FAILED"}
+        self.notifications: list[dict] = []
 
     def update(
         self,
         job_id: int,
-        old_status,
-        new_status,
+        old_status: Any,
+        new_status: Any,
         context: dict | None = None,
     ) -> None:
+        old_name = old_status.value if hasattr(old_status, "value") else str(old_status)
         new_name = new_status.value if hasattr(new_status, "value") else str(new_status)
 
         if new_name not in self._notify_on:
-            return  # Transicion intermedia: no se notifica
+            return  # Transición intermedia: no se notifica
 
-        # En produccion, aqui se llamaria a boto3, smtplib, slack_sdk, etc.
-        # Por ahora logueamos la intencion para no introducir dependencias externas.
+        now_iso = datetime.now(timezone.utc).isoformat()
+        brand_id = context.get("brand_id") if context else None
+
         if new_name == "READY":
             processed = context.get("processed_items", "?") if context else "?"
+            message = f"Job #{job_id} completado exitosamente ({processed} prendas procesadas)."
             logger.info(
-                "[Observer:Notification] NOTIFICACION: Job #%d completado exitosamente. "
-                "Prendas procesadas: %s. (En produccion: enviar email/Slack a la marca.)",
-                job_id,
-                processed,
+                "[Observer:Notification] NOTIFICACION: %s",
+                message,
+            )
+            self._append_event(
+                job_id=job_id,
+                old_status=old_name,
+                new_status=new_name,
+                level="SUCCESS",
+                message=message,
+                brand_id=brand_id,
+                timestamp=now_iso,
             )
         elif new_name == "FAILED":
             error = context.get("error", "error desconocido") if context else "error desconocido"
+            message = f"Alerta en Job #{job_id}: fallo en procesamiento ({error})."
             logger.warning(
-                "[Observer:Notification] ALERTA: Job #%d fallo. Motivo: %s. "
-                "(En produccion: notificar al equipo de soporte via PagerDuty/Slack.)",
-                job_id,
-                error,
+                "[Observer:Notification] ALERTA: %s",
+                message,
             )
+            self._append_event(
+                job_id=job_id,
+                old_status=old_name,
+                new_status=new_name,
+                level="ERROR",
+                message=message,
+                brand_id=brand_id,
+                timestamp=now_iso,
+            )
+
+    def _append_event(self, **event: Any) -> None:
+        self.notifications.insert(0, event)
+        if len(self.notifications) > self.MAX_HISTORY:
+            self.notifications = self.notifications[: self.MAX_HISTORY]
+
+    def get_notifications(self, brand_id: int | None = None) -> list[dict]:
+        """Devuelve las notificaciones registradas, opcionalmente filtradas por marca."""
+        if brand_id is None:
+            return list(self.notifications)
+        return [
+            n for n in self.notifications
+            if n.get("brand_id") in (None, brand_id)
+        ]
+
+    def clear_notifications(self) -> None:
+        """Limpia el historial de notificaciones en memoria."""
+        self.notifications.clear()
 
 
 # ─── Subject Mixin ────────────────────────────────────────────────────────────
@@ -225,9 +233,6 @@ class JobSubjectMixin:
     Mixin que convierte cualquier clase en un Subject Observable.
     Se aplica a ProcessingJob para darle comportamiento de Subject
     sin modificar los campos de la tabla ni el ORM de SQLAlchemy.
-
-    Principio de diseño: 'Program to interfaces, not implementations.'
-    ProcessingJob hereda de JobSubjectMixin, ganando register/remove/notify.
     """
 
     def __init_observables(self) -> None:
@@ -265,3 +270,10 @@ class JobSubjectMixin:
             except Exception as exc:  # noqa: BLE001
                 # Un observer que falla no debe interrumpir el procesamiento
                 logger.error("[Observer] Error en observer %s: %s", type(observer).__name__, exc)
+
+
+# ─── Shared Observer Singletons (Live Telemetry & Feed) ──────────────────────
+
+global_logging_observer = LoggingJobObserver()
+global_stats_observer = StatsJobObserver()
+global_notification_observer = NotificationJobObserver()

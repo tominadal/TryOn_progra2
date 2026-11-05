@@ -1,7 +1,8 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.domain.repositories.base import BaseRepository, CRUDBase
-from app.domain.models.catalog import Garment, GarmentImage, GarmentAsset
+from app.domain.models.catalog import Garment, GarmentImage, GarmentAsset, ProcessingJob, JobStatus
+from app.domain.models.commerce import CartItem, OrderItem
 from pydantic import BaseModel
 
 
@@ -18,6 +19,7 @@ class GarmentCreateSchema(BaseModel):
     available_colors: Optional[list] = []
     description: Optional[str] = None
 
+
 class GarmentUpdateSchema(BaseModel):
     name: Optional[str] = None
     price: Optional[float] = None
@@ -31,6 +33,9 @@ class GarmentUpdateSchema(BaseModel):
 
 class GarmentRepository(CRUDBase[Garment, GarmentCreateSchema, GarmentUpdateSchema]):
     """Repository for Garment CRUD operations with domain-specific queries."""
+
+    def count(self, db: Session) -> int:
+        return db.query(Garment).count()
 
     def get_by_sku(self, db: Session, sku: str) -> Optional[Garment]:
         return db.query(Garment).filter(Garment.sku == sku).first()
@@ -57,6 +62,20 @@ class GarmentRepository(CRUDBase[Garment, GarmentCreateSchema, GarmentUpdateSche
 
     def get_by_fit(self, db: Session, fit: str) -> List[Garment]:
         return db.query(Garment).filter(Garment.fit == fit, Garment.is_processed.is_(True)).all()
+
+    def delete_with_relations(self, db: Session, garment: Garment) -> None:
+        """
+        Elimina la prenda limpiando de forma atómica los CartItems activos y
+        desvinculando OrderItems históricos para preservar el historial de compras.
+        """
+        db.query(CartItem).filter(CartItem.garment_id == garment.id).delete(
+            synchronize_session=False
+        )
+        db.query(OrderItem).filter(OrderItem.garment_id == garment.id).update(
+            {OrderItem.garment_id: None}, synchronize_session=False
+        )
+        db.delete(garment)
+        db.commit()
 
 
 # ── GarmentImageRepository ────────────────────────────────────────────────────
@@ -108,7 +127,34 @@ class GarmentImageRepository(BaseRepository[GarmentImage]):
         return count
 
 
+# ── ProcessingJobRepository ──────────────────────────────────────────────────
+
+class ProcessingJobRepository(BaseRepository[ProcessingJob]):
+    """Repository for ProcessingJob lifecycle persistence."""
+
+    def create_job(self, db: Session, brand_id: int, total_items: int) -> ProcessingJob:
+        job = ProcessingJob(
+            brand_id=brand_id,
+            status=JobStatus.UPLOADED,
+            total_items=total_items,
+        )
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+        return job
+
+    def get_by_brand(self, db: Session, brand_id: int, limit: int = 20) -> List[ProcessingJob]:
+        return (
+            db.query(ProcessingJob)
+            .filter(ProcessingJob.brand_id == brand_id)
+            .order_by(ProcessingJob.id.desc())
+            .limit(limit)
+            .all()
+        )
+
+
 # ── Singletons (module-level, stateless) ─────────────────────────────────────
 
 garment_repo = GarmentRepository(Garment)
 garment_image_repo = GarmentImageRepository(GarmentImage)
+job_repo = ProcessingJobRepository(ProcessingJob)

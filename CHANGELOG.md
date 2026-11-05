@@ -18,12 +18,6 @@ Historial de versiones de **TryOnHub**. Sigue el formato de [Keep a Changelog](h
 
 Las líneas se escriben pensando en quien usa la plataforma, no en el código: qué cambió y por qué importa. Si el cambio rompe algo existente (un endpoint, un formato), se marca con **⚠️ Cambio incompatible**.
 
-**Al publicar una versión:**
-1. Renombrar `[Sin publicar]` a `[X.Y.Z] - AAAA-MM-DD` y crear una sección `[Sin publicar]` vacía arriba.
-2. Subir el número en `backend/app/config/settings.py` (`VERSION`) y en `frontend/package.json` (`version`).
-3. Elegir el número: **PARCHE** para correcciones, **MENOR** para funcionalidades compatibles, **MAYOR** para cambios incompatibles.
-4. Actualizar los enlaces al pie y crear el tag: `git tag vX.Y.Z`.
-
 </details>
 
 ---
@@ -32,23 +26,32 @@ Las líneas se escriben pensando en quien usa la plataforma, no en el código: q
 
 ### Añadido
 
+- **Edición completa de prendas en el Dashboard de Marca (`PUT /api/v1/catalog/garments/{id}`).** Las marcas ahora pueden editar nombre, precio, fit, color, hex, talles, material, descripción, fotografía y propiedades físicas 3D de cualquier prenda propia, eligiendo entre actualización paramétrica instantánea (`regenerate_3d=False`) o re-análisis con IA (`regenerate_3d=True`) con rollback transaccional automático en caso de fallo.
+- **Eliminación segura de prendas (`DELETE /api/v1/catalog/garments/{id}`).** Permite dar de baja prendas desde el Dashboard de Marca con modal de confirmación, limpiando automáticamente los ítems en carritos activos y preservando el historial de órdenes cerradas (`OrderItem.garment_id = NULL`).
+- **Carga masiva por Excel e historial Observer en vivo en el Dashboard de Marca.** Se incorporó el panel de importación `.xlsx`/`.xls` con barra de progreso en tiempo real y el endpoint `GET /api/v1/catalog/notifications` que expone las estadísticas y alertas generadas por `StatsJobObserver` y `NotificationJobObserver`.
+- **Buscador y filtro por Fit en el Dashboard de Marca**, junto con columnas enriquecidas (muestra de color Hex, talles disponibles, SKU, precio formateado en ARS y estado 3D).
+- **Repositorios `CartRepository`, `OrderRepository` y `ProcessingJobRepository`** en `app/domain/repositories/`, e interfaz abstracta `IStrategyFactory` (Factory Method) en `app/services/strategy_factory.py`.
 - **Talle y color en el carrito.** Cada prenda del carrito muestra el talle y el color elegidos (con una muestra del color). El pedido también los registra, así que ya se sabe qué talle y color se compró.
 - **Selector de cantidad (+/−)** en cada línea del carrito (API: `PATCH /api/v1/commerce/cart/{id}`).
 - Los pedidos (`GET /api/v1/commerce/orders`) incluyen el talle y el color de cada prenda.
 - **Centro de Ayuda** en `/ayuda` con preguntas frecuentes agrupadas por categoría (`Gemelos Digitales`, `Probador Virtual 3D`, `Compras y Carrito` y `Marcas B2B`), desplegables y con varios párrafos por respuesta (`frontend/src/lib/faqs.ts`).
-- **Carga manual paramétrica en el Dashboard de Marca.** Permite publicar prendas con metadatos 3D determinísticos (escala, tiro numérico, ahusamiento, textura, elasticidad y desgaste) aun cuando se desactiva la inferencia automática de IA (`generate_3d=False`).
+- **Carga manual paramétrica en el Dashboard de Marca.** Permite publicar prendas con metadatos 3D determinísticos (`build_parametric_metadata`) aun cuando se desactiva la inferencia automática de IA (`generate_3d=False`).
 - **Guía de Talles interactiva** en la página de producto (`/product/{id}`), con tabla de equivalencias entre talles por letra, pulgadas US, talles AR/EU y medidas en centímetros.
-- **Presentación de defensa actualizada** (`docs/presentacion.html`) con diagrama UML de clases, los 4 patrones GoF + SOLID, los 4 integrantes del equipo y las 82 pruebas automatizadas.
+- **Suite ampliada a 90 pruebas automatizadas** cubriendo edición de prendas (`PUT`), eliminación (`DELETE`), notificaciones Observer, Factory Method y aislamiento por marca.
 
 ### Cambiado
 
-- **El mismo pantalón en otro talle o color es una línea aparte.** Antes, agregar la misma prenda dos veces las fusionaba en una sola línea y, al quitarla, se eliminaban todas. Ahora solo se suman las unidades si coinciden prenda, talle **y** color; en cualquier otro caso se puede quitar cada una por separado.
-- **Pie de página:** el ícono del globo ahora es el logo de **GitHub** y abre el repositorio del proyecto en una pestaña nueva. Los links "Marketplace" (antes llevaba al inicio) y "Gemelo Digital" funcionan, y "Centro de Ayuda" lleva a `/ayuda`. Se incorporó el pie de página en todas las vistas principales (`/marketplace`, `/cart`, `/avatar`).
+- **El mismo pantalón en otro talle o color es una línea aparte.** Solo se suman las unidades si coinciden prenda, talle **y** color; en cualquier otro caso se puede quitar cada variante por separado.
+- **Pie de página:** el ícono del globo ahora es el logo de **GitHub** y abre el repositorio del proyecto en una pestaña nueva. Los links "Marketplace" y "Gemelo Digital" funcionan, y "Centro de Ayuda" lleva a `/ayuda`. Se incorporó el pie de página en todas las vistas principales (`/marketplace`, `/cart`, `/avatar`).
 - En el marketplace, el filtro "Calce (Jeans)" pasa a llamarse **"Fit (Jeans)"**, igual que en las páginas de producto ("Straight Fit", "Mom Fit").
-- El selector **"Probar en"** (elección de avatar) ahora aparece solo cuando el Probador Virtual 3D está abierto. Antes se mostraba siempre, aunque no cumplía ninguna función fuera del probador y ocupaba espacio.
-- Las líneas del carrito se muestran siempre en el orden en que se agregaron.
-- Al sumar unidades a una línea existente, el tope es 99 en lugar de poder superarlo.
-- **CI/CD en GitHub Actions:** el workflow `.github/workflows/main.yml` ahora se ejecuta tanto en la rama `master` como en `main`.
+- El selector **"Probar en"** (elección de avatar) ahora aparece solo cuando el Probador Virtual 3D está abierto.
+- Las líneas del carrito se muestran siempre en el orden en que se agregaron, con tope de 99 unidades por línea.
+- **CI/CD en GitHub Actions:** el workflow `.github/workflows/main.yml` se ejecuta tanto en la rama `master` como en `main`.
+- **Unificación de documentación y esquemas:** toda la documentación académica (Requerimientos, Casos de Uso Ronald Mak, Historias INVEST, SOLID, GoF, Diagramas de Clases/Estados/Componentes, Secuencia, DER y Resumen Ejecutivo) quedó centralizada en `docs/`.
+
+### Eliminado
+
+- Eliminados archivos residuales de prueba, activos duplicados no referenciados (`*_v2.png`, `tattoo_maori.*`), método muerto `_text_fallback` y carpetas de documentación duplicadas (`backend/docs/`, `update_log/`).
 
 ### Corregido
 
@@ -57,10 +60,6 @@ Las líneas se escriben pensando en quien usa la plataforma, no en el código: q
 - Eliminada URL hardcodeada `http://localhost:8000` en la página de inicio de sesión (`/login`), unificando las peticiones a través de `fetchApi`.
 - Normalizado el valor de `waist_rise` en el probador 3D para aceptar tanto valores numéricos (`0.0–1.0`) como etiquetas de texto (`"Tiro Alto"`, `"Tiro Medio"`, `"Tiro Bajo"`), evitando valores `NaN` en la geometría de `ParametricPants`.
 - Corregidos todos los errores de ESLint y React 19 Compiler (`react-hooks/immutability`, `react-hooks/set-state-in-effect` y tipado estricto en TypeScript).
-
-### Notas de actualización
-
-- Al reiniciar el backend, las tablas del carrito y de los pedidos se actualizan solas con las columnas de talle y color. Las líneas que ya estaban en el carrito quedan sin talle ni color.
 
 ---
 
@@ -73,68 +72,6 @@ Primera versión estable. Este lanzamiento mejora la experiencia de compra (carr
 - 👨‍👩‍👧 **Múltiples avatares.** Cada usuario puede crear hasta 10 gemelos digitales con nombre propio y elegir con cuál probarse cada prenda.
 - 🛒 **Carrito completo.** Vaciar el carrito, quitar prendas una por una y un contador que siempre está al día.
 - 💲 **Precios en pesos argentinos** con formato local (`$ 89.900`).
-
-### Añadido
-
-**Avatares**
-- Un usuario puede crear, renombrar, editar y eliminar hasta 10 avatares. La pantalla `/avatar` es ahora "Mis Gemelos Digitales".
-- Selector **"Probar en"** en la página de cada prenda: al cambiar de avatar, el maniquí 3D, las medidas y el diagnóstico de talle se actualizan al instante.
-- El último avatar elegido se recuerda en el navegador.
-- API: `GET/POST /api/v1/tryon/avatars` y `GET/PUT/DELETE /api/v1/tryon/avatars/{id}`. Cada usuario solo puede ver y modificar sus propios avatares.
-- `POST /api/v1/tryon/preview/{garment_id}` acepta el parámetro opcional `avatar_id`.
-- Actualización automática del esquema de la base de datos al iniciar la API: las bases creadas con versiones anteriores se actualizan solas y conservan sus datos.
-
-**Carrito y compras**
-- Botón **"Vaciar carrito"** con confirmación (API: `DELETE /api/v1/commerce/cart`).
-- Botón para **quitar una prenda individual** del carrito.
-- El contador del carrito en la barra superior se actualiza al instante al agregar, quitar, vaciar o pagar.
-
-**Navegación**
-- La pestaña activa de la barra superior (Inicio o Marketplace) se resalta con un recuadro, con estilos para modo claro y oscuro. Marketplace se mantiene resaltado al ver una prenda.
-
-**Calidad**
-- 14 tests nuevos en el backend (de 57 a 71): carrito, múltiples avatares, aislamiento entre usuarios y actualización de una base de datos vieja.
-
-### Cambiado
-
-- Todos los precios están en **pesos argentinos (ARS)**, sin decimales y con formato `es-AR`: inicio, marketplace, producto, carrito y panel de marca.
-- Los filtros de precio del marketplace se adaptaron a pesos: menos de $70.000, $70.000 a $100.000 y más de $100.000.
-- El formulario de carga de prendas de las marcas pide el precio en ARS.
-- Al guardar un avatar, el usuario se queda en la página (antes lo llevaba al inicio) para poder crear otro.
-- El seed carga precios de ejemplo en pesos para las 6 prendas de muestra.
-
-### Eliminado
-
-- **Cambio incompatible:** `GET /api/v1/tryon/avatar` y `POST /api/v1/tryon/avatar` (en singular), que asumían un único avatar por usuario. Se reemplazan por los endpoints `/tryon/avatars`. El frontend ya usa los nuevos.
-
-### Corregido
-
-- El botón **"Empezar a Comprar"** del carrito vacío llevaba al inicio; ahora lleva al marketplace.
-- Los ítems del carrito se mostraban con **precio $0**.
-- Al **recargar (F5)** en el carrito o en la pantalla de avatar, la plataforma pedía iniciar sesión de nuevo.
-- Las letras **"g"** del título de la página de inicio se veían cortadas por abajo.
-- Las medidas corporales detalladas de un avatar (pecho, vientre, cadera, etc.) **no se aplicaban en el probador** y se perdían al volver a editar el avatar.
-
-### Documentación
-
-- Se actualizaron el diagrama entidad-relación (Usuario → Avatar pasa de 1:1 a 1:N), el diagrama de clases, el diagrama de secuencia, los requerimientos y casos de uso, y el README del backend.
-
-### Notas de actualización
-
-Pasos al actualizar desde una versión anterior:
-
-1. **Reiniciar el backend.** La tabla de avatares se actualiza sola y los avatares existentes se conservan con el nombre "Mi avatar". También se puede ejecutar `python seed.py`.
-2. **Ejecutar `python seed.py`** para actualizar los precios de las 6 prendas de muestra a pesos.
-3. Las prendas que una marca haya cargado con precios en dólares **no se convierten solas**: hay que editar su precio.
-4. Si algún cliente externo usaba `/tryon/avatar` (singular), debe migrar a `/tryon/avatars`.
-
-### Problemas conocidos
-
-- El talle y el color que elige el usuario se envían al agregar al carrito, pero el pedido todavía no los registra.
-- El carrito no tiene controles de cantidad (+/−): solo se puede quitar la prenda completa.
-- El formulario de suscripción al boletín del pie de página es solo visual y no guarda correos.
-- La actualización automática de esquema para PostgreSQL no se probó en un entorno real (solo SQLite). Conviene probarla en una copia antes de desplegar en producción.
-- Las migraciones de Alembic no permiten crear la base desde cero; el esquema se crea con `create_all`.
 
 [Sin publicar]: https://github.com/tominadal/TryOn_progra2/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/tominadal/TryOn_progra2/releases/tag/v1.0.0

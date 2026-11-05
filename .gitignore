@@ -5,8 +5,9 @@ implementation_plan.md
 *.sqlite
 *.db
 
-# Logs de Next.js dev server
+# Logs de Next.js dev server y archivos autogenerados
 frontend/.next/dev/
+**/AGENTS.md
 
 # Archivos de sistema
 .DS_Store

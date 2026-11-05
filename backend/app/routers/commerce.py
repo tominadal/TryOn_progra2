@@ -1,37 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session, joinedload
-from typing import Optional
+from sqlalchemy.orm import Session
 
-from pydantic import BaseModel, Field, field_validator
 from app.domain.database import get_db
-from app.domain.models.commerce import Cart, CartItem, Order, OrderItem, OrderStatus
-from app.domain.models.catalog import Garment
 from app.domain.models.user import User
+from app.domain.repositories import cart_repo, order_repo, garment_repo
+from app.domain.schemas.commerce import AddToCartRequest, UpdateQuantityRequest
 from app.services.auth_service import get_current_active_user
 
 router = APIRouter(prefix="/commerce", tags=["commerce"])
 
 MAX_ITEM_QUANTITY = 99
-
-
-class AddToCartRequest(BaseModel):
-    garment_id: int = Field(..., gt=0, description="ID of the garment to add")
-    quantity: int = Field(1, ge=1, le=99, description="Number of units (1-99)")
-    size: Optional[str] = Field(None, max_length=20, description="Chosen size, e.g. 32")
-    color: Optional[str] = Field(None, max_length=50, description="Chosen color name")
-
-    @field_validator("size", "color", mode="before")
-    @classmethod
-    def blank_to_none(cls, v):
-        """Trim; empty strings mean 'no choice' so they merge with missing values."""
-        if isinstance(v, str):
-            v = v.strip()
-            return v or None
-        return v
-
-
-class UpdateQuantityRequest(BaseModel):
-    quantity: int = Field(..., ge=1, le=99, description="New number of units (1-99)")
 
 
 @router.get("/cart")
@@ -40,20 +18,14 @@ def get_cart(
     current_user: User = Depends(get_current_active_user),
 ):
     """Retrieve the current user's shopping cart."""
-    # joinedload eliminates the N+1 query problem: 1 query instead of N+1
-    cart = (
-        db.query(Cart)
-        .options(joinedload(Cart.items).joinedload(CartItem.garment))
-        .filter(Cart.user_id == current_user.id)
-        .first()
-    )
+    cart = cart_repo.get_by_user_with_items(db, current_user.id)
     if not cart:
         return {"items": [], "total": 0.0}
 
     items = []
     total = 0.0
-    for item in sorted(cart.items, key=lambda i: i.id):  # stable order for the UI
-        garment = item.garment  # already loaded — no extra query
+    for item in sorted(cart.items, key=lambda i: i.id):
+        garment = item.garment
         price = garment.price if garment else 0.0
         items.append(
             {
@@ -79,8 +51,7 @@ def add_to_cart(
     current_user: User = Depends(get_current_active_user),
 ):
     """Add a garment to the current user's cart."""
-    # --- Validate that the garment exists and is processed ---
-    garment = db.query(Garment).filter(Garment.id == request.garment_id).first()
+    garment = garment_repo.get(db, request.garment_id)
     if not garment:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -92,38 +63,16 @@ def add_to_cart(
             detail="This garment is not yet available (still processing)",
         )
 
-    cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
-    if not cart:
-        cart = Cart(user_id=current_user.id)
-        db.add(cart)
-        db.commit()
-        db.refresh(cart)
-
-    # The same garment in the same size AND color is one line (quantities add up);
-    # any other variant is a separate line so it can be removed on its own.
-    existing_item = (
-        db.query(CartItem)
-        .filter(
-            CartItem.cart_id == cart.id,
-            CartItem.garment_id == request.garment_id,
-            CartItem.size == request.size,
-            CartItem.color == request.color,
-        )
-        .first()
+    cart = cart_repo.get_or_create_for_user(db, current_user.id)
+    cart_repo.add_or_increment_item(
+        db,
+        cart=cart,
+        garment_id=request.garment_id,
+        quantity=request.quantity,
+        size=request.size,
+        color=request.color,
+        max_quantity=MAX_ITEM_QUANTITY,
     )
-    if existing_item:
-        existing_item.quantity = min(existing_item.quantity + request.quantity, MAX_ITEM_QUANTITY)
-    else:
-        item = CartItem(
-            cart_id=cart.id,
-            garment_id=request.garment_id,
-            quantity=request.quantity,
-            size=request.size,
-            color=request.color,
-        )
-        db.add(item)
-
-    db.commit()
     return {"message": "Item added to cart"}
 
 
@@ -133,16 +82,7 @@ def clear_cart(
     current_user: User = Depends(get_current_active_user),
 ):
     """Remove every item from the current user's cart. Safe to call on an empty cart."""
-    cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
-    if not cart:
-        return {"message": "Cart cleared", "removed": 0}
-
-    removed = (
-        db.query(CartItem)
-        .filter(CartItem.cart_id == cart.id)
-        .delete(synchronize_session=False)
-    )
-    db.commit()
+    removed = cart_repo.clear_for_user(db, current_user.id)
     return {"message": "Cart cleared", "removed": removed}
 
 
@@ -154,20 +94,15 @@ def update_cart_item_quantity(
     current_user: User = Depends(get_current_active_user),
 ):
     """Set the quantity of one cart line (use DELETE to remove the line)."""
-    cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
-    item = None
-    if cart:
-        item = (
-            db.query(CartItem)
-            .filter(CartItem.id == item_id, CartItem.cart_id == cart.id)
-            .first()
-        )
+    cart = cart_repo.get_by_user(db, current_user.id)
+    item = cart_repo.get_item_in_cart(db, cart.id, item_id) if cart else None
     if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cart item not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Cart item not found"
+        )
 
-    item.quantity = request.quantity
-    db.commit()
-    return {"message": "Quantity updated", "quantity": item.quantity}
+    updated = cart_repo.update_item_quantity(db, item, request.quantity)
+    return {"message": "Quantity updated", "quantity": updated.quantity}
 
 
 @router.delete("/cart/{item_id}", status_code=status.HTTP_200_OK)
@@ -177,22 +112,19 @@ def remove_from_cart(
     current_user: User = Depends(get_current_active_user),
 ):
     """Remove a specific item from the cart."""
-    cart = db.query(Cart).filter(Cart.user_id == current_user.id).first()
+    cart = cart_repo.get_by_user(db, current_user.id)
     if not cart:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found"
+        )
 
-    item = (
-        db.query(CartItem)
-        .filter(CartItem.id == item_id, CartItem.cart_id == cart.id)
-        .first()
-    )
+    item = cart_repo.get_item_in_cart(db, cart.id, item_id)
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Cart item not found"
         )
 
-    db.delete(item)
-    db.commit()
+    cart_repo.remove_item(db, item)
     return {"message": "Item removed from cart"}
 
 
@@ -205,48 +137,17 @@ def checkout(
     Converts the cart into an order and clears the cart.
     Prices are locked at checkout time (snapshot pricing).
     """
-    # joinedload eliminates the N+1 query problem for checkout as well
-    cart = (
-        db.query(Cart)
-        .options(joinedload(Cart.items).joinedload(CartItem.garment))
-        .filter(Cart.user_id == current_user.id)
-        .first()
-    )
+    cart = cart_repo.get_by_user_with_items(db, current_user.id)
     if not cart or not cart.items:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Cart is empty"
         )
 
-    order = Order(user_id=current_user.id, total_amount=0.0, status=OrderStatus.PENDING)
-    db.add(order)
-    db.commit()
-    db.refresh(order)
-
-    total = 0.0
-    for item in cart.items:
-        garment = item.garment  # already loaded — no extra query
-        # Snapshot price at checkout time
-        price = garment.price if garment else 0.0
-
-        order_item = OrderItem(
-            order_id=order.id,
-            garment_id=item.garment_id,
-            price=price,
-            quantity=item.quantity,
-            size=item.size,
-            color=item.color,
-        )
-        total += price * item.quantity
-        db.add(order_item)
-        db.delete(item)
-
-    order.total_amount = round(total, 2)
-    db.commit()
-
+    order = order_repo.create_from_cart(db, current_user.id, cart)
     return {
         "message": "Order placed successfully",
         "order_id": order.id,
-        "total": round(total, 2),
+        "total": round(order.total_amount, 2),
     }
 
 
@@ -256,18 +157,12 @@ def get_orders(
     current_user: User = Depends(get_current_active_user),
 ):
     """Retrieve all orders for the current user."""
-    # joinedload eliminates the N+1 query problem for orders
-    orders = (
-        db.query(Order)
-        .options(joinedload(Order.items).joinedload(OrderItem.garment))
-        .filter(Order.user_id == current_user.id)
-        .all()
-    )
+    orders = order_repo.get_by_user_with_items(db, current_user.id)
     result = []
     for order in orders:
         items = []
         for oi in order.items:
-            garment = oi.garment  # already loaded — no extra query
+            garment = oi.garment
             items.append(
                 {
                     "garment_id": oi.garment_id,

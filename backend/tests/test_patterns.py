@@ -23,8 +23,11 @@ from app.services.job_observers import (
     IJobObserver,
     LoggingJobObserver,
     StatsJobObserver,
+    NotificationJobObserver,
     JobSubjectMixin,
 )
+from app.services.strategy_factory import IStrategyFactory, StrategyFactory
+from app.config.settings import settings
 from app.domain.models.catalog import JobStatus
 
 
@@ -276,3 +279,33 @@ def test_subject_mixin_no_duplicate_registration():
     subject.notify_observers(JobStatus.UPLOADED, JobStatus.PROCESSING)
 
     assert obs.update.call_count == 1
+
+
+def test_notification_observer_stores_history_and_filters_by_brand():
+    """NotificationJobObserver almacena notificaciones de estados terminales y filtra por marca."""
+    obs = NotificationJobObserver()
+    obs.update(10, JobStatus.UPLOADED, JobStatus.PROCESSING, context={"brand_id": 1})
+    assert len(obs.get_notifications()) == 0  # PROCESSING no es terminal
+
+    obs.update(10, JobStatus.PROCESSING, JobStatus.READY, context={"processed_items": 4, "brand_id": 1})
+    obs.update(11, JobStatus.PROCESSING, JobStatus.FAILED, context={"error": "Invalid SKU", "brand_id": 2})
+
+    all_notifs = obs.get_notifications()
+    assert len(all_notifs) == 2
+    brand_1_notifs = obs.get_notifications(brand_id=1)
+    assert len(brand_1_notifs) == 1
+    assert brand_1_notifs[0]["level"] == "SUCCESS"
+
+
+def test_strategy_factory_implements_factory_method_interface():
+    """StrategyFactory implementa IStrategyFactory y ensambla la cadena de Decorators."""
+    factory = StrategyFactory(settings)
+    assert isinstance(factory, IStrategyFactory)
+
+    single = factory.create_single_garment()
+    bulk = factory.create_bulk_catalog()
+
+    assert isinstance(single, LoggingStrategyDecorator)
+    assert isinstance(bulk, LoggingStrategyDecorator)
+    assert isinstance(bulk._wrapped, CachingStrategyDecorator)
+

@@ -226,54 +226,6 @@ Now, analyse the provided garment image AND its metadata to return ONLY the JSON
             logger.error("[AI] Gemini Vision processing failed: %s", e)
             raise AIServiceError(f"Fallo en la generación del modelo 3D con IA: {str(e)}") from e
 
-    def _text_fallback(self, garment_data: dict, error: str) -> dict:
-        """Text-only heuristic fallback when image analysis fails."""
-        fit = str(garment_data.get("Fit") or garment_data.get("fit", "")).lower()
-        color_raw = str(garment_data.get("Color") or garment_data.get("color", "blue")).lower()
-
-        # Fit heuristics
-        fit_map = {
-            "skinny":   {"scale_x": 0.88, "scale_y": 1.02, "taper":  0.40, "fit_label": "Skinny"},
-            "slim":     {"scale_x": 0.93, "scale_y": 1.02, "taper":  0.25, "fit_label": "Slim"},
-            "regular":  {"scale_x": 1.00, "scale_y": 1.00, "taper":  0.00, "fit_label": "Regular"},
-            "mom":      {"scale_x": 1.10, "scale_y": 1.00, "taper":  0.10, "fit_label": "Mom Fit"},
-            "wide":     {"scale_x": 1.20, "scale_y": 1.03, "taper": -0.35, "fit_label": "Wide Leg"},
-            "relaxed":  {"scale_x": 1.15, "scale_y": 1.00, "taper": -0.15, "fit_label": "Relaxed"},
-            "flared":   {"scale_x": 1.05, "scale_y": 1.05, "taper": -0.40, "fit_label": "Flared"},
-            "bermuda":  {"scale_x": 1.05, "scale_y": 0.88, "taper":  0.05, "fit_label": "Bermuda"},
-        }
-        fit_params = next((v for k, v in fit_map.items() if k in fit), fit_map["regular"])
-
-        # Basic colour name → hex
-        color_map = {
-            "negro": "#0d0d0d", "black": "#0d0d0d",
-            "blanco": "#f5f5f5", "white": "#f5f5f5",
-            "azul": "#1e3a8a", "blue": "#1e3a8a",
-            "gris": "#4a4a4a", "gray": "#4a4a4a", "grey": "#4a4a4a",
-            "verde": "#2d5a1b", "green": "#2d5a1b",
-            "marron": "#5c3a1e", "brown": "#5c3a1e",
-            "beige": "#c5a97d", "khaki": "#c5a97d",
-        }
-        color_hex = next((v for k, v in color_map.items() if k in color_raw), "#2a4a7f")
-
-        return {
-            "ai_generated_image_url": garment_data.get("image_url", ""),
-            "metadata_json": {
-                **fit_params,
-                "scale_x":    fit_params["scale_x"],
-                "scale_y":    fit_params["scale_y"],
-                "color_hex":  color_hex,
-                "accent_hex": color_hex,
-                "roughness":  0.82,
-                "waist_rise": 0.5,
-                "distress":   0.0,
-                "has_cuff":   False,
-                "has_pleats": False,
-                "error":      error,
-                "source":     "text_fallback_parametric",
-            },
-        }
-
 
 class MockTryOnStrategy(VirtualTryOnStrategy):
     """
