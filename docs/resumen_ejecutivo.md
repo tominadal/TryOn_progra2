@@ -63,4 +63,5 @@ El enfoque convencional de la industria intenta generar una imagen 2D por difusi
   - [`diagrama_clases.md`](diagrama_clases.md) — Diagramas UML de Clases (Dominio, GoF, Repositorios), Diagramas de Estado y Diagrama de Componentes.
   - [`diagrama_secuencia.md`](diagrama_secuencia.md) — Diagramas de Secuencia de Alta/Edición, Eliminación, Try-On 3D, Observer, Decorator, Factory y Checkout.
   - [`diagrama_entidad_relacion.md`](diagrama_entidad_relacion.md) — DER de las 11 tablas relacionales.
+  - [`modelo_de_negocios.md`](modelo_de_negocios.md) — Propuesta de valor, vías de monetización (SaaS, Success Fee, Freemium B2C), ROI y estrategia Go-To-Market.
   - [`presentacion.html`](presentacion.html) — Presentación interactiva para la defensa oral.
