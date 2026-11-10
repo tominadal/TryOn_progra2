@@ -1,4 +1,4 @@
-name: Backend CI
+name: Backend & Frontend CI
 
 on:
   push:
@@ -26,20 +26,31 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install dependencies
+      - name: Install Backend dependencies
         working-directory: ./backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Pytest
+      - name: Run Pytest (Unit, Integration & Parametrized Tests)
         working-directory: ./backend
         env:
-          # Use SQLite in-memory for CI — avoids needing a real Postgres container
           DATABASE_URL: "sqlite:///:memory:"
-          # Dummy secret key that satisfies the >= 32 chars validator
           SECRET_KEY: "ci-test-secret-key-do-not-use-in-production!!"
           GEMINI_API_KEY: "ci-dummy-key"
           BASE_URL: "http://localhost:8000"
         run: |
           python -m pytest --tb=short -v
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend dependencies & Typecheck
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npx tsc --noEmit

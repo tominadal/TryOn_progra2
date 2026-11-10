@@ -1,3 +1,6 @@
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    """Base declarativa SQLAlchemy 2.0 para el mapeo objeto-relacional (ORM)."""
+    pass

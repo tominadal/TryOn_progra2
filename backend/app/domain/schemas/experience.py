@@ -30,6 +30,9 @@ class AvatarBase(BaseModel):
 
     # Accessories
     glasses: Optional[bool] = None
+    glasses_color: Optional[str] = None
+    watch: Optional[bool] = None
+    watch_color: Optional[str] = None
     hat_style: Optional[str] = None
 
     # Clothes
@@ -85,9 +88,9 @@ class AvatarResponse(AvatarBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    @field_validator("glasses", mode="before")
+    @field_validator("glasses", "watch", mode="before")
     @classmethod
-    def parse_glasses(cls, v: Any) -> bool:
+    def parse_bool_accessories(cls, v: Any) -> bool:
         return bool(v)
 
     model_config = ConfigDict(from_attributes=True)

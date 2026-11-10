@@ -27,11 +27,19 @@ def get_cart(
     for item in sorted(cart.items, key=lambda i: i.id):
         garment = item.garment
         price = garment.price if garment else 0.0
+        primary_image = None
+        if garment:
+            if garment.images:
+                primary_image = garment.images[0].image_url
+            elif garment.asset:
+                primary_image = garment.asset.ai_generated_image_url
         items.append(
             {
                 "cart_item_id": item.id,
                 "garment_id": item.garment_id,
                 "garment_name": garment.name if garment else "Unknown",
+                "image": primary_image,
+                "available_colors": (garment.available_colors or []) if garment else [],
                 "size": item.size,
                 "color": item.color,
                 "quantity": item.quantity,

@@ -1,6 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 from app.domain.repositories.base import BaseRepository
+from app.domain.models.catalog import Garment
 from app.domain.models.commerce import Cart, CartItem, Order, OrderItem, OrderStatus
 
 
@@ -11,10 +12,17 @@ class CartRepository(BaseRepository[Cart]):
         return db.query(Cart).filter(Cart.user_id == user_id).first()
 
     def get_by_user_with_items(self, db: Session, user_id: int) -> Optional[Cart]:
-        """Recupera el carrito del usuario con sus ítems y prendas precargados (evita N+1)."""
+        """Recupera el carrito del usuario con sus ítems, prendas, imágenes y assets precargados (evita N+1)."""
         return (
             db.query(Cart)
-            .options(joinedload(Cart.items).joinedload(CartItem.garment))
+            .options(
+                joinedload(Cart.items)
+                .joinedload(CartItem.garment)
+                .joinedload(Garment.images),
+                joinedload(Cart.items)
+                .joinedload(CartItem.garment)
+                .joinedload(Garment.asset),
+            )
             .filter(Cart.user_id == user_id)
             .first()
         )

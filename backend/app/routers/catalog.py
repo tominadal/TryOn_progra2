@@ -31,21 +31,70 @@ import io
 router = APIRouter(prefix="/catalog", tags=["catalog"])
 
 
+def _resolve_valid_image_url(url: Optional[str], fit: Optional[str] = None) -> Optional[str]:
+    """If a local /static/uploads/ file no longer exists on disk, fall back to a valid product image."""
+    if not url:
+        return None
+    if "/static/uploads/" in url:
+        filename = url.rsplit("/static/uploads/", 1)[-1].split("?")[0]
+        if not (Path("static/uploads") / filename).is_file():
+            fit_lower = (fit or "").lower()
+            if "bermuda" in fit_lower or "short" in fit_lower:
+                return "/products/bermuda_front.png"
+            if "skirt" in fit_lower or "pollera" in fit_lower:
+                return "/products/skirt_front.png"
+            if "flare" in fit_lower:
+                return "/products/flared_front.png"
+            if "skinny" in fit_lower:
+                return "/products/jean_black.png"
+            if "mom" in fit_lower or "relaxed" in fit_lower or "wide" in fit_lower:
+                return "/products/jean_vintage.png"
+            return "/products/jean_classic.png"
+    return url
+
+
 def _garment_to_dict(g: Garment) -> dict:
     """Serialize a Garment + its asset and images to a response dict."""
     asset = g.asset
     images = g.images if g.images else []
 
     gallery = [
-        {"url": img.image_url, "type": img.image_type, "sort_order": img.sort_order}
+        {
+            "url": _resolve_valid_image_url(img.image_url, g.fit) or "/products/jean_classic.png",
+            "type": img.image_type,
+            "sort_order": img.sort_order,
+        }
         for img in images
     ]
 
-    primary_image = (
+    raw_primary = (
         gallery[0]["url"]
         if gallery
         else (asset.ai_generated_image_url if asset else None)
     )
+    primary_image = _resolve_valid_image_url(raw_primary, g.fit)
+
+    raw_meta = dict(asset.metadata_json) if (asset and asset.metadata_json) else {}
+    if raw_meta.get("source") in ("seed", "seed_update") or ("waist_cm" not in raw_meta and "confidence_score" not in raw_meta):
+        default_color_hex = (
+            raw_meta.get("color_hex")
+            or (
+                g.available_colors[0].get("hex")
+                if g.available_colors and isinstance(g.available_colors[0], dict)
+                else "#1e3a8a"
+            )
+        )
+        hydrated = build_parametric_metadata(
+            fit=g.fit or "Regular",
+            color_hex=default_color_hex,
+            waist_rise_label=raw_meta.get("waist_rise_label", "Tiro Medio"),
+            texture=raw_meta.get("texture") or g.material or "Denim Clásico",
+            distress_level=raw_meta.get("distress_level", int(round((raw_meta.get("distress") or 0) * 100))),
+            has_cuffs=bool(raw_meta.get("has_cuffs") or raw_meta.get("has_cuff")),
+            has_pleats=bool(raw_meta.get("has_pleats")),
+        )
+        hydrated.update(raw_meta)
+        raw_meta = hydrated
 
     return {
         "id": g.id,
@@ -63,8 +112,8 @@ def _garment_to_dict(g: Garment) -> dict:
         "available_colors": g.available_colors or [],
         "image": primary_image,
         "images": gallery,
-        "model_3d_url": asset.ai_generated_image_url if asset else None,
-        "metadata_json": asset.metadata_json if asset else {},
+        "model_3d_url": _resolve_valid_image_url(asset.ai_generated_image_url, g.fit) if asset else None,
+        "metadata_json": raw_meta,
     }
 
 
@@ -78,7 +127,11 @@ def _require_brand_manager(current_user: User) -> int:
     return current_user.brand_id
 
 
-def process_catalog_background(job_id: int, file_content: bytes):
+def process_catalog_background(
+    job_id: int,
+    file_content: bytes,
+    parsed_records: Optional[list[dict]] = None,
+):
     """Background task: parses Excel, calls AI strategy (with Decorator chain), and stores garments.
 
     Patrones aplicados:
@@ -108,13 +161,17 @@ def process_catalog_background(job_id: int, file_content: bytes):
     )
 
     try:
-        df = pd.read_excel(io.BytesIO(file_content))
-        validate_excel_columns(df)
+        if parsed_records is not None:
+            records = parsed_records
+        else:
+            df = pd.read_excel(io.BytesIO(file_content))
+            validate_excel_columns(df)
+            records = df.to_dict(orient="records")
 
         strategy = get_tryon_strategy(with_cache=True)
 
-        for index, row in df.iterrows():
-            garment_data = row.to_dict()
+        for index, row_dict in enumerate(records):
+            garment_data = dict(row_dict)
             raw_price = garment_data.get("Price", 0)
             price = parse_price(raw_price)
 
@@ -164,7 +221,8 @@ def process_catalog_background(job_id: int, file_content: bytes):
                 )
 
             job.processed_items += 1
-            db.commit()
+            if job.processed_items % 10 == 0:
+                db.commit()
 
         old_status = job.status
         job.status = JobStatus.READY
@@ -225,7 +283,8 @@ def upload_catalog(
     try:
         df = pd.read_excel(io.BytesIO(content))
         validate_excel_columns(df)
-        total_items = len(df)
+        records = df.to_dict(orient="records")
+        total_items = len(records)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
@@ -235,7 +294,7 @@ def upload_catalog(
         )
 
     job = job_repo.create_job(db, brand_id=brand_id, total_items=total_items)
-    background_tasks.add_task(process_catalog_background, job.id, content)
+    background_tasks.add_task(process_catalog_background, job.id, content, records)
 
     return {
         "message": "Catalog uploaded and processing started",
@@ -404,9 +463,19 @@ async def update_garment(
                 )
             )
         )
-        if garment_in.color is not None or garment_in.color_hex is not None:
+        if garment_in.colors is not None and len(garment_in.colors) > 0:
+            garment.available_colors = garment_in.colors
+            garment.color = garment_in.colors[0].get("name", current_color_name)
+            current_color_name = garment.color
+            current_color_hex = garment_in.colors[0].get("hex", current_color_hex)
+        elif garment_in.color is not None or garment_in.color_hex is not None:
             garment.color = current_color_name
-            garment.available_colors = [{"name": current_color_name, "hex": current_color_hex}]
+            existing_extra = (
+                list(garment.available_colors[1:])
+                if garment.available_colors and len(garment.available_colors) > 1
+                else []
+            )
+            garment.available_colors = [{"name": current_color_name, "hex": current_color_hex}] + existing_extra
 
         # Actualizar imagen principal si se envía nueva URL
         current_image_url = garment_in.image_url
@@ -489,7 +558,11 @@ async def update_garment(
                     "image_url": current_image_url or "",
                 }
                 asset_data = await run_in_threadpool(active_strategy.process_garment, garment_data)
-                new_metadata = asset_data["metadata_json"]
+                new_metadata = dict(asset_data["metadata_json"])
+                for cm_key in ("waist_cm", "hip_cm", "thigh_cm", "inseam_cm", "hem_width_cm", "rise_cm"):
+                    cm_val = getattr(garment_in, cm_key, None)
+                    if cm_val is not None:
+                        new_metadata[cm_key] = round(float(cm_val), 1)
             except Exception as e:
                 db.rollback()
                 raise HTTPException(
@@ -507,6 +580,12 @@ async def update_garment(
                 distress_level=distress_val,
                 has_cuffs=has_cuffs_val,
                 has_pleats=has_pleats_val,
+                waist_cm=garment_in.waist_cm,
+                hip_cm=garment_in.hip_cm,
+                thigh_cm=garment_in.thigh_cm,
+                inseam_cm=garment_in.inseam_cm,
+                hem_width_cm=garment_in.hem_width_cm,
+                rise_cm=garment_in.rise_cm,
                 existing_meta=existing_meta,
             )
 
@@ -583,12 +662,19 @@ async def create_garment(
 
     try:
         count = garment_repo.count(db)
-        initial_colors = []
-        if garment_in.color:
-            initial_colors.append({
-                "name": garment_in.color,
-                "hex": garment_in.color_hex or "#1e3a8a",
-            })
+        if garment_in.colors and len(garment_in.colors) > 0:
+            initial_colors = garment_in.colors
+            primary_color_name = initial_colors[0].get("name", garment_in.color)
+            primary_color_hex = initial_colors[0].get("hex", garment_in.color_hex or "#1e3a8a")
+        else:
+            initial_colors = []
+            primary_color_name = garment_in.color
+            primary_color_hex = garment_in.color_hex or "#1e3a8a"
+            if garment_in.color:
+                initial_colors.append({
+                    "name": garment_in.color,
+                    "hex": primary_color_hex,
+                })
 
         new_garment = Garment(
             brand_id=brand_id,
@@ -596,7 +682,7 @@ async def create_garment(
             name=garment_in.name,
             fit=garment_in.fit,
             size=garment_in.sizes[0] if garment_in.sizes else "M",
-            color=garment_in.color,
+            color=primary_color_name,
             price=garment_in.price,
             material=garment_in.material,
             description=garment_in.description,
@@ -621,7 +707,7 @@ async def create_garment(
                     "Material": garment_in.material,
                     "Description": garment_in.description,
                     "Waist_Rise": garment_in.waist_rise,
-                    "color_hex": garment_in.color_hex,
+                    "color_hex": primary_color_hex,
                     "texture": garment_in.texture,
                     "elasticity": garment_in.elasticity,
                     "fabric_weight": garment_in.fabric_weight,
@@ -631,7 +717,11 @@ async def create_garment(
                     "image_url": garment_in.image_url or "",
                 }
                 asset_data = await run_in_threadpool(active_strategy.process_garment, garment_data)
-                metadata_json = asset_data["metadata_json"]
+                metadata_json = dict(asset_data["metadata_json"])
+                for cm_key in ("waist_cm", "hip_cm", "thigh_cm", "inseam_cm", "hem_width_cm", "rise_cm"):
+                    cm_val = getattr(garment_in, cm_key, None)
+                    if cm_val is not None:
+                        metadata_json[cm_key] = round(float(cm_val), 1)
             except Exception as e:
                 db.rollback()
                 raise HTTPException(
@@ -641,7 +731,7 @@ async def create_garment(
         else:
             metadata_json = build_parametric_metadata(
                 fit=garment_in.fit,
-                color_hex=garment_in.color_hex,
+                color_hex=primary_color_hex,
                 waist_rise_label=garment_in.waist_rise or "Tiro Medio",
                 texture=garment_in.texture or "Denim Clásico",
                 elasticity=garment_in.elasticity or "Rígido",
@@ -649,6 +739,12 @@ async def create_garment(
                 distress_level=garment_in.distress_level or 0,
                 has_cuffs=bool(garment_in.has_cuffs),
                 has_pleats=bool(garment_in.has_pleats),
+                waist_cm=garment_in.waist_cm,
+                hip_cm=garment_in.hip_cm,
+                thigh_cm=garment_in.thigh_cm,
+                inseam_cm=garment_in.inseam_cm,
+                hem_width_cm=garment_in.hem_width_cm,
+                rise_cm=garment_in.rise_cm,
             )
 
         asset = GarmentAsset(

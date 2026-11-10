@@ -1,3 +1,4 @@
+import { memo } from "react";
 import * as THREE from "three";
 
 interface ModernShoeProps {
@@ -5,6 +6,8 @@ interface ModernShoeProps {
   shoeMat: {
     color: string;
     map?: THREE.Texture | null;
+    bumpMap?: THREE.Texture | null;
+    bumpScale?: number;
     roughness: number;
     metalness: number;
   };
@@ -13,89 +16,79 @@ interface ModernShoeProps {
   yOffset?: number;
 }
 
-export function ModernShoe({ isLeft, shoeMat, isFemale, calfR, yOffset = 0 }: ModernShoeProps) {
+const SOLE_MAT = { color: "#f4f4f5", roughness: 0.55, metalness: 0.04 };
+const TREAD_MAT = { color: "#27272a", roughness: 0.88, metalness: 0.08 };
+const LACE_MAT = { color: "#ffffff", roughness: 0.7, metalness: 0.0 };
+
+export const ModernShoe = memo(function ModernShoe({
+  isLeft,
+  shoeMat,
+  isFemale,
+  calfR,
+  yOffset = 0,
+}: ModernShoeProps) {
   const sideX = isLeft ? -1 : 1;
-  const shoeWidth = isFemale ? 0.048 : 0.054;
-  const shoeLength = isFemale ? 0.14 : 0.155;
-  const soleColor = "#f4f4f4"; // Crisp modern sneaker midsole
-  const soleMat = { color: soleColor, roughness: 0.6, metalness: 0.05 };
-  const treadMat = { color: "#1e293b", roughness: 0.9, metalness: 0.1 };
-  const laceMat = { color: "#ffffff", roughness: 0.7, metalness: 0.0 };
+  const shoeWidth = isFemale ? 0.046 : 0.051;
+  const shoeLength = isFemale ? 0.132 : 0.146;
 
   return (
-    <group position={[0, -0.86 + yOffset, 0.035]} rotation={[0, sideX * 0.04, 0]}>
-      {/* ── HIGH/MID PADDED ANKLE COLLAR ── */}
-      <mesh position={[0, 0.045, -0.025]} rotation={[0.08, 0, 0]}>
-        <cylinderGeometry args={[calfR * 0.88, calfR * 0.96, 0.065, 24]} />
-        <meshStandardMaterial {...shoeMat} />
-      </mesh>
-      {/* Collar soft cushion ring */}
-      <mesh position={[0, 0.075, -0.025]} rotation={[0.08, 0, 0]}>
-        <torusGeometry args={[calfR * 0.90, 0.009, 12, 24]} />
-        <meshStandardMaterial {...shoeMat} roughness={0.9} />
-      </mesh>
-
-      {/* ── HEEL COUNTER (Sturdy back cup) ── */}
-      <mesh position={[0, 0.02, -0.042]} scale={[shoeWidth * 0.95, 0.055, 0.04]}>
-        <sphereGeometry args={[1, 16, 16]} />
+    <group position={[0, -0.845 + yOffset, 0.028]} rotation={[0, sideX * 0.035, 0]}>
+      {/* ── PADDED ANKLE COLLAR ── */}
+      <mesh position={[0, 0.038, -0.022]} rotation={[0.06, 0, 0]}>
+        <cylinderGeometry args={[calfR * 0.86, calfR * 0.95, 0.06, 28]} />
         <meshStandardMaterial {...shoeMat} />
       </mesh>
 
-      {/* ── UPPER MAIN BODY (Vamp & Quarter) ── */}
-      <mesh position={[0, 0.015, 0.012]} scale={[shoeWidth, 0.042, shoeLength * 0.58]}>
-        <boxGeometry args={[1, 1, 1]} />
+      {/* ── SCULPTED SNEAKER UPPER (Rounded Capsule Vamp + Heel) ── */}
+      <mesh
+        position={[0, 0.008, 0.006]}
+        rotation={[Math.PI / 2, 0, 0]}
+        scale={[1.0, 1.0, 0.68]}
+      >
+        <capsuleGeometry args={[shoeWidth * 0.92, shoeLength * 0.44, 16, 28]} />
         <meshStandardMaterial {...shoeMat} />
       </mesh>
 
-      {/* ── ROUNDED TOE BOX (Contoured front) ── */}
-      <mesh position={[0, 0.008, shoeLength * 0.34]} scale={[shoeWidth * 0.94, 0.032, 0.042]}>
-        <sphereGeometry args={[1, 20, 16]} />
-        <meshStandardMaterial {...shoeMat} />
+      {/* ── TONGUE & LACES ── */}
+      <mesh
+        position={[0, 0.036, 0.002]}
+        rotation={[-0.38, 0, 0]}
+        scale={[shoeWidth * 0.54, 0.048, 0.012]}
+      >
+        <sphereGeometry args={[1, 16, 14]} />
+        <meshStandardMaterial {...shoeMat} roughness={0.88} />
       </mesh>
 
-      {/* ── TONGUE & LACE EYELETS (Sneaker Details) ── */}
-      {/* Padded Tongue */}
-      <mesh position={[0, 0.048, 0.005]} rotation={[-0.42, 0, 0]} scale={[shoeWidth * 0.52, 0.065, 0.012]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial {...shoeMat} roughness={0.9} />
-      </mesh>
-
-      {/* 4 Laces Bars */}
-      {[-0.01, 0.008, 0.025, 0.042].map((yOffset, i) => (
+      {[-0.006, 0.008, 0.022].map((_, i) => (
         <mesh
           key={`lace-${i}`}
-          position={[0, 0.028 + i * 0.007, 0.035 - i * 0.012]}
-          rotation={[-0.38, 0, 0]}
+          position={[0, 0.024 + i * 0.0065, 0.026 - i * 0.011]}
+          rotation={[-0.35, 0, 0]}
         >
-          <boxGeometry args={[shoeWidth * 0.65, 0.0035, 0.005]} />
-          <meshStandardMaterial {...laceMat} />
+          <boxGeometry args={[shoeWidth * 0.72, 0.0032, 0.0045]} />
+          <meshStandardMaterial {...LACE_MAT} />
         </mesh>
       ))}
 
-      {/* ── MODERN MIDSOLE (Sculpted Cushion Layer) ── */}
-      {/* Upper midsole border */}
-      <mesh position={[0, -0.018, 0.012]} scale={[shoeWidth * 1.06, 0.024, shoeLength * 0.7]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial {...soleMat} />
+      {/* ── UNIFIED ROUNDED MIDSOLE (Flush with upper) ── */}
+      <mesh
+        position={[0, -0.014, 0.006]}
+        rotation={[Math.PI / 2, 0, 0]}
+        scale={[1.05, 1.04, 0.32]}
+      >
+        <capsuleGeometry args={[shoeWidth * 0.94, shoeLength * 0.46, 14, 28]} />
+        <meshStandardMaterial {...SOLE_MAT} />
       </mesh>
 
-      {/* Heel wedge lift (Modern athletic thick heel) */}
-      <mesh position={[0, -0.012, -0.036]} scale={[shoeWidth * 1.05, 0.032, 0.045]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial {...soleMat} />
-      </mesh>
-
-      {/* ── OUTSOLE (Rubber Grip Tread Layer) ── */}
-      <mesh position={[0, -0.035, 0.012]} scale={[shoeWidth * 1.08, 0.012, shoeLength * 0.72]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial {...treadMat} />
-      </mesh>
-
-      {/* Toe bumper tip wrap */}
-      <mesh position={[0, -0.015, shoeLength * 0.38]} scale={[shoeWidth * 0.85, 0.022, 0.015]}>
-        <sphereGeometry args={[1, 14, 14]} />
-        <meshStandardMaterial {...soleMat} />
+      {/* ── FLUSH RUBBER OUTSOLE TREAD (No floating gap) ── */}
+      <mesh
+        position={[0, -0.024, 0.006]}
+        rotation={[Math.PI / 2, 0, 0]}
+        scale={[1.02, 1.02, 0.14]}
+      >
+        <capsuleGeometry args={[shoeWidth * 0.92, shoeLength * 0.45, 10, 24]} />
+        <meshStandardMaterial {...TREAD_MAT} />
       </mesh>
     </group>
   );
-}
+});

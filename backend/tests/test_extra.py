@@ -172,3 +172,136 @@ def test_get_me_requires_authentication(client: TestClient):
     """GET /users/me without token returns 401."""
     res = client.get("/api/v1/users/me")
     assert res.status_code == 401
+
+
+# ─── Tests Parametrizados (Principio DRY — Clase Testing+Automatiza+Deploy) ────
+
+from jose import jwt
+from app.config.settings import settings
+from app.domain.database import normalize_database_url
+from app.routers.validators import is_valid_image, parse_price
+from app.routers.catalog import _resolve_valid_image_url
+
+
+@pytest.mark.parametrize(
+    "raw_price,expected",
+    [
+        (45000, 45000.0),
+        ("89.99", 89.99),
+        (0, 0.0),
+        (-150.5, 0.0),
+        ("invalid_price", 0.0),
+        (None, 0.0),
+    ],
+)
+def test_parse_price_parametrized(raw_price, expected: float):
+    """Verifica el parseo defensivo de precios con un único assert parametrizado (DRY)."""
+    assert parse_price(raw_price) == expected
+
+
+@pytest.mark.parametrize(
+    "magic_bytes,expected_valid",
+    [
+        (b"\xff\xd8\xff\xe0\x00\x10JFIF", True),          # JPEG válido
+        (b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR", True),  # PNG válido
+        (b"GIF89a\x01\x00\x01\x00", True),                # GIF válido
+        (b"RIFF\x00\x00\x00\x00WEBPVP8 ", True),          # WEBP válido
+        (b"RIFF\x00\x00\x00\x00WAVEfmt ", False),         # RIFF de audio (no WEBP)
+        (b"MZ\x90\x00\x03\x00\x00\x00", False),           # Ejecutable binario (.exe)
+        (b"<script>alert(1)</script>", False),            # Payload XSS disfrazado
+    ],
+)
+def test_is_valid_image_magic_bytes_parametrized(magic_bytes: bytes, expected_valid: bool):
+    """Verifica validación de imágenes por magic bytes contra múltiples formatos y vectores."""
+    assert is_valid_image(magic_bytes) is expected_valid
+
+
+@pytest.mark.parametrize(
+    "input_url,expected_url",
+    [
+        ("postgres://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db"),
+        ("postgresql://user:pass@host:5432/db", "postgresql://user:pass@host:5432/db"),
+        ("sqlite:///./tryon_db.sqlite", "sqlite:///./tryon_db.sqlite"),
+    ],
+)
+def test_normalize_database_url_parametrized(input_url: str, expected_url: str):
+    """Verifica la normalización del dialecto PostgreSQL para proveedores Cloud (Render/Neon)."""
+    assert normalize_database_url(input_url) == expected_url
+
+
+@pytest.mark.parametrize(
+    "fit,expected_fallback",
+    [
+        ("Skinny", "/products/jean_black.png"),
+        ("Mom Fit", "/products/jean_vintage.png"),
+        ("Baggy Relaxed", "/products/jean_vintage.png"),
+        ("Bermuda", "/products/bermuda_front.png"),
+        ("Skirt", "/products/skirt_front.png"),
+        ("Flared", "/products/flared_front.png"),
+        ("Regular", "/products/jean_classic.png"),
+    ],
+)
+def test_resolve_valid_image_url_missing_upload_parametrized(fit: str, expected_fallback: str):
+    """Si un archivo en /static/uploads/ no existe en disco, resuelve un fallback acorde al fit."""
+    missing_url = "http://127.0.0.1:8000/static/uploads/non_existent_uuid_file.png"
+    assert _resolve_valid_image_url(missing_url, fit) == expected_fallback
+
+
+@pytest.mark.parametrize(
+    "role_id,expected_role_claim",
+    [
+        (1, "customer"),
+        (2, "brand_manager"),
+    ],
+)
+def test_jwt_payload_standard_claims_parametrized(
+    client: TestClient, role_id: int, expected_role_claim: str
+):
+    """Verifica que el JWT emitido contenga los claims estándar: sub, iat, exp y role."""
+    email = f"jwt_claims_role_{role_id}@example.com"
+    token = _register_and_login(client, email, role_id=role_id)
+    payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    assert payload["sub"] == email
+    assert payload["role"] == expected_role_claim
+    assert isinstance(payload["iat"], int)
+    assert payload["exp"] > payload["iat"]
+
+
+@pytest.mark.parametrize(
+    "fit,waist_cm,hip_cm,thigh_cm,hem_width_cm,expected_scale_min,expected_taper_sign",
+    [
+        ("Skinny", 78.0, 94.0, 52.0, 14.5, 0.85, 1),
+        ("Regular", 82.0, 100.0, 58.0, 20.0, 0.98, 0),
+        ("Wide Leg", 84.0, 108.0, 66.0, 28.0, 1.05, -1),
+    ],
+)
+def test_parametric_metadata_centimeters_parametrized(
+    fit: str,
+    waist_cm: float,
+    hip_cm: float,
+    thigh_cm: float,
+    hem_width_cm: float,
+    expected_scale_min: float,
+    expected_taper_sign: int,
+):
+    """Verifica que build_parametric_metadata derive scale_x, taper y almacene las medidas en cm."""
+    from app.domain.schemas.catalog import build_parametric_metadata
+
+    meta = build_parametric_metadata(
+        fit=fit,
+        waist_cm=waist_cm,
+        hip_cm=hip_cm,
+        thigh_cm=thigh_cm,
+        hem_width_cm=hem_width_cm,
+    )
+    assert meta["waist_cm"] == waist_cm
+    assert meta["hip_cm"] == hip_cm
+    assert meta["thigh_cm"] == thigh_cm
+    assert meta["hem_width_cm"] == hem_width_cm
+    assert meta["scale_x"] >= expected_scale_min
+    if expected_taper_sign > 0:
+        assert meta["taper"] > 0
+    elif expected_taper_sign < 0:
+        assert meta["taper"] < 0
+
+

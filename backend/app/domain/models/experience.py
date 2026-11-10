@@ -35,6 +35,9 @@ class Avatar(Base):
 
     # Accessories
     glasses = Column(Integer, nullable=True, default=0)  # 0 false, 1 true
+    glasses_color = Column(String(50), nullable=True, default="#111827")
+    watch = Column(Boolean, nullable=True, default=False)
+    watch_color = Column(String(50), nullable=True, default="#18181b")
     hat_style = Column(String(50), nullable=True, default="Ninguno")    # Ninguno/Gorra/Sombrero/Headband
 
     # Clothes

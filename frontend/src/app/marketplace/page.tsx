@@ -60,80 +60,82 @@ export default function MarketplacePage() {
   });
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50 font-sans selection:bg-blue-500/30 transition-colors duration-300">
+    <div className="min-h-screen liquid-bg text-neutral-900 dark:text-neutral-50 font-sans selection:bg-blue-500/30 transition-colors duration-300">
       <Navbar />
 
-      <main className="pt-24 pb-12 px-6 max-w-[1400px] mx-auto min-h-screen flex flex-col lg:flex-row gap-8">
+      <main className="pt-28 md:pt-24 pb-12 px-4 sm:px-6 max-w-[1400px] mx-auto min-h-screen flex flex-col lg:flex-row gap-6 lg:gap-8">
         
         {/* Sticky Sidebar (Left) */}
-        <aside className="w-full lg:w-64 shrink-0 space-y-8 lg:sticky lg:top-24 h-fit">
+        <aside className="w-full lg:w-64 shrink-0 space-y-6 lg:space-y-8 lg:sticky lg:top-24 h-fit liquid-glass-panel p-5 sm:p-6 rounded-3xl">
           <div>
-            <h2 className="text-2xl font-bold mb-6">Filtros</h2>
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Filtros</h2>
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input 
                 type="text" 
                 placeholder="Buscar modelo o color..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-medium"
+                className="w-full pl-10 pr-4 py-3 liquid-glass-input rounded-xl text-sm font-medium"
               />
             </div>
           </div>
           
-          <div className="space-y-4">
-            <h3 className="font-semibold flex items-center gap-2"><Filter className="w-4 h-4" /> Fit (Jeans)</h3>
-            <div className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400 font-medium">
-              <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="checkbox" checked={selectedFits.includes("Straight")} onChange={() => handleFitChange("Straight")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500" /> Straight / Recto
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="checkbox" checked={selectedFits.includes("Skinny")} onChange={() => handleFitChange("Skinny")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500" /> Skinny / Ajustado
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="checkbox" checked={selectedFits.includes("Wide Leg")} onChange={() => handleFitChange("Wide Leg")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500" /> Wide Leg
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="checkbox" checked={selectedFits.includes("Mom Fit")} onChange={() => handleFitChange("Mom Fit")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500" /> Mom Fit
-              </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+            <div className="space-y-3.5">
+              <h3 className="font-semibold flex items-center gap-2"><Filter className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Fit (Jeans)</h3>
+              <div className="space-y-2.5 text-sm text-neutral-600 dark:text-neutral-300 font-medium">
+                <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
+                  <input type="checkbox" checked={selectedFits.includes("Straight")} onChange={() => handleFitChange("Straight")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 accent-blue-600" /> Straight / Recto
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
+                  <input type="checkbox" checked={selectedFits.includes("Skinny")} onChange={() => handleFitChange("Skinny")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 accent-blue-600" /> Skinny / Ajustado
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
+                  <input type="checkbox" checked={selectedFits.includes("Wide Leg")} onChange={() => handleFitChange("Wide Leg")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 accent-blue-600" /> Wide Leg
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
+                  <input type="checkbox" checked={selectedFits.includes("Mom Fit")} onChange={() => handleFitChange("Mom Fit")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 accent-blue-600" /> Mom Fit
+                </label>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <h3 className="font-semibold">Precio</h3>
-            <div className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400 font-medium">
-              <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="radio" name="price" checked={selectedPrice === "all"} onChange={() => setSelectedPrice("all")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> Todos
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="radio" name="price" checked={selectedPrice === "under_70k"} onChange={() => setSelectedPrice("under_70k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> Menos de $70.000
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="radio" name="price" checked={selectedPrice === "70k_to_100k"} onChange={() => setSelectedPrice("70k_to_100k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> $70.000 - $100.000
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
-                <input type="radio" name="price" checked={selectedPrice === "over_100k"} onChange={() => setSelectedPrice("over_100k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300" /> Más de $100.000
-              </label>
+            <div className="space-y-3.5">
+              <h3 className="font-semibold">Precio</h3>
+              <div className="space-y-2.5 text-sm text-neutral-600 dark:text-neutral-300 font-medium">
+                <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
+                  <input type="radio" name="price" checked={selectedPrice === "all"} onChange={() => setSelectedPrice("all")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300 accent-blue-600" /> Todos
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
+                  <input type="radio" name="price" checked={selectedPrice === "under_70k"} onChange={() => setSelectedPrice("under_70k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300 accent-blue-600" /> Menos de $70.000
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
+                  <input type="radio" name="price" checked={selectedPrice === "70k_to_100k"} onChange={() => setSelectedPrice("70k_to_100k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300 accent-blue-600" /> $70.000 - $100.000
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
+                  <input type="radio" name="price" checked={selectedPrice === "over_100k"} onChange={() => setSelectedPrice("over_100k")} className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-neutral-300 accent-blue-600" /> Más de $100.000
+                </label>
+              </div>
             </div>
           </div>
         </aside>
 
         {/* Content (Right) */}
         <section className="flex-1 w-full">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 border-b border-neutral-200 dark:border-neutral-800 pb-4 gap-4">
-            <h1 className="text-3xl font-bold tracking-tight">Marketplace</h1>
-            <div className="flex gap-2">
+          <div className="flex flex-row justify-between items-center mb-6 border-b border-neutral-200/70 dark:border-white/10 pb-4 gap-4">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Marketplace</h1>
+            <div className="flex gap-2 p-1 rounded-2xl liquid-glass-pill">
               <button 
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'liquid-glass-btn-primary shadow-sm' : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'}`}
               >
-                <Grid3X3 className="w-5 h-5" />
+                <Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button 
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded-xl transition-colors ${viewMode === 'list' ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'liquid-glass-btn-primary shadow-sm' : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'}`}
               >
-                <List className="w-5 h-5" />
+                <List className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
@@ -141,30 +143,38 @@ export default function MarketplacePage() {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div key={n} className="bg-neutral-100 dark:bg-neutral-900 h-96 rounded-3xl animate-pulse"></div>
+                <div key={n} className="liquid-glass-card h-96 rounded-3xl animate-pulse"></div>
               ))}
             </div>
           ) : (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-6"}>
+            <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" : "flex flex-col gap-6"}>
               {filteredGarments.length === 0 ? (
-                <div className="col-span-full py-12 text-center text-neutral-500 bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800">
+                <div className="col-span-full py-12 px-6 text-center text-neutral-500 liquid-glass-panel rounded-3xl">
                   <p className="text-lg font-medium">No se encontraron prendas con esos filtros.</p>
-                  <button onClick={() => { setSearchQuery(""); setSelectedFits([]); setSelectedPrice("all"); }} className="mt-4 text-blue-600 hover:underline">Limpiar filtros</button>
+                  <button onClick={() => { setSearchQuery(""); setSelectedFits([]); setSelectedPrice("all"); }} className="mt-4 text-blue-600 dark:text-blue-400 font-semibold hover:underline">Limpiar filtros</button>
                 </div>
               ) : filteredGarments.map((garment) => (
                 <Link 
                   key={garment.id} 
                   href={`/product/${garment.id}`}
-                  className={`group bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 overflow-hidden hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 block ${viewMode === 'list' ? 'flex flex-col sm:flex-row h-auto sm:h-56' : ''}`}
+                  className={`group liquid-glass-card rounded-3xl overflow-hidden hover:-translate-y-1.5 block ${viewMode === 'list' ? 'flex flex-col sm:flex-row h-auto sm:min-h-56' : ''}`}
                 >
-                  <div className={`relative bg-neutral-100 dark:bg-neutral-800 ${viewMode === 'list' ? 'w-full sm:w-48 h-64 sm:h-full shrink-0' : 'aspect-[4/5] w-full'}`}>
+                  <div className={`relative bg-neutral-100/60 dark:bg-neutral-800/60 overflow-hidden ${viewMode === 'list' ? 'w-full sm:w-52 h-64 sm:h-auto shrink-0' : 'aspect-[4/5] w-full'}`}>
                     {garment.image ? (
-                      <img src={garment.image + "?v=5"} alt={garment.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <img
+                        src={garment.image}
+                        alt={garment.name}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/products/jean_classic.png";
+                        }}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-neutral-400 font-medium">Sin Imagen</div>
                     )}
                     {garment.is_processed && (
-                      <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur text-xs font-bold px-3 py-1.5 rounded-full shadow-sm border border-neutral-200 dark:border-neutral-800 flex items-center gap-1.5">
+                      <div className="absolute top-4 left-4 liquid-glass-pill liquid-glass-refract text-neutral-900 dark:text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
                         <span className="flex h-2 w-2">
                           <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -173,21 +183,21 @@ export default function MarketplacePage() {
                       </div>
                     )}
                   </div>
-                  <div className={`p-6 flex flex-col justify-between ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                  <div className={`p-5 sm:p-6 flex flex-col justify-between ${viewMode === 'list' ? 'flex-1' : ''}`}>
                     <div>
-                      <p className="text-xs text-neutral-500 font-bold mb-2 tracking-widest uppercase">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold mb-2 tracking-widest uppercase">
                         {garment.brand_id === 1 ? 'Acme Denim' : 'Marca ' + garment.brand_id}
                       </p>
-                      <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">{garment.name}</h3>
+                      <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">{garment.name}</h3>
                       {viewMode === 'list' && (
-                         <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-2">
+                         <p className="text-sm text-neutral-600 dark:text-neutral-300 mb-4 line-clamp-2">
                            Jeans premium con calce perfecto. Digitalizado para TryOnHub.
                          </p>
                       )}
                     </div>
-                    <div className="flex justify-between items-center mt-6">
-                      <span className="text-2xl font-black">{formatPrice(garment.price)}</span>
-                      <span className="text-sm font-bold px-4 py-2 bg-neutral-100 dark:bg-neutral-800 rounded-xl text-neutral-700 dark:text-neutral-300 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <div className="flex justify-between items-center gap-2 mt-5">
+                      <span className="text-xl sm:text-2xl font-black">{formatPrice(garment.price)}</span>
+                      <span className="text-xs sm:text-sm font-bold px-3.5 sm:px-4 py-2 liquid-glass-btn-secondary rounded-xl text-neutral-800 dark:text-neutral-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-all shrink-0">
                         Comprar &rarr;
                       </span>
                     </div>

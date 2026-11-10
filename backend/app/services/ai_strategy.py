@@ -234,6 +234,8 @@ class MockTryOnStrategy(VirtualTryOnStrategy):
     """
 
     def process_garment(self, garment_data: dict) -> dict:
+        from app.domain.schemas.catalog import build_parametric_metadata
+
         image_url = (
             garment_data.get("image_url")
             or garment_data.get("ImageURL")
@@ -245,27 +247,30 @@ class MockTryOnStrategy(VirtualTryOnStrategy):
             or "Regular"
         )
         color_val = garment_data.get("color_hex") or "#1e3a8a"
+        waist_rise_label = (
+            garment_data.get("Waist_Rise")
+            or garment_data.get("waist_rise")
+            or "Tiro Medio"
+        )
+
+        meta = build_parametric_metadata(
+            fit=fit_val,
+            color_hex=color_val,
+            waist_rise_label=waist_rise_label,
+            texture=garment_data.get("texture") or "Denim Clásico",
+            elasticity=garment_data.get("elasticity") or "Rígido",
+            fabric_weight=garment_data.get("fabric_weight") or "Medio",
+            distress_level=garment_data.get("distress_level") or 0,
+            has_cuffs=bool(garment_data.get("has_cuffs") or garment_data.get("has_cuff")),
+            has_pleats=bool(garment_data.get("has_pleats")),
+        )
+        meta.update({
+            "garment_name": garment_data.get("Name") or garment_data.get("name") or "Mock Garment",
+            "fit": fit_val,
+            "source": "mock",
+        })
 
         return {
             "ai_generated_image_url": image_url,
-            "metadata_json": {
-                "scale_x": 1.0,
-                "scale_y": 1.0,
-                "color_hex": color_val,
-                "accent_hex": color_val,
-                "roughness": 0.82,
-                "metalness": 0.1,
-                "fabric_weight": 0.6,
-                "stretch_factor": 0.4,
-                "opacity": 1.0,
-                "waist_rise": 0.5,
-                "taper": 0.0,
-                "distress": 0.0,
-                "has_cuff": False,
-                "has_pleats": False,
-                "fit_label": fit_val,
-                "garment_name": garment_data.get("Name") or garment_data.get("name") or "Mock Garment",
-                "fit": fit_val,
-                "source": "mock",
-            },
+            "metadata_json": meta,
         }

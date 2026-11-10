@@ -1,6 +1,10 @@
 hoverhub-core/
 implementation_plan.md
 
+# Variables de entorno y secretos
+.env
+.env.*
+
 # Base de datos local de desarrollo
 *.sqlite
 *.db

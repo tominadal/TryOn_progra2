@@ -39,6 +39,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* SVG Optical Refraction Filter for Liquid Glass surfaces */}
+        <svg className="pointer-events-none fixed inset-0 h-0 w-0 opacity-0" aria-hidden="true">
+          <defs>
+            <filter id="liquid-glass-refract" x="-10%" y="-10%" width="120%" height="120%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="noise" />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+          </defs>
+        </svg>
         <ThemeProvider>
           <AuthProvider>
             {children}

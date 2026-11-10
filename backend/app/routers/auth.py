@@ -33,7 +33,12 @@ def login_access_token(
     else:
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
+    role_val = (
+        user.role.name
+        if getattr(user, "role", None) and getattr(user.role, "name", None)
+        else ("brand_manager" if user.role_id == 2 else "customer")
+    )
     access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
+        data={"sub": user.email, "role": role_val}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}

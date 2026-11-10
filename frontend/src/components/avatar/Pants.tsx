@@ -1,5 +1,17 @@
+import { memo, useMemo } from "react";
 import * as THREE from "three";
-import { useTexture } from "@react-three/drei";
+import {
+  buildLoftedGeometry,
+  evaluateRingPoint,
+  getProceduralFabricTexture,
+  LoftRing,
+  sampleLoftRings,
+} from "./loftGeometry";
+import { normalizeMorphFactor } from "@/lib/avatars";
+
+const RIVET_MAT = { color: "#b45309", roughness: 0.32, metalness: 0.82 };
+const BUTTON_MAT = { color: "#cbd5e1", roughness: 0.25, metalness: 0.9 };
+const STITCH_MAT = { color: "#b45309", roughness: 0.85, metalness: 0.05 };
 
 export interface ParametricPantsProps {
   color?: string;
@@ -14,12 +26,90 @@ export interface ParametricPantsProps {
   taper?: number;
   waistRise?: number;
   hasCuff?: boolean;
+  hasPleats?: boolean;
+  distress?: number; // 0.0 to 1.0 (0% to 100% vintage wear / distressing)
+  texture?: string; // "Denim Clásico" | "Denim Crudo (Rígido)" | "Cuero/Ecocuero" | "Algodón Suave" | "Lino/Fresco" | "Gabardina"
+  garmentPatternCm?: {
+    waistCm?: number;
+    hipCm?: number;
+    thighCm?: number;
+    inseamCm?: number;
+    hemWidthCm?: number;
+    riseCm?: number;
+  };
   legThickness?: number;
   hipWidth?: number;
-  fitTightness?: number; // < -0.2 = Demasiado chico / ajustado, > 0.2 = Demasiado grande / holgado
+  bellyWidth?: number;
+  bellyDepth?: number;
+  chestWidth?: number;
+  fitTightness?: number; // < -0.22 = Talla chica / ajustada, > 0.22 = Talla grande / holgada
 }
 
-export function ParametricPants({
+/**
+ * Builds a curved 3D patch mesh that conforms 100% to the lofted pelvis surface
+ * (used for back pockets, front fly J-stitch, and curved pocket seams so nothing ever floats).
+ */
+function buildSurfacePatch(
+  rings: LoftRing[],
+  uMin: number,
+  uMax: number,
+  thetaMin: number,
+  thetaMax: number,
+  normalOffset: number,
+  uSteps = 10,
+  tSteps = 10,
+  radialDisplacement?: (theta: number, y: number, u: number) => { drx?: number; drz?: number; dy?: number }
+): THREE.BufferGeometry {
+  const stride = tSteps + 1;
+  const positions = new Float32Array((uSteps + 1) * stride * 3);
+  const uvs = new Float32Array((uSteps + 1) * stride * 2);
+  const indices: number[] = [];
+
+  for (let i = 0; i <= uSteps; i++) {
+    const uFrac = i / uSteps;
+    const u = uMin + (uMax - uMin) * uFrac;
+    const ring = sampleLoftRings(rings, u);
+
+    for (let j = 0; j <= tSteps; j++) {
+      const tFrac = j / tSteps;
+      const theta = thetaMin + (thetaMax - thetaMin) * tFrac;
+      const mod = radialDisplacement ? radialDisplacement(theta, ring.y, u) : undefined;
+      const offsetRing: LoftRing = {
+        ...ring,
+        rx: ring.rx + (mod?.drx ?? 0) + normalOffset,
+        rzFront: ring.rzFront + (mod?.drz ?? 0) + normalOffset,
+        rzBack: ring.rzBack + (mod?.drz ?? 0) + normalOffset,
+      };
+      const pt = evaluateRingPoint(offsetRing, theta);
+      const idx = i * stride + j;
+      positions[idx * 3] = pt.x;
+      positions[idx * 3 + 1] = pt.y + (mod?.dy ?? 0);
+      positions[idx * 3 + 2] = pt.z;
+      uvs[idx * 2] = tFrac;
+      uvs[idx * 2 + 1] = uFrac;
+    }
+  }
+
+  for (let i = 0; i < uSteps; i++) {
+    for (let j = 0; j < tSteps; j++) {
+      const a = i * stride + j;
+      const b = (i + 1) * stride + j;
+      const c = (i + 1) * stride + (j + 1);
+      const d = i * stride + (j + 1);
+      indices.push(a, d, b);
+      indices.push(b, d, c);
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+export const ParametricPants = memo(function ParametricPants({
   color = "#1e3a8a",
   accentColor,
   avatarScaleXZ = 1.0,
@@ -28,393 +118,739 @@ export function ParametricPants({
   pantsScaleY = 1.0,
   pantsFit = "Regular",
   isFemale = false,
-  roughness = 0.82,
+  roughness = 0.80,
   taper = 0.0,
   waistRise = 0.5,
   hasCuff = false,
+  hasPleats = false,
+  distress = 0.0,
+  texture = "Denim Clásico",
+  garmentPatternCm,
   legThickness = 1.0,
   hipWidth = 1.0,
+  bellyWidth = 1.0,
+  bellyDepth = 1.0,
+  chestWidth = 1.0,
   fitTightness = 0.0,
 }: ParametricPantsProps) {
-  const [denimTex] = useTexture(["/textures/denim.png"], (textures) => {
-    const tex = Array.isArray(textures) ? textures[0] : textures;
-    if (tex) {
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(2, 2);
-      tex.needsUpdate = true;
-    }
-  });
+  const texLower = (texture || "Denim Clásico").toLowerCase();
+  const isLeather = texLower.includes("cuero");
+  const isCottonOrChino =
+    texLower.includes("algod") || texLower.includes("gabardina") || texLower.includes("lino");
+
+  const fabricTex = useMemo(
+    () =>
+      getProceduralFabricTexture(
+        isLeather ? "leather" : isCottonOrChino ? "cotton" : "denim",
+        4,
+        4
+      ),
+    [isLeather, isCottonOrChino]
+  );
 
   const accent = accentColor ?? color;
+  const genderLabel = isFemale ? "Mujer" : "Hombre";
 
-  // Fit calculations:
-  // fitTightness:
-  // -1.0 .. -0.3 = Demasiado chica / Ajustada
-  // -0.3 .. 0.3  = Calce perfecto
-  //  0.3 .. 1.0  = Demasiado grande / Holgada
-  const isTooSmall = fitTightness < -0.25;
-  const isTooBig = fitTightness > 0.25;
+  const isTooSmall = fitTightness < -0.22;
+  const isTooBig = fitTightness > 0.22;
 
-  // Visual modifications from fitTightness
-  // If too small: tighter radius, higher waist constriction, tension wrinkles, hem rides up
-  // If too big: loose gap, extra baggy circumference, hem puddles at ankles
-  const tightnessRadiusOffset = fitTightness * 0.018; // Positive adds girth, negative reduces
-  const hemRideUp = isTooSmall ? Math.abs(fitTightness) * 0.035 : 0; // Short/tight hem rides up
-  const puddleAmount = isTooBig ? fitTightness * 0.04 : 0; // Stacking / bunching fabric
+  const clampedTightness = Math.max(-0.85, Math.min(0.85, fitTightness));
+  const tightnessRadiusOffset = clampedTightness * 0.013;
+  const hemRideUp = isTooSmall ? Math.min(0.038, Math.abs(clampedTightness) * 0.030) : 0;
+  const puddleAmount = isTooBig ? Math.min(0.034, clampedTightness * 0.026) : 0;
+
+  const baseTexRoughness = isLeather
+    ? 0.26
+    : texLower.includes("gabardina")
+    ? 0.68
+    : texLower.includes("lino")
+    ? 0.90
+    : roughness;
+  const baseTexMetalness = isLeather ? 0.34 : 0.02;
 
   const adjustedRoughness = isTooSmall
-    ? Math.max(0.65, roughness - 0.12) // Taut fabric has subtle stretch sheen
+    ? Math.max(0.22, baseTexRoughness - 0.08)
     : isTooBig
-    ? Math.min(0.92, roughness + 0.05) // Baggy fabric has soft diffuse matte
-    : roughness;
+    ? Math.min(0.94, baseTexRoughness + 0.05)
+    : baseTexRoughness;
 
-  const deniMat = {
-    color: color,
-    map: denimTex,
-    roughness: adjustedRoughness,
-    metalness: 0.02,
-  };
+  const deniMat = useMemo(
+    () => ({
+      color: color,
+      map: fabricTex,
+      bumpMap: fabricTex,
+      bumpScale: isLeather ? 0.0038 : 0.0065,
+      roughness: adjustedRoughness,
+      metalness: baseTexMetalness,
+    }),
+    [color, fabricTex, isLeather, adjustedRoughness, baseTexMetalness]
+  );
 
-  const rivetMat = { color: "#d97706", roughness: 0.3, metalness: 0.85 }; // Copper rivets
-  const buttonMat = { color: "#cbd5e1", roughness: 0.25, metalness: 0.9 }; // Metal button
-  const stitchMat = { color: "#d97706", roughness: 0.8, metalness: 0.0 }; // Gold denim thread
+  const pocketMat = useMemo(
+    () => ({
+      color: color,
+      map: fabricTex,
+      bumpMap: fabricTex,
+      bumpScale: isLeather ? 0.0042 : 0.0075,
+      roughness: Math.min(0.94, adjustedRoughness + 0.04),
+      metalness: baseTexMetalness * 0.8,
+      side: THREE.DoubleSide,
+    }),
+    [color, fabricTex, isLeather, adjustedRoughness, baseTexMetalness]
+  );
 
-  const taperFactor = taper * 0.04;
-  const waistRiseOffset = (waistRise - 0.5) * 0.06;
-
-  let thighMod = 0,
-    calfMod = 0,
-    hipMod = 0;
-  switch (pantsFit) {
-    case "Skinny":
-      thighMod = -0.015 - taperFactor;
-      calfMod = -0.018 - taperFactor;
-      break;
-    case "Slim":
-      thighMod = -0.008 - taperFactor * 0.5;
-      calfMod = -0.01 - taperFactor * 0.5;
-      break;
-    case "Wide Leg":
-      thighMod = 0.03 - taperFactor;
-      calfMod = 0.038 - taperFactor;
-      break;
-    case "Relaxed":
-      thighMod = 0.02 - taperFactor;
-      calfMod = 0.025 - taperFactor;
-      break;
-    case "Mom Fit":
-      hipMod = 0.025;
-      thighMod = 0.012 - taperFactor;
-      calfMod = -0.005 - taperFactor;
-      break;
-    case "Skinny-Mom":
-      hipMod = 0.02;
-      thighMod = -0.008 - taperFactor;
-      calfMod = -0.015 - taperFactor;
-      break;
-    case "Bermuda":
-      thighMod = 0.01 - taperFactor;
-      break;
-    case "Flared":
-      hipMod = 0.01;
-      thighMod = -0.01 - taperFactor;
-      calfMod = -0.015 - taperFactor;
-      break;
-    case "Skirt":
-      hipMod = 0.01;
-      thighMod = -0.01;
-      calfMod = -0.01;
-      break;
-    default:
-      thighMod = -taperFactor * 0.5;
-      calfMod = -taperFactor;
-      break;
-  }
+  const taperFactor = Math.max(-0.6, Math.min(0.6, taper)) * 0.026;
+  const effectiveRise =
+    garmentPatternCm?.riseCm !== undefined
+      ? Math.max(0, Math.min(1, (garmentPatternCm.riseCm - 20) / 12))
+      : Math.max(0, Math.min(1, waistRise));
+  const waistRiseOffset = (effectiveRise - 0.5) * 0.055;
 
   const fitLower = pantsFit.toLowerCase();
   const isBermuda = fitLower.includes("bermuda") || fitLower.includes("short");
   const isSkirt = fitLower.includes("skirt") || fitLower.includes("pollera");
   const isFlared = fitLower.includes("flare");
 
-  const hipR_base = isFemale ? 0.142 * hipWidth : 0.126 * hipWidth;
-  const offset = isTooSmall ? 0.003 : isTooBig ? 0.022 : 0.009;
+  let thighMod = 0,
+    calfMod = 0,
+    hipMod = 0;
 
-  const minHipR = hipR_base + 0.004;
-  const minThighR = (isFemale ? 0.068 : 0.062) * legThickness + 0.003;
-  const minCalfR = (isFemale ? 0.046 : 0.05) * legThickness + 0.003;
+  if (fitLower.includes("skinny-mom")) {
+    hipMod = 0.012;
+    thighMod = -0.005 - taperFactor;
+    calfMod = -0.010 - taperFactor;
+  } else if (fitLower.includes("skinny")) {
+    thighMod = -0.010 - taperFactor;
+    calfMod = -0.012 - taperFactor;
+  } else if (fitLower.includes("slim")) {
+    thighMod = -0.005 - taperFactor * 0.5;
+    calfMod = -0.007 - taperFactor * 0.5;
+  } else if (fitLower.includes("wide") || fitLower.includes("baggy")) {
+    hipMod = 0.009;
+    thighMod = 0.022 - taperFactor;
+    calfMod = 0.028 - taperFactor;
+  } else if (fitLower.includes("relaxed")) {
+    hipMod = 0.007;
+    thighMod = 0.016 - taperFactor;
+    calfMod = 0.020 - taperFactor;
+  } else if (fitLower.includes("mom")) {
+    hipMod = 0.015;
+    thighMod = 0.009 - taperFactor;
+    calfMod = -0.004 - taperFactor;
+  } else if (isBermuda) {
+    thighMod = 0.009 - taperFactor;
+  } else if (isFlared) {
+    hipMod = 0.005;
+    thighMod = -0.007 - taperFactor;
+    calfMod = -0.009 - taperFactor;
+  } else if (isSkirt) {
+    hipMod = 0.007;
+  } else {
+    thighMod = -taperFactor * 0.5;
+    calfMod = -taperFactor;
+  }
 
-  const finalHipR = Math.max(
-    minHipR,
-    (hipR_base + hipMod) * pantsScaleX + offset * 1.5 + tightnessRadiusOffset
+  // Normalized anthropometric factors (identical to ParametricMannequin)
+  const hipModVal = normalizeMorphFactor(hipWidth, "hipWidth", genderLabel);
+  const legModVal = normalizeMorphFactor(legThickness, "legThickness", genderLabel);
+  const bellyWMod = normalizeMorphFactor(bellyWidth, "bellyWidth", genderLabel);
+  const bellyDMod = normalizeMorphFactor(bellyDepth, "bellyDepth", genderLabel);
+  const chestMod = normalizeMorphFactor(chestWidth, "chestWidth", genderLabel);
+  const clampedScaleX = Math.max(0.86, Math.min(1.20, pantsScaleX || 1.0));
+
+  const baseChestRx = (isFemale ? 0.126 : 0.140) * chestMod;
+  const baseChestRz = (isFemale ? 0.096 : 0.104) * (0.65 + 0.35 * chestMod);
+  const rawWaistRx = (isFemale ? 0.102 : 0.116) * bellyWMod;
+  const rawWaistRz = (isFemale ? 0.082 : 0.092) * bellyDMod;
+
+  const hipRxBase = (isFemale ? 0.138 : 0.128) * hipModVal;
+  const hipRzBase = (isFemale ? 0.104 : 0.098) * (0.68 + 0.32 * hipModVal);
+
+  const waistRx = Math.max(rawWaistRx, Math.min(baseChestRx, hipRxBase) * 0.78);
+  const waistRzFront =
+    Math.max(rawWaistRz, baseChestRz * 0.74) *
+    (bellyDMod > 1 ? 1 + (bellyDMod - 1) * 0.22 : 1);
+  const waistRzBack = Math.max(rawWaistRz * 0.86, hipRzBase * 0.76);
+
+  // Coupled iliac/waistband radii matching Mannequin.tsx so there is NEVER a shelf/cliff
+  const coupledIliacRx = waistRx * 0.42 + hipRxBase * 0.58;
+  const coupledIliacRzFront = waistRzFront * 0.58 + hipRzBase * 0.42;
+  const coupledIliacRzBack = waistRzBack * 0.35 + hipRzBase * 0.65;
+
+  const minHipRx = hipRxBase + 0.004;
+  const minThighR = (isFemale ? 0.060 : 0.057) * legModVal + 0.004;
+  const minCalfR = (isFemale ? 0.042 : 0.045) * legModVal + 0.004;
+
+  const fitEase = isTooSmall ? 0.002 : isTooBig ? 0.014 : 0.006;
+
+  const finalHipRx = Math.max(
+    minHipRx,
+    (hipRxBase + hipMod) * (0.68 + 0.32 * clampedScaleX) + fitEase + tightnessRadiusOffset
   );
+  const finalHipRzFront = Math.max(
+    hipRzBase * 0.92 + 0.003,
+    coupledIliacRzFront * 0.94
+  );
+  const finalHipRzBack = Math.max(
+    hipRzBase * 1.0 + 0.004,
+    coupledIliacRzBack * 0.98
+  );
+
   const thighR = Math.max(
     minThighR,
-    ((isFemale ? 0.068 : 0.062) * legThickness + thighMod) * pantsScaleX +
-      offset +
-      tightnessRadiusOffset
+    ((isFemale ? 0.062 : 0.059) * legModVal + thighMod) * (0.62 + 0.38 * clampedScaleX) +
+      fitEase +
+      tightnessRadiusOffset * 0.82
   );
   const calfR = Math.max(
     minCalfR,
-    ((isFemale ? 0.046 : 0.05) * legThickness + calfMod) * pantsScaleX +
-      offset +
-      tightnessRadiusOffset * 0.8
+    ((isFemale ? 0.044 : 0.047) * legModVal + calfMod) * (0.62 + 0.38 * clampedScaleX) +
+      fitEase +
+      tightnessRadiusOffset * 0.72
   );
 
+  const beltY = 0.896 + waistRiseOffset;
+
+  // ── 1. CONTINUOUS LOFTED PELVIS / RISE / WAISTBAND RINGS ──────────────────
+  const pelvisRings = useMemo<LoftRing[]>(() => {
+    const wbEase = isTooSmall ? 0.001 : isTooBig ? 0.009 : 0.003;
+    const wbRx = coupledIliacRx + wbEase;
+    const wbRzFront = coupledIliacRzFront + wbEase;
+    const wbRzBack = coupledIliacRzBack + wbEase;
+
+    if (isSkirt) {
+      const skirtHemRx = finalHipRx * 1.24;
+      const skirtHemRz = finalHipRzFront * 1.20;
+      return [
+        { y: 0.46, rx: skirtHemRx, rzFront: skirtHemRz, rzBack: skirtHemRz * 1.04, cz: 0 },
+        { y: 0.60, rx: finalHipRx * 1.12, rzFront: finalHipRzFront * 1.08, rzBack: finalHipRzBack * 1.06, cz: -0.002 },
+        { y: 0.74, rx: finalHipRx * 1.03, rzFront: finalHipRzFront * 1.01, rzBack: finalHipRzBack * 1.03, cz: -0.003 },
+        { y: 0.83, rx: finalHipRx, rzFront: finalHipRzFront, rzBack: finalHipRzBack, cz: -0.002 },
+        { y: beltY - 0.022, rx: wbRx * 1.01, rzFront: wbRzFront, rzBack: wbRzBack, cz: 0 },
+        { y: beltY + 0.012, rx: wbRx, rzFront: wbRzFront, rzBack: wbRzBack, cz: 0.001 },
+      ];
+    }
+
+    return [
+      // Deep crotch / sub-gluteal saddle base (merges smoothly into upper thighs)
+      { y: 0.695, rx: finalHipRx * 0.86, rzFront: finalHipRzFront * 0.76, rzBack: finalHipRzBack * 0.82, cz: -0.002 },
+      // Lower seat / hip curve
+      { y: 0.765, rx: finalHipRx * 0.97, rzFront: finalHipRzFront * 0.94, rzBack: finalHipRzBack * 1.01, cz: -0.004 },
+      // Mid-pelvis / Fullest hip & glute contour
+      { y: 0.828, rx: finalHipRx, rzFront: finalHipRzFront, rzBack: finalHipRzBack * 1.02, cz: -0.002 },
+      // Upper rise / Under-waistband transition
+      { y: beltY - 0.024, rx: (finalHipRx * 0.4 + wbRx * 0.6), rzFront: (finalHipRzFront * 0.35 + wbRzFront * 0.65), rzBack: (finalHipRzBack * 0.35 + wbRzBack * 0.65), cz: 0 },
+      // Top of waistband (coupled to torso iliac contour)
+      { y: beltY + 0.012, rx: wbRx, rzFront: wbRzFront, rzBack: wbRzBack, cz: 0.001 },
+    ];
+  }, [
+    isSkirt,
+    finalHipRx,
+    finalHipRzFront,
+    finalHipRzBack,
+    coupledIliacRx,
+    coupledIliacRzFront,
+    coupledIliacRzBack,
+    isTooSmall,
+    isTooBig,
+    beltY,
+  ]);
+
+  const pelvisDisplacement = useMemo(
+    () => (theta: number, y: number) => {
+      let drz = 0;
+      let drx = 0;
+
+      // Subtle anatomical dual-glute contour in the back
+      const backWeight = Math.max(0, -Math.cos(theta));
+      if (backWeight > 0.1 && y > 0.72 && y < 0.86) {
+        const yEnv = Math.sin(((y - 0.72) / 0.14) * Math.PI);
+        const cheekSpread = Math.sin(Math.abs(Math.sin(theta)) * Math.PI * 1.4);
+        drz += 0.007 * yEnv * Math.max(0, cheekSpread) * backWeight;
+      }
+
+      // Subtle horizontal fabric tension ripples when pants are too small
+      if (isTooSmall && Math.cos(theta) > 0.2 && y > 0.75 && y < 0.88) {
+        const frontW = Math.cos(theta);
+        const ripple = Math.sin((y - 0.75) * 140) * 0.0016 * Math.abs(clampedTightness);
+        drz += ripple * frontW;
+      }
+
+      // Subtle side drape folds when pants are too big
+      if (isTooBig && y > 0.74 && y < 0.88) {
+        const sideW = Math.abs(Math.sin(theta));
+        drx += Math.sin(theta * 6) * 0.002 * clampedTightness * sideW;
+      }
+
+      return { drx, drz };
+    },
+    [isTooSmall, isTooBig, clampedTightness]
+  );
+
+  const pelvisGeometry = useMemo(
+    () =>
+      buildLoftedGeometry({
+        rings: pelvisRings,
+        heightSegments: 36,
+        radialSegments: 52,
+        capBottom: true,
+        capTop: true,
+        uRepeat: 3,
+        vRepeat: 2,
+        radialDisplacement: pelvisDisplacement,
+      }),
+    [pelvisRings, pelvisDisplacement]
+  );
+
+  // ── 2. SURFACE-SNAPPED DENIM DETAILS (0% FLOATING GUARANTEE) ──────────────
+  const waistbandGeometry = useMemo(
+    () =>
+      buildSurfacePatch(
+        pelvisRings,
+        0.84,
+        0.99,
+        0,
+        Math.PI * 2,
+        0.0012,
+        6,
+        48,
+        pelvisDisplacement
+      ),
+    [pelvisRings, pelvisDisplacement]
+  );
+
+  // Subtle, fine-thread Front Fly J-Stitch (no thick orange stripe)
+  const flyStitchGeometry = useMemo(
+    () =>
+      buildSurfacePatch(
+        pelvisRings,
+        isSkirt ? 0.64 : 0.32,
+        0.84,
+        -0.004,
+        0.006,
+        0.0014,
+        10,
+        4,
+        pelvisDisplacement
+      ),
+    [pelvisRings, isSkirt, pelvisDisplacement]
+  );
+
+  const frontPocketsGeometry = useMemo(() => {
+    const uStart = isSkirt ? 0.72 : 0.56;
+    const uEnd = 0.84;
+    return [
+      buildSurfacePatch(pelvisRings, uStart, uEnd, 0.36, 0.88, 0.0018, 8, 10, pelvisDisplacement),
+      buildSurfacePatch(
+        pelvisRings,
+        uStart,
+        uEnd,
+        Math.PI * 2 - 0.88,
+        Math.PI * 2 - 0.36,
+        0.0018,
+        8,
+        10,
+        pelvisDisplacement
+      ),
+    ];
+  }, [pelvisRings, isSkirt, pelvisDisplacement]);
+
+  const backPocketsGeometry = useMemo(() => {
+    const uStart = isSkirt ? 0.58 : 0.28;
+    const uEnd = isSkirt ? 0.80 : 0.68;
+    return [
+      buildSurfacePatch(
+        pelvisRings,
+        uStart,
+        uEnd,
+        Math.PI - 0.54,
+        Math.PI - 0.16,
+        0.002,
+        10,
+        10,
+        pelvisDisplacement
+      ),
+      buildSurfacePatch(
+        pelvisRings,
+        uStart,
+        uEnd,
+        Math.PI + 0.16,
+        Math.PI + 0.54,
+        0.002,
+        10,
+        10,
+        pelvisDisplacement
+      ),
+    ];
+  }, [pelvisRings, isSkirt, pelvisDisplacement]);
+
+  const beltLoopGeometries = useMemo(() => {
+    const angles = [-0.32, 0.32, Math.PI * 0.5, Math.PI * 0.82, Math.PI * 1.18, Math.PI * 1.5];
+    return angles.map((ang) =>
+      buildSurfacePatch(
+        pelvisRings,
+        0.83,
+        0.995,
+        ang - 0.032,
+        ang + 0.032,
+        0.0028,
+        6,
+        4,
+        pelvisDisplacement
+      )
+    );
+  }, [pelvisRings, pelvisDisplacement]);
+
+  // Front Pleats (Pinzas Frontales / Sastreras)
+  const pleatGeometries = useMemo(() => {
+    if (!hasPleats) return [];
+    const uStart = isSkirt ? 0.34 : 0.42;
+    const uEnd = 0.83;
+    return [
+      buildSurfacePatch(pelvisRings, uStart, uEnd, 0.24, 0.295, 0.0032, 10, 4, pelvisDisplacement),
+      buildSurfacePatch(pelvisRings, uStart, uEnd, 0.36, 0.405, 0.0022, 10, 4, pelvisDisplacement),
+      buildSurfacePatch(
+        pelvisRings,
+        uStart,
+        uEnd,
+        Math.PI * 2 - 0.295,
+        Math.PI * 2 - 0.24,
+        0.0032,
+        10,
+        4,
+        pelvisDisplacement
+      ),
+      buildSurfacePatch(
+        pelvisRings,
+        uStart,
+        uEnd,
+        Math.PI * 2 - 0.405,
+        Math.PI * 2 - 0.36,
+        0.0022,
+        10,
+        4,
+        pelvisDisplacement
+      ),
+    ];
+  }, [hasPleats, pelvisRings, isSkirt, pelvisDisplacement]);
+
+  // Vintage Distress / Whiskers on upper pelvis
+  const pelvisWhiskerGeometries = useMemo(() => {
+    if (distress <= 0.05) return [];
+    const whiskers: THREE.BufferGeometry[] = [];
+    const uPositions = isSkirt ? [0.58, 0.66] : [0.46, 0.54, 0.62];
+    for (const uPos of uPositions) {
+      whiskers.push(
+        buildSurfacePatch(
+          pelvisRings,
+          uPos - 0.015,
+          uPos + 0.015,
+          0.18,
+          0.68,
+          0.0019,
+          4,
+          8,
+          pelvisDisplacement
+        ),
+        buildSurfacePatch(
+          pelvisRings,
+          uPos - 0.015,
+          uPos + 0.015,
+          Math.PI * 2 - 0.68,
+          Math.PI * 2 - 0.18,
+          0.0019,
+          4,
+          8,
+          pelvisDisplacement
+        )
+      );
+    }
+    return whiskers;
+  }, [distress, pelvisRings, isSkirt, pelvisDisplacement]);
+
+  const distressMat = useMemo(() => {
+    const baseCol = new THREE.Color(color || "#1e3a8a");
+    const fadedCol = baseCol.clone().lerp(new THREE.Color("#e2e8f0"), Math.min(0.68, 0.25 + distress * 0.48));
+    return {
+      color: `#${fadedCol.getHexString()}`,
+      roughness: 0.95,
+      metalness: 0.01,
+      bumpMap: fabricTex || undefined,
+      bumpScale: 0.006,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+    };
+  }, [color, distress, fabricTex]);
+
+  const hardwarePositions = useMemo(() => {
+    const topRing = sampleLoftRings(pelvisRings, 0.92);
+    const buttonPt = evaluateRingPoint(topRing, 0, pelvisDisplacement, 0.92);
+
+    const pocketU = isSkirt ? 0.76 : 0.64;
+    const pocketRing = sampleLoftRings(pelvisRings, pocketU);
+    const rivetR = evaluateRingPoint(pocketRing, 0.42, pelvisDisplacement, pocketU);
+    const rivetL = evaluateRingPoint(pocketRing, Math.PI * 2 - 0.42, pelvisDisplacement, pocketU);
+
+    return {
+      button: [buttonPt.x, buttonPt.y, buttonPt.z + 0.0025] as [number, number, number],
+      rivetR: [rivetR.x * 1.012, rivetR.y, rivetR.z * 1.012] as [number, number, number],
+      rivetL: [rivetL.x * 1.012, rivetL.y, rivetL.z * 1.012] as [number, number, number],
+    };
+  }, [pelvisRings, isSkirt, pelvisDisplacement]);
+
+  // ── 3. CONTINUOUS LOFTED PANT LEG GEOMETRY (Seamless medial thigh merge) ───
+  const inseamCmMod = garmentPatternCm?.inseamCm
+    ? Math.max(-0.07, Math.min(0.06, ((garmentPatternCm.inseamCm - (isBermuda ? 24 : 79)) / 79) * 0.42))
+    : 0;
+  const legBottomY = isBermuda ? -0.38 - inseamCmMod * 0.5 : -0.785 + hemRideUp - inseamCmMod;
+
+  const baseHemR = isFlared
+    ? calfR * 1.48
+    : fitLower.includes("wide") || fitLower.includes("baggy")
+    ? thighR * 0.96
+    : fitLower.includes("skinny")
+    ? calfR * 0.80
+    : calfR * 0.90;
+
+  const defaultHemCm = isFlared
+    ? 25
+    : fitLower.includes("wide")
+    ? 26
+    : fitLower.includes("baggy")
+    ? 24
+    : fitLower.includes("skinny")
+    ? 15
+    : fitLower.includes("slim")
+    ? 17
+    : 19.5;
+  const hemCmScale = garmentPatternCm?.hemWidthCm
+    ? Math.max(0.78, Math.min(1.45, garmentPatternCm.hemWidthCm / defaultHemCm))
+    : 1.0;
+  const hemR = Math.max(calfR * 0.76, baseHemR * hemCmScale);
+
+  const legGeometries = useMemo(() => {
+    if (isSkirt) return null;
+
+    const buildLegForSide = (side: number) => {
+      // Shift upper thigh rings medially toward the pelvis midline so there is zero gap
+      const medialShift = -side * 0.011;
+
+      if (isBermuda) {
+        const rings: LoftRing[] = [
+          { y: -0.38, rx: thighR * 0.95, rzFront: thighR * 0.94, rzBack: thighR * 0.96, cz: 0.002 },
+          { y: -0.24, rx: thighR * 0.98, rzFront: thighR * 0.96, rzBack: thighR * 0.98, cz: 0.001 },
+          { y: -0.08, rx: thighR * 1.04, rzFront: thighR, rzBack: thighR * 1.04, cx: medialShift * 0.5, cz: 0 },
+          { y: 0.06, rx: thighR * 1.09, rzFront: thighR * 0.98, rzBack: thighR * 1.06, cx: medialShift, cz: -0.002 },
+        ];
+        return buildLoftedGeometry({
+          rings,
+          heightSegments: 24,
+          radialSegments: 40,
+          capBottom: true,
+          capTop: true,
+          uRepeat: 2,
+          vRepeat: 1.5,
+        });
+      }
+
+      const kneeR = fitLower.includes("wide")
+        ? thighR * 0.96
+        : fitLower.includes("relaxed")
+        ? thighR * 0.92
+        : thighR * 0.84;
+
+      const rings: LoftRing[] = [
+        { y: legBottomY, rx: hemR, rzFront: hemR * 0.96, rzBack: hemR * 0.98, cz: 0.004 },
+        {
+          y: -0.66 + hemRideUp * 0.6,
+          rx: isFlared ? calfR * 1.24 : calfR * 0.94,
+          rzFront: isFlared ? calfR * 1.22 : calfR * 0.92,
+          rzBack: isFlared ? calfR * 1.24 : calfR * 0.98,
+          cz: 0.001,
+        },
+        { y: -0.52, rx: calfR, rzFront: calfR * 0.95, rzBack: calfR * 1.05, cz: -0.003 },
+        { y: -0.39, rx: kneeR, rzFront: kneeR * 1.02, rzBack: kneeR * 0.96, cz: 0.004 },
+        { y: -0.22, rx: thighR * 0.97, rzFront: thighR * 0.96, rzBack: thighR * 0.98, cz: 0.002 },
+        { y: -0.06, rx: thighR * 1.04, rzFront: thighR * 0.98, rzBack: thighR * 1.04, cx: medialShift * 0.55, cz: 0 },
+        { y: 0.065, rx: thighR * 1.09, rzFront: thighR * 0.96, rzBack: thighR * 1.06, cx: medialShift, cz: -0.002 },
+      ];
+
+      return buildLoftedGeometry({
+        rings,
+        heightSegments: 44,
+        radialSegments: 44,
+        capBottom: true,
+        capTop: true,
+        uRepeat: 2,
+        vRepeat: 3,
+        radialDisplacement: (theta, y, u) => {
+          let drx = 0;
+          let drz = 0;
+
+          if (isTooBig && !isFlared && u < 0.32) {
+            const stackEnv = Math.sin((u / 0.32) * Math.PI);
+            const wave = Math.sin(u * 55 + Math.cos(theta * 2) * 0.6);
+            const amp = puddleAmount * 0.28 * stackEnv * (0.6 + 0.4 * wave);
+            drx += amp;
+            drz += amp * 1.15;
+          }
+
+          if (isTooSmall && y > -0.45 && y < -0.33) {
+            const kneeEnv = Math.sin(((y + 0.45) / 0.12) * Math.PI);
+            const ripple = Math.sin((y + 0.45) * 160) * 0.0014 * Math.abs(clampedTightness) * kneeEnv;
+            drz += ripple;
+          }
+
+          return { drx, drz };
+        },
+      });
+    };
+
+    return {
+      left: buildLegForSide(-1),
+      right: buildLegForSide(1),
+    };
+  }, [
+    isSkirt,
+    isBermuda,
+    isFlared,
+    fitLower,
+    thighR,
+    calfR,
+    hemR,
+    legBottomY,
+    hemRideUp,
+    isTooBig,
+    isTooSmall,
+    puddleAmount,
+    clampedTightness,
+  ]);
+
   const modelY = -0.9 + 0.111 * avatarScaleY;
-  const beltY = 0.9 + waistRiseOffset * 3;
+  const legPosX = (isFemale ? 0.072 : 0.074) * Math.max(0.90, hipModVal * 0.92);
+  const clampedScaleY = Math.max(0.92, Math.min(1.08, pantsScaleY || 1.0));
 
   return (
     <group scale={[avatarScaleXZ, avatarScaleY, avatarScaleXZ]} position={[0, modelY, 0]}>
-      {/* ── HIPS & WAISTBAND & GLUTEAL FIT ── */}
-      <group position={[0, 0.87, 0]}>
-        {/* Main pelvis cover */}
-        <mesh scale={[1.12, 0.9, 0.96]}>
-          <sphereGeometry args={[finalHipR * 0.95, 32, 32]} />
+      {/* ── CONTINUOUS LOFTED PELVIS / RISE / SKIRT BODY ── */}
+      <mesh geometry={pelvisGeometry}>
+        <meshStandardMaterial {...deniMat} />
+      </mesh>
+
+      {/* Surface-Snapped Waistband Collar */}
+      <mesh geometry={waistbandGeometry}>
+        <meshStandardMaterial {...deniMat} roughness={Math.min(0.92, adjustedRoughness + 0.04)} />
+      </mesh>
+
+      {/* Surface-Snapped Belt Loops */}
+      {beltLoopGeometries.map((geo, idx) => (
+        <mesh key={`beltloop-${idx}`} geometry={geo}>
           <meshStandardMaterial {...deniMat} />
         </mesh>
+      ))}
 
-        {/* Dual gluteal pocket mounds on the back */}
-        {[-1, 1].map((side) => (
-          <group key={`back-pocket-${side}`} position={[side * (finalHipR * 0.42), 0.01, -finalHipR * 0.44]}>
-            {/* Glute contour denim patch */}
-            <mesh scale={[1.05, 1.15, 1.08]} rotation={[-0.15, side * 0.12, 0]}>
-              <sphereGeometry args={[finalHipR * 0.56, 24, 24]} />
-              <meshStandardMaterial {...deniMat} />
-            </mesh>
-            {/* Back Pocket Shield with V-Stitch */}
-            <mesh position={[0, -0.015, -0.015]} rotation={[-0.2, side * 0.1, 0]}>
-              <boxGeometry args={[finalHipR * 0.38, finalHipR * 0.45, 0.008]} />
-              <meshStandardMaterial {...deniMat} roughness={0.88} />
-            </mesh>
-            {/* Pocket decorative rivet top-outer corner */}
-            <mesh position={[side * (finalHipR * 0.18), finalHipR * 0.18, -0.016]}>
-              <sphereGeometry args={[0.004, 8, 8]} />
-              <meshStandardMaterial {...rivetMat} />
-            </mesh>
-          </group>
-        ))}
-
-        {/* Front Fly J-Stitch seam (Bragueta) */}
-        <mesh position={[0.008, 0.02, finalHipR * 0.92]} rotation={[0.08, 0, 0]}>
-          <boxGeometry args={[0.004, 0.13, 0.006]} />
-          <meshStandardMaterial {...stitchMat} />
+      {/* Surface-Snapped Front Pleats (Pinzas Sastreras) */}
+      {pleatGeometries.map((geo, idx) => (
+        <mesh key={`pleat-${idx}`} geometry={geo}>
+          <meshStandardMaterial {...pocketMat} />
         </mesh>
+      ))}
 
-        {/* Curved Front Pockets with Rivets */}
-        {[-1, 1].map((side) => (
-          <group key={`front-pocket-${side}`} position={[side * (finalHipR * 0.58), 0.06, finalHipR * 0.65]}>
-            {/* Curved pocket slit */}
-            <mesh rotation={[0, 0, side * -0.45]}>
-              <boxGeometry args={[0.045, 0.005, 0.008]} />
-              <meshStandardMaterial {...stitchMat} />
-            </mesh>
-            {/* Copper Rivet */}
-            <mesh position={[side * 0.02, -0.008, 0.005]}>
-              <sphereGeometry args={[0.0042, 8, 8]} />
-              <meshStandardMaterial {...rivetMat} />
-            </mesh>
-          </group>
-        ))}
-
-        {/* ── TENSION WRINKLES (ONLY WHEN TOO SMALL / TIGHT) ── */}
-        {isTooSmall && (
-          <group position={[0, -0.02, finalHipR * 0.88]}>
-            {/* Horizontal pull lines where fabric stretches across the hips */}
-            {[-0.03, 0.0, 0.03].map((yOffset, i) => (
-              <mesh
-                key={`tension-${i}`}
-                position={[0, yOffset, (1 - Math.abs(yOffset) * 15) * 0.006]}
-                rotation={[0, 0, (i - 1) * 0.06]}
-                scale={[finalHipR * 1.5, 0.006, 0.008]}
-              >
-                <cylinderGeometry args={[1, 1, 1, 16]} />
-                <meshStandardMaterial color={color} roughness={0.6} metalness={0.05} />
-              </mesh>
-            ))}
-          </group>
-        )}
-
-        {/* ── BAGGY EXCESS FABRIC FOLDS (ONLY WHEN TOO BIG / LOOSE) ── */}
-        {isTooBig && (
-          <group position={[0, -0.05, 0]}>
-            {/* Loose drape folds hanging from waist */}
-            {[-1, 1].map((side) => (
-              <mesh
-                key={`loose-fold-${side}`}
-                position={[side * (finalHipR * 0.72), -0.04, finalHipR * 0.4]}
-                rotation={[0, 0, side * 0.15]}
-                scale={[0.015, 0.12, 0.025]}
-              >
-                <capsuleGeometry args={[1, 1, 8, 8]} />
-                <meshStandardMaterial {...deniMat} />
-              </mesh>
-            ))}
-          </group>
-        )}
-      </group>
-
-      {/* Skirt option */}
-      {isSkirt && (
-        <mesh position={[0, 0.65, 0]}>
-          <cylinderGeometry args={[finalHipR * 1.02, finalHipR * 1.35, 0.45, 32]} />
-          <meshStandardMaterial {...deniMat} />
+      {/* Surface-Snapped Vintage Whiskers (Desgaste Superior) */}
+      {pelvisWhiskerGeometries.map((geo, idx) => (
+        <mesh key={`whisker-${idx}`} geometry={geo}>
+          <meshStandardMaterial {...distressMat} />
         </mesh>
-      )}
+      ))}
 
-      {/* ── CONTOURED WAISTBAND & HARDWARE ── */}
-      <group position={[0, beltY, 0]}>
-        {/* Main Waistband Ring */}
-        <mesh>
-          <cylinderGeometry
-            args={[
-              finalHipR * (isTooBig ? 1.06 : 1.02),
-              finalHipR * (isTooBig ? 1.06 : 1.02),
-              0.045,
-              32,
-            ]}
-          />
-          <meshStandardMaterial {...deniMat} />
+      {/* Surface-Snapped Front Fly J-Stitch */}
+      <mesh geometry={flyStitchGeometry}>
+        <meshStandardMaterial {...STITCH_MAT} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* Surface-Snapped Curved Front Pockets */}
+      {frontPocketsGeometry.map((geo, idx) => (
+        <mesh key={`front-pocket-${idx}`} geometry={geo}>
+          <meshStandardMaterial {...pocketMat} />
         </mesh>
+      ))}
 
-        {/* Metal Shank Button (Center front) */}
-        <mesh position={[0, 0.005, finalHipR * (isTooBig ? 1.07 : 1.03)]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.012, 0.012, 0.006, 16]} />
-          <meshStandardMaterial {...buttonMat} />
+      {/* Surface-Snapped Curved Back Patch Pockets */}
+      {backPocketsGeometry.map((geo, idx) => (
+        <mesh key={`back-pocket-${idx}`} geometry={geo}>
+          <meshStandardMaterial {...pocketMat} />
         </mesh>
+      ))}
 
-        {/* Belt Loops (5 classic positions) */}
-        {[
-          -0.12,
-          0.12,
-          Math.PI * 0.5,
-          Math.PI * 0.82,
-          -Math.PI * 0.82,
-        ].map((angle, i) => (
-          <mesh
-            key={`beltloop-${i}`}
-            position={[
-              Math.sin(angle) * (finalHipR * (isTooBig ? 1.07 : 1.03)),
-              0,
-              Math.cos(angle) * (finalHipR * (isTooBig ? 1.07 : 1.03)),
-            ]}
-            rotation={[0, angle, 0]}
-          >
-            <boxGeometry args={[0.012, 0.046, 0.005]} />
-            <meshStandardMaterial {...deniMat} />
-          </mesh>
-        ))}
-      </group>
+      {/* Surface-Snapped Metal Shank Button & Copper Rivets */}
+      <mesh position={hardwarePositions.button} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.0085, 0.0085, 0.0038, 18]} />
+        <meshStandardMaterial {...BUTTON_MAT} />
+      </mesh>
+      <mesh position={hardwarePositions.rivetL}>
+        <sphereGeometry args={[0.003, 10, 10]} />
+        <meshStandardMaterial {...RIVET_MAT} />
+      </mesh>
+      <mesh position={hardwarePositions.rivetR}>
+        <sphereGeometry args={[0.003, 10, 10]} />
+        <meshStandardMaterial {...RIVET_MAT} />
+      </mesh>
 
-      {/* High-Rise Abdomen Fill */}
-      {waistRiseOffset > 0 && (
-        <mesh position={[0, 0.87 + (beltY - 0.87) / 2, 0]}>
-          <cylinderGeometry args={[finalHipR * 1.01, finalHipR * 1.01, beltY - 0.87, 32]} />
-          <meshStandardMaterial {...deniMat} />
-        </mesh>
-      )}
-
-      {/* ── LEGS GENERATOR ── */}
+      {/* ── CONTINUOUS LOFTED PANT LEGS ── */}
       {!isSkirt &&
+        legGeometries &&
         [-1, 1].map((legSide) => {
-          const isLeft = legSide === -1;
-          const posX = isLeft ? (isFemale ? -0.095 : -0.088) : isFemale ? 0.095 : 0.088;
-          const legYOffset = hemRideUp; // Shifts up if too small
-
+          const legGeo = legSide === -1 ? legGeometries.left : legGeometries.right;
           return (
             <group
-              key={`leg-${legSide}`}
-              position={[posX, 0.82 + legYOffset, 0]}
-              scale={[1, pantsScaleY, 1]}
+              key={`pant-leg-${legSide}`}
+              position={[legSide * legPosX, 0.81, 0]}
+              scale={[1, clampedScaleY, 1]}
             >
-              {/* Thigh */}
-              <mesh position={[0, -0.24, 0]}>
-                <capsuleGeometry args={[thighR, 0.3, 16, 32]} />
+              <mesh geometry={legGeo}>
                 <meshStandardMaterial {...deniMat} />
               </mesh>
 
-              {/* Bermuda Hem */}
-              {isBermuda && (
-                <mesh position={[0, -0.4, 0]}>
-                  <cylinderGeometry args={[thighR * 1.06, thighR * 1.06, 0.035, 32]} />
-                  <meshStandardMaterial {...deniMat} />
-                </mesh>
+              {/* Vintage Thigh/Knee Distress Fade when distress > 0.12 */}
+              {!isBermuda && distress > 0.12 && (
+                <group position={[0, -0.37, 0.005]}>
+                  <mesh scale={[1.015, 1, 1.02]}>
+                    <cylinderGeometry
+                      args={[thighR * 0.87, thighR * 0.86, 0.022 + distress * 0.035, 28, 1, true, -0.65, 1.3]}
+                    />
+                    <meshStandardMaterial {...distressMat} side={THREE.DoubleSide} />
+                  </mesh>
+                  {distress > 0.35 && (
+                    <mesh position={[0, 0.14, -0.002]} scale={[1.015, 1, 1.02]}>
+                      <cylinderGeometry
+                        args={[thighR * 0.96, thighR * 0.93, 0.08 + distress * 0.06, 28, 1, true, -0.58, 1.16]}
+                      />
+                      <meshStandardMaterial {...distressMat} side={THREE.DoubleSide} />
+                    </mesh>
+                  )}
+                </group>
               )}
 
-              {!isBermuda && (
-                <>
-                  {/* Knee transition */}
-                  <mesh position={[0, -0.43, 0.018]}>
-                    <sphereGeometry args={[thighR * 0.88, 28, 28]} />
-                    <meshStandardMaterial {...deniMat} />
-                  </mesh>
-
-                  {/* Cargo pocket (Relaxed fit) */}
-                  {pantsFit === "Relaxed" && (
-                    <mesh position={[legSide * thighR * 0.85, -0.25, 0]} scale={[0.4, 0.5, 0.2]}>
-                      <boxGeometry args={[0.1, 0.12, 0.04]} />
-                      <meshStandardMaterial {...deniMat} />
-                    </mesh>
-                  )}
-
-                  {/* Calf */}
-                  <mesh position={[0, -0.64, 0]}>
-                    <capsuleGeometry args={[calfR, 0.28, 16, 32]} />
-                    <meshStandardMaterial {...deniMat} />
-                  </mesh>
-
-                  {/* Flared extension */}
-                  {isFlared && (
-                    <mesh position={[0, -0.72, 0]}>
-                      <cylinderGeometry args={[calfR, calfR * 1.8, 0.35, 32]} />
-                      <meshStandardMaterial {...deniMat} />
-                    </mesh>
-                  )}
-
-                  {/* Cuff (Turn-up hem) */}
-                  {hasCuff && !isFlared && (
-                    <mesh position={[0, -0.79, 0]}>
-                      <cylinderGeometry args={[calfR * 1.08, calfR * 1.08, 0.04, 32]} />
-                      <meshStandardMaterial color={accent} roughness={roughness * 0.9} />
-                    </mesh>
-                  )}
-
-                  {/* ── ACCORDION STACKING WRINKLES (WHEN TOO BIG / LONG) ── */}
-                  {isTooBig && !isFlared && (
-                    <group position={[0, -0.77, 0.005]}>
-                      {/* Puddling fold 1 */}
-                      <mesh rotation={[0.08, 0, 0]}>
-                        <torusGeometry args={[calfR * 1.14, 0.014 * puddleAmount * 25, 10, 24]} />
-                        <meshStandardMaterial {...deniMat} />
-                      </mesh>
-                      {/* Puddling fold 2 */}
-                      <mesh position={[0, -0.035, 0.008]} rotation={[-0.1, 0, 0]}>
-                        <torusGeometry args={[calfR * 1.18, 0.016 * puddleAmount * 25, 10, 24]} />
-                        <meshStandardMaterial {...deniMat} />
-                      </mesh>
-                      {/* Puddling drape over shoe instep */}
-                      <mesh position={[0, -0.065, 0.02]} scale={[calfR * 1.25, 0.025, calfR * 1.3]}>
-                        <sphereGeometry args={[1, 16, 12]} />
-                        <meshStandardMaterial {...deniMat} />
-                      </mesh>
-                    </group>
-                  )}
-
-                  {/* Bottom Hem seam ring */}
-                  <mesh position={[0, -0.805, 0]}>
-                    <cylinderGeometry args={[calfR * 1.04, calfR * 1.04, 0.018, 32]} />
-                    <meshStandardMaterial {...deniMat} />
-                  </mesh>
-                  {/* Hem gold stitch line */}
-                  <mesh position={[0, -0.80, 0]}>
-                    <torusGeometry args={[calfR * 1.045, 0.0018, 8, 32]} />
-                    <meshStandardMaterial {...stitchMat} />
-                  </mesh>
-                </>
+              {/* Turn-up Cuff or Clean Bottom Hem Stitch */}
+              {!isBermuda && hasCuff && !isFlared ? (
+                <mesh position={[0, legBottomY + 0.018, 0.004]}>
+                  <cylinderGeometry args={[hemR * 1.045, hemR * 1.045, 0.036, 36]} />
+                  <meshStandardMaterial color={accent} roughness={adjustedRoughness * 0.9} />
+                </mesh>
+              ) : (
+                <mesh
+                  position={[0, legBottomY + 0.006, isBermuda ? 0.002 : 0.004]}
+                  rotation={[Math.PI / 2, 0, 0]}
+                >
+                  <torusGeometry
+                    args={[(isBermuda ? thighR * 0.95 : hemR) * 1.005, 0.0013, 8, 36]}
+                  />
+                  <meshStandardMaterial {...STITCH_MAT} />
+                </mesh>
               )}
             </group>
           );
         })}
     </group>
   );
-}
+});

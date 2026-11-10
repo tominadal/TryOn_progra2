@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TryOnHub Frontend — Next.js 16 + React Three Fiber + Liquid Glass UI
 
-## Getting Started
+Interfaz web B2B2C de **TryOnHub**, construida con **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **TailwindCSS v4** y **React Three Fiber (Three.js / WebGL)**.
 
-First, run the development server:
+## ✨ Características Principales
+
+- **Sistema de Diseño Liquid Glass 100% Responsivo**:
+  - Superficies translúcidas multicapa (`.liquid-glass-nav`, `.liquid-glass-panel`, `.liquid-glass-card`, `.liquid-glass-pill`, `.liquid-glass-input`) con `backdrop-filter: blur() saturate(190%)`, reflejos especulares internos (`inset 0 1px 1px`) y sombras cromáticas difusas.
+  - Filtro SVG global de refracción óptica (`#liquid-glass-refract` con `feTurbulence` + `feDisplacementMap`) integrado en `src/app/layout.tsx`.
+  - Soporte completo para Modo Claro y Modo Oscuro (`next-themes`) y accesibilidad (`prefers-reduced-transparency`).
+  - Diseño adaptativo en todos los breakpoints (`320px` Mobile, `640px` Tablet, `1024px` Laptop, `1440px+` Desktop).
+- **Motor 3D Paramétrico de Alto Rendimiento (`src/components/avatar/`)**:
+  - Gemelo digital antropométrico (`ParametricMannequin`) y prendas deformables en tiempo real (`ParametricPants`).
+  - Sub-árboles anatómicos (`RealisticFace`, `RealisticHand`, `ModernShoe`, `HairComponent`) y materiales PBR memoizados (`React.memo` + `useMemo`), precarga de texturas (`useTexture.preload`) y control de densidad de píxeles (`dpr={[1, 2]}`) para mantener 60 FPS estables.
+- **Flujo B2C y B2B Completo**:
+  - **Consumidores (`/`, `/marketplace`, `/product/[id]`, `/avatar`, `/cart`, `/ayuda`)**: Exploración de catálogo, probador virtual 3D con diagnóstico inteligente de calce, gestión de hasta 10 gemelos digitales y carrito por variante (talle/color) hidratado en una única consulta HTTP.
+  - **Marcas (`/brand/dashboard`)**: Alta individual de prendas (con IA Vision o motor paramétrico determinístico), edición (`PUT`), baja segura (`DELETE`), importación masiva por Excel con barra de progreso y monitor `Observer` en tiempo real.
+
+## 🚀 Ejecución en Desarrollo Local
 
 ```bash
+cd frontend
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000) en el navegador (requiere el backend FastAPI corriendo en `http://127.0.0.1:8000`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🧪 Verificación de Tipos y Linter
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx tsc --noEmit
+npm run lint
+```

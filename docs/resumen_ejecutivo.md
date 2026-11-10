@@ -37,7 +37,7 @@ El enfoque convencional de la industria intenta generar una imagen 2D por difusi
 3. **Economías de Escala (*Economies of Scale*):**
    - Gracias al `CachingStrategyDecorator` en la ingesta y al renderizado WebGL distribuido en el cliente, el costo de infraestructura del servidor prácticamente no crece cuando el tráfico de compradores se multiplica por 100x.
 4. **Prototipo de Implementación y Validación:**
-   - Siguiendo la distinción de la cátedra entre *Prototipos de Implementación* y *MVP*, **TryOnHub** materializa un sistema de punta a punta funcional, contenerizado y verificado con **90 pruebas automatizadas**.
+   - Siguiendo la distinción de la cátedra entre *Prototipos de Implementación* y *MVP*, **TryOnHub** materializa un sistema de punta a punta funcional, contenerizado, con patronaje antropométrico en centímetros (`cm`), geometría 3D lofteada continua y verificado con **118 pruebas automatizadas**.
 
 ---
 
@@ -55,8 +55,8 @@ El enfoque convencional de la industria intenta generar una imagen 2D por difusi
 
 ## 4. Estructura del Repositorio
 
-- [`backend/`](../backend/): API RESTful en **FastAPI**, modelos y repositorios **SQLAlchemy**, patrones GoF, validadores de seguridad y suite de **90 tests** en [`backend/tests/`](../backend/tests/).
-- [`frontend/`](../frontend/): Aplicación **Next.js 16 + React 19 + TypeScript**, motor 3D WebGL en [`frontend/src/components/avatar/`](../frontend/src/components/avatar/), Dashboard de Marca con CRUD completo e ingesta Excel en [`frontend/src/app/brand/dashboard/page.tsx`](../frontend/src/app/brand/dashboard/page.tsx).
+- [`backend/`](../backend/): API RESTful en **FastAPI**, modelos y repositorios **SQLAlchemy 2.0**, patrones GoF, validadores de seguridad y suite de **118 tests** en [`backend/tests/`](../backend/tests/).
+- [`frontend/`](../frontend/): Aplicación **Next.js 16 + React 19 + TypeScript** bajo el sistema estético **Liquid Glass 100% Responsivo**, motor 3D WebGL memoizado en [`frontend/src/components/avatar/`](../frontend/src/components/avatar/) y Dashboard de Marca con CRUD completo e ingesta Excel en [`frontend/src/app/brand/dashboard/page.tsx`](../frontend/src/app/brand/dashboard/page.tsx).
 - [`docs/`](./): Documentación académica completa:
   - [`requerimientos_casos_uso.md`](requerimientos_casos_uso.md) — RF, RNF, tabla RESTful completa, Casos de Uso (Ronald Mak) e Historias de Usuario INVEST.
   - [`patrones_solid.md`](patrones_solid.md) — Mapeo de los 5 principios SOLID y análisis profundo de Decorator, Observer (Push vs. Pull) y Factory Method.

@@ -101,7 +101,7 @@ pytest --tb=short -v
 
 El conjunto de pruebas utiliza una **base de datos SQLite en memoria**, garantizando aislamiento y prescindiendo de servicios externos.
 
-Se espera la ejecución exitosa de **20+ pruebas** que evalúan los dominios de Autenticación, Catálogo, Comercio, Try-On y las Estrategias de IA.
+Se verifica la ejecución exitosa de **90 pruebas automatizadas** que evalúan los dominios de Autenticación, Catálogo (CRUD completo + lotes Excel), Comercio (Carrito por variante sin N+1 + Checkout), Try-On Multi-Avatar y los Patrones GoF (Strategy, Decorator, Observer, Factory Method y Repository).
 
 ---
 

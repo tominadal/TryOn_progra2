@@ -6,7 +6,18 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { fetchApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
-import { SavedAvatar, getStoredAvatarId, parseMorphs, pickAvatar, storeAvatarId } from "@/lib/avatars";
+import {
+  AvatarMeasurementsCm,
+  BodyMorphs,
+  GarmentPatternCm,
+  SavedAvatar,
+  getAvatarMeasurementsCm,
+  getDefaultGarmentPatternCm,
+  getStoredAvatarId,
+  parseMorphs,
+  pickAvatar,
+  storeAvatarId,
+} from "@/lib/avatars";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
@@ -15,7 +26,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Box } from "@react-three/drei";
 import { ParametricMannequin, ParametricPants } from "@/components/avatar";
 
-// ── Size Parsing & Fit Diagnostic Logic ──────────────────────────────────────
+// ── Size Parsing & Centimeter (cm) Fit Diagnostic Logic ──────────────────────
 function parseSizeInches(size: string): number {
   if (!size) return 32;
   const upper = size.toUpperCase().trim();
@@ -29,12 +40,9 @@ function parseSizeInches(size: string): number {
   const numMatch = size.match(/\d+/);
   if (numMatch) {
     const num = parseInt(numMatch[0]);
-    // Standard European / Argentine waist size (e.g., 38, 40, 42, 44, 46, 48, 50)
-    // Talle 38 AR/EU ≈ 28-29 US, 40 ≈ 30-31 US, 42 ≈ 32-33 US, 44 ≈ 34 US, etc.
     if (num >= 38 && num <= 60) {
       return Math.round(num - 10);
     }
-    // Standard US Jeans sizing in inches (e.g., 24, 26, 28, 30, 32, 34, 36)
     if (num >= 22 && num < 38) {
       return num;
     }
@@ -46,14 +54,49 @@ function parseSizeInches(size: string): number {
 function calculateSizeScale(size: string): number {
   if (!size) return 1.0;
   const inches = parseSizeInches(size);
-  // Realistic sizing scale: 2.5% volume difference per inch (~5% per standard size step)
   return 1.0 + (inches - 32) * 0.025;
+}
+
+/**
+ * Computes the exact garment measurements in centimeters (cm) for the selected size,
+ * anchored on the brand's base pattern in cm (reference size M / 32 US / 42 AR).
+ */
+function getGarmentSizeMeasurementsCm(
+  selectedSize: string,
+  fitLabel: string,
+  meta?: GarmentMetadata
+): GarmentPatternCm {
+  const defaults = getDefaultGarmentPatternCm(
+    fitLabel,
+    typeof meta?.waist_rise === "string" ? meta.waist_rise : meta?.waist_rise_label || "Tiro Medio"
+  );
+  const baseWaist = meta?.waist_cm ?? defaults.waistCm;
+  const baseHip = meta?.hip_cm ?? defaults.hipCm;
+  const baseThigh = meta?.thigh_cm ?? defaults.thighCm;
+  const baseInseam = meta?.inseam_cm ?? defaults.inseamCm;
+  const baseHem = meta?.hem_width_cm ?? defaults.hemWidthCm;
+  const baseRise = meta?.rise_cm ?? defaults.riseCm;
+
+  const sizeInches = parseSizeInches(selectedSize);
+  const inchDelta = sizeInches - 32; // 0 for M / 32 US / 42 AR
+
+  return {
+    waistCm: Math.round(baseWaist + inchDelta * 2.5),
+    hipCm: Math.round(baseHip + inchDelta * 2.5),
+    thighCm: Math.round(baseThigh + inchDelta * 1.4),
+    inseamCm: Math.round(baseInseam + inchDelta * 0.5),
+    hemWidthCm: Number((baseHem + inchDelta * 0.35).toFixed(1)),
+    riseCm: Number((baseRise + inchDelta * 0.25).toFixed(1)),
+  };
 }
 
 interface FitDiagnosticResult {
   garmentSizeInches: number;
-  avatarWaistInches: number;
-  fitDiff: number;
+  garmentCm: GarmentPatternCm;
+  avatarCm: AvatarMeasurementsCm;
+  waistDeltaCm: number;
+  hipDeltaCm: number;
+  thighDeltaCm: number;
   fitTightness: number;
   isTooSmall: boolean;
   isTooBig: boolean;
@@ -66,46 +109,58 @@ interface FitDiagnosticResult {
 
 function calculateFitDiagnostic(
   selectedSize: string,
-  avatarWeight: number,
-  morphs: { bellyWidth?: number; hipWidth?: number }
+  avatarHeight: number,
+  avatarGender: string,
+  morphs: BodyMorphs,
+  fitLabel: string,
+  meta?: GarmentMetadata
 ): FitDiagnosticResult {
   const garmentSizeInches = parseSizeInches(selectedSize);
-  const avatarWaistInches = Math.round(
-    32 +
-    (avatarWeight - 70) * 0.35 +
-    ((morphs.bellyWidth ?? 1.0) - 1.0) * 8 +
-    ((morphs.hipWidth ?? 1.0) - 1.0) * 6
-  );
+  const garmentCm = getGarmentSizeMeasurementsCm(selectedSize, fitLabel, meta);
+  const avatarCm = getAvatarMeasurementsCm(avatarHeight, avatarGender, morphs);
 
-  const fitDiff = garmentSizeInches - avatarWaistInches;
-  const fitTightness = Math.max(-1.0, Math.min(1.0, fitDiff * 0.24));
-  const isTooSmall = fitTightness < -0.22;
-  const isTooBig = fitTightness > 0.22;
+  const waistDeltaCm = garmentCm.waistCm - avatarCm.waistCm;
+  const hipDeltaCm = garmentCm.hipCm - avatarCm.hipCm;
+  const thighDeltaCm = garmentCm.thighCm - avatarCm.thighCm;
 
-  let badgeText = "✨ Calce Ideal";
-  let badgeClass = "bg-emerald-500/20 text-emerald-900 dark:text-emerald-200 border-emerald-500/40";
+  // Weighted anthropometric delta in cm (Waist 55%, Hip 35%, Thigh 10%)
+  const weightedDeltaCm = waistDeltaCm * 0.55 + hipDeltaCm * 0.35 + thighDeltaCm * 0.10;
+  const fitTightness = Math.max(-1.0, Math.min(1.0, weightedDeltaCm / 12.0));
+  const isTooSmall = fitTightness < -0.22 || waistDeltaCm < -3 || hipDeltaCm < -4;
+  const isTooBig = !isTooSmall && (fitTightness > 0.22 || waistDeltaCm > 5 || hipDeltaCm > 7);
+
+  const formatSignedCm = (v: number) => (v > 0 ? `+${v} cm` : `${v} cm`);
+
+  let badgeText = `✨ Calce Ideal (${formatSignedCm(waistDeltaCm)} cintura)`;
+  let badgeClass =
+    "bg-white/90 dark:bg-slate-900/90 text-emerald-800 dark:text-emerald-300 border-emerald-500/50";
   let dotClass = "bg-emerald-500";
-  let detailTitle = "✨ Diagnóstico: Calce Recomendado";
-  let detailBody = `El talle ${selectedSize} se adapta con caída limpia a tus proporciones (~talle ${avatarWaistInches}), sin tirantez ni arrugas de holgura excesiva.`;
+  let detailTitle = "✨ Diagnóstico Antropométrico: Calce Recomendado";
+  let detailBody = `Tu cintura (${avatarCm.waistCm} cm) y cadera (${avatarCm.hipCm} cm) calzan de forma óptima en el talle ${selectedSize} (cintura ${garmentCm.waistCm} cm · cadera ${garmentCm.hipCm} cm · tiro/largo ${garmentCm.inseamCm} cm).`;
 
   if (isTooSmall) {
-    badgeText = "⚠️ Talla Muy Ajustada (Chica)";
-    badgeClass = "bg-amber-500/20 text-amber-900 dark:text-amber-200 border-amber-500/40";
+    badgeText = `⚠️ Talla Chica (${formatSignedCm(waistDeltaCm)} cintura)`;
+    badgeClass =
+      "bg-white/90 dark:bg-slate-900/90 text-amber-800 dark:text-amber-300 border-amber-500/50";
     dotClass = "bg-amber-500";
-    detailTitle = "⚠️ Diagnóstico: Talla Ajustada / Pequeña";
-    detailBody = `Para tu complexión (~talle ${avatarWaistInches}), el talle ${selectedSize} ejerce tensión en cintura y muslos; la botamanga queda corta en tus tobillos. Se muestran líneas de tensión en el 3D.`;
+    detailTitle = "⚠️ Diagnóstico Antropométrico: Talla Ajustada / Pequeña";
+    detailBody = `Tu avatar mide ${avatarCm.waistCm} cm de cintura y ${avatarCm.hipCm} cm de cadera, mientras que el talle ${selectedSize} ofrece ${garmentCm.waistCm} cm de cintura (${formatSignedCm(waistDeltaCm)}) y ${garmentCm.hipCm} cm de cadera (${formatSignedCm(hipDeltaCm)}). Se visualiza tensión textil en 3D.`;
   } else if (isTooBig) {
-    badgeText = "⚠️ Talla Holgada (Grande)";
-    badgeClass = "bg-purple-500/20 text-purple-900 dark:text-purple-200 border-purple-500/40";
+    badgeText = `⚠️ Talla Holgada (${formatSignedCm(waistDeltaCm)} cintura)`;
+    badgeClass =
+      "bg-white/90 dark:bg-slate-900/90 text-purple-800 dark:text-purple-300 border-purple-500/50";
     dotClass = "bg-purple-500";
-    detailTitle = "⚠️ Diagnóstico: Talla Holgada / Grande";
-    detailBody = `Para tu complexión (~talle ${avatarWaistInches}), el talle ${selectedSize} queda suelto con holgura en cintura y exceso de tela acumulado sobre las zapatillas.`;
+    detailTitle = "⚠️ Diagnóstico Antropométrico: Talla Holgada / Grande";
+    detailBody = `Para tu cintura (${avatarCm.waistCm} cm) y cadera (${avatarCm.hipCm} cm), el talle ${selectedSize} (${garmentCm.waistCm} cm cintura · ${garmentCm.hipCm} cm cadera) deja una holgura de ${formatSignedCm(waistDeltaCm)} en cintura y acumulación sobre el calzado.`;
   }
 
   return {
     garmentSizeInches,
-    avatarWaistInches,
-    fitDiff,
+    garmentCm,
+    avatarCm,
+    waistDeltaCm,
+    hipDeltaCm,
+    thighDeltaCm,
     fitTightness,
     isTooSmall,
     isTooBig,
@@ -135,12 +190,21 @@ interface GarmentMetadata {
   roughness?: number;
   taper?: number;
   waist_rise?: number | string;
+  waist_rise_label?: string;
   distress?: number;
+  distress_level?: number;
+  texture?: string;
   has_cuff?: boolean;
   has_cuffs?: boolean;
   has_pleats?: boolean;
   fit_label?: string;
   source?: string;
+  waist_cm?: number;
+  hip_cm?: number;
+  thigh_cm?: number;
+  inseam_cm?: number;
+  hem_width_cm?: number;
+  rise_cm?: number;
 }
 
 interface Garment {
@@ -245,16 +309,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center justify-center">
+      <div className="min-h-screen liquid-bg flex flex-col items-center justify-center px-4 text-center">
         <h1 className="text-3xl font-bold mb-4">Producto no encontrado</h1>
-        <button onClick={() => router.push("/")} className="text-blue-500 hover:underline">Volver al inicio</button>
+        <button onClick={() => router.push("/")} className="text-blue-500 hover:underline font-medium">Volver al inicio</button>
       </div>
     );
   }
 
   if (loading || !product) {
     return (
-      <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center">
+      <div className="min-h-screen liquid-bg flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -280,20 +344,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const tryOnPantsColor = selectedColor?.hex || aiColorHex;
   const accentHex = product.metadata_json?.accent_hex ?? tryOnPantsColor;
 
-  // ── Avatar scale ─────────────────────────────────────────────────────────
+  // ── Avatar scale (Height drives Y; horizontal widths are driven by cm morphs) ──
   const avatarScaleY = avatarHeight / 170.0;
-  const avatarScaleXZ = Math.pow(avatarWeight / 70.0, 0.5);
+  const avatarScaleXZ = 1.0;
 
   // ── Size drives pants scale in 3D ────────────────────────────────────────
   const sizeScaleMod = calculateSizeScale(selectedSize);
 
-  // ── AI Vision Parameters ─────────────────────────────────────────────────
-  // These come from Gemini analysing the REAL garment photograph,
-  // making every product's 3D representation unique and image-faithful.
+  // ── AI Vision & Parametric cm Parameters ─────────────────────────────────
   const aiScaleX    = product.metadata_json?.scale_x    ?? 1.0;
   const aiScaleY    = product.metadata_json?.scale_y    ?? 1.0;
-  const aiRoughness = product.metadata_json?.roughness  ?? 0.82;
-  const aiTaper     = product.metadata_json?.taper      ?? 0.0;  // negative=wide, positive=skinny
+  const aiRoughness = product.metadata_json?.roughness  ?? 0.80;
+  const aiTaper     = product.metadata_json?.taper      ?? 0.0;
   const rawWaistRise = product.metadata_json?.waist_rise;
   const aiWaistRise = typeof rawWaistRise === "number"
     ? rawWaistRise
@@ -301,17 +363,26 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     ? (rawWaistRise.toLowerCase().includes("alto") ? 0.85 : rawWaistRise.toLowerCase().includes("bajo") ? 0.2 : 0.5)
     : 0.5;
   const aiHasCuff   = Boolean(product.metadata_json?.has_cuff ?? product.metadata_json?.has_cuffs ?? false);
-  // fit_label from Vision takes precedence over text field
+  const aiHasPleats = Boolean(product.metadata_json?.has_pleats ?? false);
+  const aiDistress  = product.metadata_json?.distress ?? (product.metadata_json?.distress_level ? product.metadata_json.distress_level / 100 : 0);
+  const aiTexture   = product.metadata_json?.texture ?? product.material ?? "Denim Clásico";
   const aiFitLabel  = product.metadata_json?.fit_label  ?? product.fit ?? "Regular";
   const aiSource    = product.metadata_json?.source ?? "";
   const formattedFit = product.fit?.toLowerCase().includes("fit") ? product.fit : `${product.fit || "Regular"} Fit`;
 
-  // ── Smart Fit Diagnostic ─────────────────────────────────────────────────
-  const fitDiagnostic = calculateFitDiagnostic(selectedSize, avatarWeight, morphs);
-  const { fitTightness, isTooSmall, isTooBig } = fitDiagnostic;
+  // ── Smart Centimeter (cm) Fit Diagnostic ─────────────────────────────────
+  const fitDiagnostic = calculateFitDiagnostic(
+    selectedSize,
+    avatarHeight,
+    avatarGender,
+    morphs,
+    aiFitLabel,
+    product.metadata_json
+  );
+  const { fitTightness, isTooSmall, isTooBig, garmentCm, avatarCm } = fitDiagnostic;
 
-  // Combine AI scale with Avatar size and weight
-  const finalPantsScaleX = aiScaleX * sizeScaleMod * avatarScaleXZ;
+  // Combine AI scale with selected garment size scale
+  const finalPantsScaleX = aiScaleX * sizeScaleMod;
   const finalPantsScaleY = aiScaleY;
 
   // ── Gallery images (from backend GarmentImage records) ───────────────────
@@ -320,29 +391,29 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     : [product.image || "/products/jean_classic.png"];
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50 font-sans selection:bg-blue-500/30 transition-colors duration-300 flex flex-col">
+    <div className="min-h-screen liquid-bg text-neutral-900 dark:text-neutral-50 font-sans selection:bg-blue-500/30 transition-colors duration-300 flex flex-col">
       <Navbar />
 
-      <main className="pt-24 pb-12 px-6 max-w-7xl mx-auto flex-1 w-full">
+      <main className="pt-28 md:pt-24 pb-12 px-4 sm:px-6 max-w-7xl mx-auto flex-1 w-full">
         <Link
           href="/marketplace"
-          className="inline-flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass-pill text-xs sm:text-sm text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white mb-6 sm:mb-8 transition-all"
         >
           ← Volver al Catálogo
         </Link>
 
-        <div className="flex flex-col lg:flex-row gap-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
 
           {/* ── LEFT: Gallery / Try-On ─────────────────────────────────── */}
           <div className="w-full lg:w-1/2">
             <div
-              className={`w-full aspect-[4/5] bg-neutral-100 dark:bg-neutral-900 rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 relative transition-all duration-500 ${
-                isTryOnActive ? "shadow-2xl ring-4 ring-blue-500/20" : ""
+              className={`w-full aspect-[4/5] liquid-glass-card rounded-3xl overflow-hidden relative transition-all duration-500 ${
+                isTryOnActive ? "shadow-2xl ring-4 ring-blue-500/25" : ""
               }`}
             >
               {isTryOnActive ? (
                 <div className="w-full h-full cursor-grab active:cursor-grabbing">
-                  <Canvas camera={{ position: [0, 1.2, 3.5], fov: 44 }} shadows>
+                  <Canvas dpr={[1, 2]} camera={{ position: [0, 1.2, 3.5], fov: 44 }} shadows>
                     <ambientLight intensity={0.55} />
                     <directionalLight position={[5, 10, 5]} intensity={1.6} castShadow />
                     <directionalLight position={[-4, 4, -4]} intensity={0.5} />
@@ -373,6 +444,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       <ParametricMannequin
                         skinColor={avatarSkinColor}
                         shirtColor={avatarData?.shirt_color || "#f8f8f8"}
+                        shirtSleeve={avatarData?.shirt_style || "Manga Corta"}
                         shoesColor={avatarShoesColor}
                         hairStyle={avatarHairStyle}
                         hairColor={avatarHairColor}
@@ -390,6 +462,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         legThickness={morphs.legThickness}
                         breastSize={morphs.breastSize}
                         neckThickness={morphs.neckThickness}
+                        glasses={Boolean(avatarData?.glasses)}
+                        glassesColor={avatarData?.glasses_color || "#111827"}
+                        watch={Boolean(avatarData?.watch)}
+                        watchColor={avatarData?.watch_color || "#18181b"}
                       />
                       <ParametricPants
                         color={tryOnPantsColor}
@@ -402,11 +478,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         isFemale={avatarGender === "Mujer"}
                         legThickness={morphs.legThickness}
                         hipWidth={morphs.hipWidth}
+                        bellyWidth={morphs.bellyWidth}
+                        bellyDepth={morphs.bellyDepth}
+                        chestWidth={morphs.chestWidth}
                         waistRise={aiWaistRise}
                         taper={aiTaper}
                         roughness={aiRoughness}
                         hasCuff={aiHasCuff}
+                        hasPleats={aiHasPleats}
+                        distress={aiDistress}
+                        texture={aiTexture}
                         fitTightness={fitTightness}
+                        garmentPatternCm={garmentCm}
                       />
                     </group>
                     <ContactShadows position={[0, -0.89, 0]} opacity={0.6} scale={5} blur={1.8} far={4} />
@@ -421,30 +504,30 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </Canvas>
 
                   {/* Dynamic Fit Badge on top-left of Canvas */}
-                  <div className={`absolute top-4 left-4 flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-md shadow-md border transition-all ${fitDiagnostic.badgeClass}`}>
-                    <div className={`w-2 h-2 rounded-full animate-pulse ${fitDiagnostic.dotClass}`} />
-                    {fitDiagnostic.badgeText}
+                  <div className={`absolute top-3 sm:top-4 left-3 sm:left-4 max-w-[calc(100%-4.5rem)] flex items-center gap-2 text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_8px_20px_rgba(0,0,0,0.18)] border transition-all truncate ${fitDiagnostic.badgeClass}`}>
+                    <div className={`w-2 h-2 rounded-full shrink-0 animate-pulse ${fitDiagnostic.dotClass}`} />
+                    <span className="truncate">{fitDiagnostic.badgeText}</span>
                   </div>
                   {/* Size indicator in TryOn */}
-                  <div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-bold text-white bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full">
+                  <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 flex items-center gap-2 text-[11px] sm:text-xs font-bold text-white bg-black/65 backdrop-blur-xl border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] px-3 py-1.5 rounded-full">
                     Talle {selectedSize} · {selectedColor?.name}
                   </div>
                   {/* AI analysis source badge */}
                   {aiSource && (
-                    <div className="absolute bottom-4 right-4 flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border shadow-sm backdrop-blur-md"
-                      style={{
-                        background: aiSource.includes("vision") ? "rgba(124,58,237,0.12)" : "rgba(0,0,0,0.5)",
-                        borderColor: aiSource.includes("vision") ? "#7c3aed" : "#555",
-                        color: aiSource.includes("vision") ? "#c4b5fd" : "#aaa",
-                      }}
+                    <div
+                      className={`absolute bottom-3 sm:bottom-4 right-3 sm:right-4 flex items-center gap-1.5 text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded-full border shadow-md backdrop-blur-xl ${
+                        aiSource.includes("vision")
+                          ? "bg-purple-950/85 text-purple-100 border-purple-400/50"
+                          : "bg-black/75 text-neutral-100 border-white/25"
+                      }`}
                     >
-                      <div className={`w-1.5 h-1.5 rounded-full ${aiSource.includes("vision") ? "bg-blue-400 animate-pulse" : "bg-gray-500"}`} />
+                      <div className={`w-1.5 h-1.5 rounded-full ${aiSource.includes("vision") ? "bg-blue-400 animate-pulse" : "bg-gray-300"}`} />
                       {aiSource.includes("vision") ? "IA Visión" : "IA Texto"}
                     </div>
                   )}
                   <button
                     onClick={handleTryOnToggle}
-                    className="absolute top-4 right-4 bg-white/90 dark:bg-black/90 backdrop-blur-md p-2 rounded-full shadow-sm hover:scale-110 transition-transform"
+                    className="absolute top-3 sm:top-4 right-3 sm:right-4 liquid-glass-pill liquid-glass-refract p-2 rounded-full hover:scale-110 transition-transform"
                   >
                     <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -456,18 +539,22 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   <img
                     src={galleryImages[activeImageIndex]}
                     alt={product.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/products/jean_classic.png";
+                    }}
                     className="w-full h-full object-cover animate-in fade-in duration-300"
                     key={galleryImages[activeImageIndex]}
                   />
                   {(product.model_3d_url || product.metadata_json?.scale_x) && (
-                    <div className="absolute top-4 left-4 flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-100/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-green-200 shadow-sm">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    <div className="absolute top-4 left-4 flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-200 bg-white/90 dark:bg-slate-900/85 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-emerald-500/50 shadow-md">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       Try-On 3D disponible
                     </div>
                   )}
                   {/* Photo type label */}
                   {product.images?.[activeImageIndex]?.type && (
-                    <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full backdrop-blur font-semibold">
+                    <div className="absolute bottom-4 right-4 bg-black/70 text-white text-xs px-3.5 py-1.5 rounded-full backdrop-blur-xl border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] font-semibold">
                       {{ FRONT: "Vista Frontal", SIDE: "Vista Lateral", BACK: "Vista Posterior" }[product.images[activeImageIndex].type] ?? ""}
                     </div>
                   )}
@@ -477,18 +564,26 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {/* Thumbnails */}
             {!isTryOnActive && (
-              <div className="flex gap-3 mt-4 overflow-x-auto pb-1">
+              <div className="flex gap-3 mt-4 overflow-x-auto pb-2 pt-1 px-1">
                 {galleryImages.map((imgSrc, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`shrink-0 w-20 h-24 bg-neutral-200 dark:bg-neutral-800 rounded-2xl overflow-hidden border-2 transition-all ${
+                    className={`shrink-0 w-18 sm:w-20 h-22 sm:h-24 liquid-glass-card rounded-2xl overflow-hidden border-2 transition-all ${
                       activeImageIndex === idx
-                        ? "border-blue-500 shadow-md scale-105"
-                        : "border-transparent hover:border-neutral-400 hover:scale-105"
+                        ? "border-blue-500 shadow-lg scale-105 ring-2 ring-blue-500/25"
+                        : "border-transparent hover:border-blue-400/50 hover:scale-105"
                     }`}
                   >
-                    <img src={imgSrc} alt={`Vista ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img
+                      src={imgSrc}
+                      alt={`Vista ${idx + 1}`}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/products/jean_classic.png";
+                      }}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -496,36 +591,36 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           </div>
 
           {/* ── RIGHT: Product details ─────────────────────────────────── */}
-          <div className="w-full lg:w-1/2 flex flex-col">
+          <div className="w-full lg:w-1/2 flex flex-col liquid-glass-panel p-5 sm:p-8 rounded-3xl h-fit">
 
             {/* Header */}
-            <div className="mb-2">
-              <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mb-1">Acme Denim · {formattedFit}</p>
-              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2">{product.name}</h1>
-              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatPrice(product.price)}</p>
+            <div className="mb-3">
+              <p className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest mb-1">Acme Denim · {formattedFit}</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-2">{product.name}</h1>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">{formatPrice(product.price)}</p>
             </div>
 
             {/* Description */}
             {product.description && (
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 border-l-2 border-blue-200 dark:border-blue-800 pl-4">
+              <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed mb-6 border-l-2 border-blue-400/60 dark:border-blue-500/60 pl-4">
                 {product.description}
               </p>
             )}
 
             {/* Material badge */}
             {product.material && (
-              <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-6">
-                <Info className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-600 dark:text-neutral-300 mb-6 px-3 py-1.5 rounded-full liquid-glass-pill w-fit">
+                <Info className="w-3.5 h-3.5 text-blue-500" />
                 {product.material}
               </div>
             )}
 
             {/* Avatar picker: who is trying the garment on (only useful inside the 3D fitting room) */}
             {isTryOnActive && avatars.length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
+              <div className="mb-5 p-3.5 rounded-2xl liquid-glass-card">
+                <div className="flex items-center justify-between mb-2.5">
                   <span className="text-sm font-semibold">Probar en</span>
-                  <Link href="/avatar" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                  <Link href="/avatar" className="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline">
                     Gestionar avatares
                   </Link>
                 </div>
@@ -538,10 +633,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         role="radio"
                         aria-checked={active}
                         onClick={() => handleSelectAvatar(avatar)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-colors ${
+                        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${
                           active
-                            ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700 dark:text-blue-400"
-                            : "bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300 dark:hover:border-neutral-700"
+                            ? "bg-blue-500/15 dark:bg-blue-500/25 border-blue-500 text-blue-700 dark:text-blue-300 shadow-sm"
+                            : "liquid-glass-btn-secondary text-neutral-600 dark:text-neutral-300"
                         }`}
                       >
                         <UserIcon className="w-4 h-4" />
@@ -554,14 +649,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             )}
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-8 pb-8 border-b border-neutral-200 dark:border-neutral-800">
+            <div className="flex flex-col sm:flex-row gap-3 mb-8 pb-8 border-b border-neutral-200/70 dark:border-white/10">
               {(product.model_3d_url || product.metadata_json?.scale_x) ? (
                 <button
                   onClick={handleTryOnToggle}
-                  className={`flex-1 py-4 px-6 font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 text-sm ${
+                  className={`flex-1 py-4 px-6 font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 text-sm ${
                     isTryOnActive
-                      ? "bg-neutral-200 dark:bg-neutral-800 text-neutral-900 dark:text-white"
-                      : "bg-black dark:bg-white text-white dark:text-black shadow-black/20"
+                      ? "liquid-glass-btn-secondary text-neutral-900 dark:text-white hover:bg-neutral-200/80 dark:hover:bg-neutral-800/80"
+                      : "bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 backdrop-blur-xl text-white dark:text-neutral-950 border border-neutral-800 dark:border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_10px_24px_-6px_rgba(0,0,0,0.3)]"
                   }`}
                 >
                   {isTryOnActive ? (
@@ -577,14 +672,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   )}
                 </button>
               ) : (
-                <button disabled className="flex-1 py-4 px-6 bg-neutral-200 dark:bg-neutral-800 text-neutral-400 font-bold rounded-xl cursor-not-allowed text-sm">
+                <button disabled className="flex-1 py-4 px-6 liquid-glass-btn-secondary text-neutral-400 font-bold rounded-2xl cursor-not-allowed text-sm opacity-60">
                   Probador No Disponible
                 </button>
               )}
 
               <button
                 onClick={handleAddToCart}
-                className="flex-1 py-4 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm"
+                className="flex-1 py-4 px-6 liquid-glass-btn-primary font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 text-sm"
               >
                 <ShoppingCart className="w-4 h-4" />
                 Añadir al Carrito
@@ -595,7 +690,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {product.available_colors?.length > 0 && (
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Palette className="w-4 h-4 text-neutral-500" />
+                  <Palette className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   <h3 className="font-semibold text-sm">Color</h3>
                   <span className="text-xs text-neutral-500 dark:text-neutral-400 ml-auto font-medium">{selectedColor?.name}</span>
                 </div>
@@ -604,10 +699,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <button
                       key={c.hex}
                       onClick={() => setSelectedColor(c)}
-                      className={`w-12 h-12 rounded-full border-2 transition-all shadow-sm ${
+                      className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 transition-all shadow-[inset_0_2px_4px_rgba(255,255,255,0.45),0_4px_10px_rgba(0,0,0,0.15)] ${
                         selectedColor?.hex === c.hex
-                          ? "border-blue-500 scale-110 shadow-md ring-4 ring-blue-500/20"
-                          : "border-transparent hover:scale-105 hover:shadow-md"
+                          ? "border-blue-500 scale-110 ring-4 ring-blue-500/25"
+                          : "border-white/50 dark:border-white/20 hover:scale-105"
                       }`}
                       style={{ backgroundColor: c.hex }}
                       title={c.name}
@@ -627,7 +722,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-3">
                   <div className="flex items-center gap-2">
-                    <Ruler className="w-4 h-4 text-neutral-500" />
+                    <Ruler className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     <h3 className="font-semibold text-sm">Talle</h3>
                   </div>
                   <button
@@ -639,12 +734,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </button>
                 </div>
                 {showSizeGuide && (
-                  <div className="mb-4 p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs animate-in fade-in duration-200">
-                    <p className="font-bold mb-2 text-neutral-700 dark:text-neutral-200">Equivalencia de Talles (Jeans)</p>
+                  <div className="mb-4 p-4 rounded-2xl liquid-glass-card text-xs animate-in fade-in duration-200">
+                    <p className="font-bold mb-2 text-neutral-800 dark:text-neutral-200">Equivalencia de Talles (Jeans)</p>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse">
+                      <table className="w-full text-left border-collapse min-w-[280px]">
                         <thead>
-                          <tr className="border-b border-neutral-300 dark:border-neutral-700 text-neutral-500">
+                          <tr className="border-b border-neutral-300/70 dark:border-white/15 text-neutral-500 dark:text-neutral-400">
                             <th className="py-1.5 pr-3">Letra</th>
                             <th className="py-1.5 pr-3">US (Pulg.)</th>
                             <th className="py-1.5 pr-3">AR / EU</th>
@@ -652,7 +747,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             <th className="py-1.5">Cadera (cm)</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                        <tbody className="divide-y divide-neutral-200/60 dark:divide-white/10">
                           <tr><td className="py-1.5 font-semibold">XS</td><td>26 - 28</td><td>36 - 38</td><td>68 - 73</td><td>88 - 93</td></tr>
                           <tr><td className="py-1.5 font-semibold">S</td><td>29 - 30</td><td>38 - 40</td><td>74 - 78</td><td>94 - 98</td></tr>
                           <tr><td className="py-1.5 font-semibold">M</td><td>31 - 32</td><td>42</td><td>79 - 84</td><td>99 - 104</td></tr>
@@ -668,26 +763,78 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <button
                       key={s}
                       onClick={() => setSelectedSize(s)}
-                      className={`min-w-[3rem] h-11 px-3 rounded-xl font-bold text-sm transition-all border-2 flex items-center justify-center ${
+                      className={`min-w-[3rem] h-11 px-3.5 rounded-xl font-bold text-sm transition-all border flex items-center justify-center ${
                         selectedSize === s
-                          ? "bg-blue-50 dark:bg-blue-900/20 border-blue-600 text-blue-700 dark:text-blue-400"
-                          : "bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-300 dark:hover:border-neutral-700 hover:text-neutral-700 dark:hover:text-neutral-300"
+                          ? "bg-blue-500/15 dark:bg-blue-500/25 border-blue-500 text-blue-700 dark:text-blue-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)]"
+                          : "liquid-glass-btn-secondary text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white"
                       }`}
                     >
                       {s}
                     </button>
                   ))}
                 </div>
+
+                {/* Ficha de Medidas Reales en Centímetros (cm) del Talle Seleccionado */}
+                <div className="mt-3 p-3.5 rounded-2xl liquid-glass-card text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-neutral-800 dark:text-neutral-200">
+                      Medidas de la Prenda (Talle {selectedSize})
+                    </span>
+                    {avatarData && (
+                      <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                        Comparado con {avatarData.name} ({avatarCm.heightCm} cm)
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                    <div className="p-2 rounded-xl bg-white/50 dark:bg-white/5 border border-white/40 dark:border-white/10">
+                      <span className="text-[10px] text-neutral-500 dark:text-neutral-400 block">Cintura</span>
+                      <span className="font-bold text-neutral-900 dark:text-white">{garmentCm.waistCm} cm</span>
+                      {avatarData && (
+                        <span className="text-[10px] text-neutral-500 block">
+                          Tu avatar: {avatarCm.waistCm} cm
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-2 rounded-xl bg-white/50 dark:bg-white/5 border border-white/40 dark:border-white/10">
+                      <span className="text-[10px] text-neutral-500 dark:text-neutral-400 block">Cadera</span>
+                      <span className="font-bold text-neutral-900 dark:text-white">{garmentCm.hipCm} cm</span>
+                      {avatarData && (
+                        <span className="text-[10px] text-neutral-500 block">
+                          Tu avatar: {avatarCm.hipCm} cm
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-2 rounded-xl bg-white/50 dark:bg-white/5 border border-white/40 dark:border-white/10">
+                      <span className="text-[10px] text-neutral-500 dark:text-neutral-400 block">Muslo</span>
+                      <span className="font-bold text-neutral-900 dark:text-white">{garmentCm.thighCm} cm</span>
+                      {avatarData && (
+                        <span className="text-[10px] text-neutral-500 block">
+                          Tu avatar: {avatarCm.thighCm} cm
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-2 rounded-xl bg-white/50 dark:bg-white/5 border border-white/40 dark:border-white/10">
+                      <span className="text-[10px] text-neutral-500 dark:text-neutral-400 block">Entrepierna</span>
+                      <span className="font-bold text-neutral-900 dark:text-white">{garmentCm.inseamCm} cm</span>
+                      {avatarData && (
+                        <span className="text-[10px] text-neutral-500 block">
+                          Tu pierna: ~{avatarCm.inseamCm} cm
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 {isTryOnActive && (
-                  <div className={`mt-3.5 p-3.5 rounded-2xl border text-xs transition-all shadow-sm ${
+                  <div className={`mt-3.5 p-3.5 rounded-2xl border backdrop-blur-xl text-xs transition-all shadow-[inset_0_1px_1px_rgba(255,255,255,0.35)] ${
                     isTooSmall
-                      ? "bg-amber-50/80 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800/60 text-amber-900 dark:text-amber-200"
+                      ? "bg-amber-500/15 border-amber-400/50 text-amber-950 dark:text-amber-200"
                       : isTooBig
-                      ? "bg-purple-50/80 dark:bg-purple-950/30 border-purple-300 dark:border-purple-800/60 text-purple-900 dark:text-purple-200"
-                      : "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200"
+                      ? "bg-purple-500/15 border-purple-400/50 text-purple-950 dark:text-purple-200"
+                      : "bg-emerald-500/15 border-emerald-400/50 text-emerald-950 dark:text-emerald-200"
                   }`}>
                     <div className="flex items-center gap-2 font-bold mb-1.5">
-                      <span className={`w-2 h-2 rounded-full ${fitDiagnostic.dotClass}`} />
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${fitDiagnostic.dotClass}`} />
                       {fitDiagnostic.detailTitle}
                     </div>
                     <p className="opacity-90 leading-relaxed">
@@ -699,13 +846,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             )}
 
             {/* Specs mini-grid */}
-            <div className="grid grid-cols-2 gap-3 mt-2">
-              <div className="p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl">
-                <p className="text-xs text-neutral-400 mb-1">Corte</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+              <div className="p-4 liquid-glass-card rounded-2xl">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Corte</p>
                 <p className="font-bold text-sm">{formattedFit}</p>
               </div>
-              <div className="p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl">
-                <p className="text-xs text-neutral-400 mb-1">Talle seleccionado</p>
+              <div className="p-4 liquid-glass-card rounded-2xl">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Talle seleccionado</p>
                 <p className="font-bold text-sm">{selectedSize || "—"}</p>
               </div>
             </div>

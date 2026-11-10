@@ -3,24 +3,215 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #eef3f9;
+  --foreground: #0f172a;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.88);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-border-outer: rgba(100, 116, 139, 0.24);
+  --glass-specular-top: rgba(255, 255, 255, 0.96);
+  --glass-specular-bottom: rgba(255, 255, 255, 0.45);
+  --glass-shadow: 0 16px 40px -12px rgba(15, 23, 42, 0.10), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+  --glass-shadow-hover: 0 22px 48px -12px rgba(37, 99, 235, 0.18), 0 8px 20px -4px rgba(15, 23, 42, 0.08);
 }
 
 :root[class~="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #060911;
+  --foreground: #f1f5f9;
+  --glass-bg: rgba(15, 23, 42, 0.52);
+  --glass-bg-strong: rgba(15, 23, 42, 0.72);
+  --glass-bg-subtle: rgba(30, 41, 59, 0.38);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-outer: rgba(255, 255, 255, 0.12);
+  --glass-specular-top: rgba(255, 255, 255, 0.28);
+  --glass-specular-bottom: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.55), 0 4px 16px -2px rgba(0, 0, 0, 0.35);
+  --glass-shadow-hover: 0 24px 56px -10px rgba(59, 130, 246, 0.25), 0 8px 24px -4px rgba(0, 0, 0, 0.5);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(at 12% 10%, rgba(59, 130, 246, 0.13) 0px, transparent 48%),
+    radial-gradient(at 88% 16%, rgba(139, 92, 246, 0.11) 0px, transparent 45%),
+    radial-gradient(at 50% 85%, rgba(14, 165, 233, 0.09) 0px, transparent 52%);
+  background-attachment: scroll;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+@media (min-width: 768px) {
+  body {
+    background-attachment: fixed;
+  }
+}
+
+:root[class~="dark"] body {
+  background-image:
+    radial-gradient(at 12% 10%, rgba(37, 99, 235, 0.20) 0px, transparent 50%),
+    radial-gradient(at 88% 18%, rgba(124, 58, 237, 0.16) 0px, transparent 48%),
+    radial-gradient(at 50% 88%, rgba(6, 182, 212, 0.12) 0px, transparent 55%);
+}
+
+/* ── Liquid Glass Material System (WWDC25 / liquidglassdesign.com) ── */
+@layer components {
+  .liquid-bg {
+    background-color: transparent;
+    position: relative;
+  }
+
+  .liquid-glass-nav {
+    background-color: var(--glass-bg-strong);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border-bottom: 1px solid var(--glass-border-outer);
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-specular-top),
+      inset 0 -1px 0 0 var(--glass-specular-bottom),
+      0 10px 30px -10px rgba(15, 23, 42, 0.08);
+  }
+
+  .liquid-glass-panel {
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(26px) saturate(190%);
+    -webkit-backdrop-filter: blur(26px) saturate(190%);
+    border: 1px solid var(--glass-border-outer);
+    box-shadow:
+      inset 0 1.5px 1px 0 var(--glass-specular-top),
+      inset 0 -1px 1px 0 var(--glass-specular-bottom),
+      var(--glass-shadow);
+  }
+
+  .liquid-glass-card {
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(22px) saturate(185%);
+    -webkit-backdrop-filter: blur(22px) saturate(185%);
+    border: 1px solid var(--glass-border-outer);
+    box-shadow:
+      inset 0 1.5px 1px 0 var(--glass-specular-top),
+      inset 0 -1px 1px 0 var(--glass-specular-bottom),
+      var(--glass-shadow);
+    transition:
+      transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.32s ease,
+      background-color 0.32s ease;
+  }
+
+  .liquid-glass-card:hover {
+    border-color: rgba(59, 130, 246, 0.55);
+    box-shadow:
+      inset 0 1.5px 2px 0 var(--glass-specular-top),
+      inset 0 -1px 1px 0 rgba(59, 130, 246, 0.2),
+      var(--glass-shadow-hover);
+  }
+
+  .liquid-glass-pill {
+    background-color: var(--glass-bg-strong);
+    backdrop-filter: blur(20px) saturate(200%);
+    -webkit-backdrop-filter: blur(20px) saturate(200%);
+    border: 1px solid var(--glass-border-outer);
+    box-shadow:
+      inset 0 1px 1px 0 var(--glass-specular-top),
+      inset 0 -1px 0.5px 0 var(--glass-specular-bottom),
+      0 8px 20px -6px rgba(15, 23, 42, 0.14);
+  }
+
+  .liquid-glass-refract {
+    backdrop-filter: url(#liquid-glass-refract) blur(18px) saturate(195%);
+    -webkit-backdrop-filter: blur(18px) saturate(195%);
+  }
+
+  .liquid-glass-input {
+    background-color: var(--glass-bg-subtle);
+    color: var(--foreground);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid var(--glass-border-outer);
+    box-shadow:
+      inset 0 1px 2px 0 rgba(15, 23, 42, 0.05),
+      0 1px 0 0 var(--glass-specular-top);
+    transition: all 0.22s ease;
+  }
+
+  .liquid-glass-input:focus {
+    border-color: #3b82f6;
+    box-shadow:
+      inset 0 1px 1px 0 var(--glass-specular-top),
+      0 0 0 3px rgba(59, 130, 246, 0.22);
+    outline: none;
+  }
+
+  .liquid-glass-input option {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  .liquid-glass-btn-primary {
+    background-color: #2563eb;
+    background-image: linear-gradient(180deg, rgba(59, 130, 246, 0.96) 0%, rgba(37, 99, 235, 0.94) 100%);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(147, 197, 253, 0.45);
+    box-shadow:
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.48),
+      inset 0 -1px 1px 0 rgba(29, 78, 216, 0.5),
+      0 10px 24px -6px rgba(37, 99, 235, 0.42);
+    color: #ffffff;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .liquid-glass-btn-primary:hover:not(:disabled) {
+    background-color: #1d4ed8;
+    background-image: linear-gradient(180deg, rgba(59, 130, 246, 1) 0%, rgba(29, 78, 216, 0.98) 100%);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.65),
+      0 14px 28px -6px rgba(37, 99, 235, 0.52);
+    transform: translateY(-1px);
+  }
+
+  .liquid-glass-btn-secondary {
+    background-color: var(--glass-bg-strong);
+    color: var(--foreground);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid var(--glass-border-outer);
+    box-shadow:
+      inset 0 1px 1px 0 var(--glass-specular-top),
+      0 6px 16px -4px rgba(15, 23, 42, 0.08);
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .liquid-glass-btn-secondary:hover:not(:disabled) {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow:
+      inset 0 1.5px 1.5px 0 var(--glass-specular-top),
+      0 10px 22px -6px rgba(37, 99, 235, 0.16);
+  }
+}
+
+/* Accessibility: Respect OS Reduce Transparency preference */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-bg-strong: rgba(255, 255, 255, 0.98);
+    --glass-bg-subtle: rgba(248, 250, 252, 0.96);
+  }
+  :root[class~="dark"] {
+    --glass-bg: rgba(15, 23, 42, 0.94);
+    --glass-bg-strong: rgba(15, 23, 42, 0.98);
+    --glass-bg-subtle: rgba(30, 41, 59, 0.94);
+  }
 }
 
 /* Custom Selection */
@@ -31,19 +222,19 @@ body {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3b82f6; /* Blue 500 */
-  border-radius: 5px;
+  background: rgba(59, 130, 246, 0.55);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2563eb; /* Blue 600 */
+  background: rgba(37, 99, 235, 0.85);
 }

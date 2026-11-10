@@ -1,0 +1,20 @@
+# Variables de entorno y secretos
+.env
+.env.*
+
+# Entornos virtuales y cachés Python
+venv/
+.venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Bases de datos locales SQLite y archivos temporales
+*.sqlite
+*.db
+static/uploads/*
+!static/uploads/.gitkeep
+

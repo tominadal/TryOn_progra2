@@ -19,6 +19,7 @@ from app.domain.models.catalog import Garment, GarmentAsset, GarmentImage
 from app.domain.models.experience import Avatar
 from app.domain.models.commerce import Cart, CartItem, Order, OrderItem
 from app.domain.schema_upgrades import upgrade_schema
+from app.domain.schemas.catalog import build_parametric_metadata
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -267,8 +268,32 @@ def seed():
         db.commit()
 
         # ── 5. Sample Garments — 6 unique jeans ───────────────────────────────
+        seed_parametric_profiles = {
+            "ACME-501-ORG": {"waist_rise_label": "Tiro Medio", "distress_level": 10, "has_cuffs": False, "has_pleats": False, "texture": "Denim Clásico"},
+            "ACME-711-SKN": {"waist_rise_label": "Tiro Bajo", "distress_level": 0, "has_cuffs": False, "has_pleats": False, "texture": "Denim Clásico"},
+            "ACME-90S-VNT": {"waist_rise_label": "Tiro Alto", "distress_level": 55, "has_cuffs": True, "has_pleats": True, "texture": "Denim Clásico"},
+            "ACME-BRM-SHT": {"waist_rise_label": "Tiro Medio", "distress_level": 20, "has_cuffs": False, "has_pleats": False, "texture": "Denim Clásico"},
+            "ACME-SKT-DNM": {"waist_rise_label": "Tiro Alto", "distress_level": 15, "has_cuffs": False, "has_pleats": False, "texture": "Denim Clásico"},
+            "ACME-FLR-RET": {"waist_rise_label": "Tiro Alto", "distress_level": 5, "has_cuffs": False, "has_pleats": False, "texture": "Denim Clásico"},
+        }
+
         for jean_data in SAMPLE_JEANS:
             garment = db.query(Garment).filter(Garment.sku == jean_data["sku"]).first()
+            profile = seed_parametric_profiles.get(jean_data["sku"], {})
+            rich_meta = build_parametric_metadata(
+                fit=jean_data["fit"],
+                color_hex=jean_data["available_colors"][0]["hex"],
+                waist_rise_label=profile.get("waist_rise_label", "Tiro Medio"),
+                texture=profile.get("texture", "Denim Clásico"),
+                distress_level=profile.get("distress_level", 0),
+                has_cuffs=profile.get("has_cuffs", False),
+                has_pleats=profile.get("has_pleats", False),
+                existing_meta={
+                    "source": "seed",
+                    "fit": jean_data["fit"],
+                    "colors": jean_data["available_colors"],
+                },
+            )
 
             if not garment:
                 garment = Garment(
@@ -296,11 +321,7 @@ def seed():
                     ai_generated_image_url=jean_data["images"][0]["url"],
                     thumbnail_url=jean_data["images"][0]["url"],
                     status="COMPLETED",
-                    metadata_json={
-                        "source": "seed",
-                        "fit": jean_data["fit"],
-                        "colors": jean_data["available_colors"],
-                    },
+                    metadata_json=rich_meta,
                 )
                 db.add(asset)
 
@@ -346,11 +367,7 @@ def seed():
                     asset.ai_generated_image_url = jean_data["images"][0]["url"]
                     asset.thumbnail_url = jean_data["images"][0]["url"]
                     asset.status = "COMPLETED"
-                    asset.metadata_json = {
-                        "source": "seed_update",
-                        "fit": jean_data["fit"],
-                        "colors": jean_data["available_colors"],
-                    }
+                    asset.metadata_json = rich_meta
 
                 db.commit()
                 print(f"[UPDATE] Jean '{jean_data['name']}' actualizado.")

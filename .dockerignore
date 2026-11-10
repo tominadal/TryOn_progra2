@@ -1,0 +1,30 @@
+# Variables de entorno y secretos (Nunca incluir en imágenes Docker)
+.env
+.env.*
+*.env
+
+# Entornos virtuales de Python y cachés
+venv/
+.venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Bases de datos locales SQLite
+*.sqlite
+*.db
+
+# Dependencias y builds de Frontend
+node_modules/
+.next/
+out/
+
+# Control de versiones y documentación
+.git/
+.github/
+docs/
+*.md
+

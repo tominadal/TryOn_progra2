@@ -75,6 +75,11 @@ def _upgrade_avatars_postgres(conn: Connection) -> None:
 _VARIANT_COLUMNS = {
     "cart_items": {"size": "VARCHAR(20)", "color": "VARCHAR(50)"},
     "order_items": {"size": "VARCHAR(20)", "color": "VARCHAR(50)"},
+    "avatars": {
+        "glasses_color": "VARCHAR(50)",
+        "watch": "BOOLEAN",
+        "watch_color": "VARCHAR(50)",
+    },
 }
 
 

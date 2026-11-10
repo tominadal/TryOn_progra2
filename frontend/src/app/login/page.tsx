@@ -53,19 +53,19 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center p-6 text-neutral-900 dark:text-neutral-50 font-sans transition-colors duration-300">
+    <div className="min-h-screen liquid-bg flex items-center justify-center p-4 sm:p-6 text-neutral-900 dark:text-neutral-50 font-sans transition-colors duration-300">
       <div className="w-full max-w-md">
-        <div className="text-center mb-10">
+        <div className="text-center mb-8 sm:mb-10">
           <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold tracking-tighter mb-2 text-black dark:text-white">
-            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain dark:invert" />
-            TryOn <span className="text-neutral-500">Hub</span>
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain dark:invert drop-shadow-sm" />
+            TryOn <span className="text-neutral-500 dark:text-neutral-400">Hub</span>
           </Link>
-          <h1 className="text-2xl font-semibold mt-6">Bienvenido de nuevo</h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mt-2">Ingresa tus credenciales para acceder a tu cuenta</p>
+          <h1 className="text-2xl font-semibold mt-5 sm:mt-6">Bienvenido de nuevo</h1>
+          <p className="text-neutral-600 dark:text-neutral-400 mt-2 text-sm sm:text-base">Ingresa tus credenciales para acceder a tu cuenta</p>
         </div>
 
-        <div className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl p-8 rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-xl dark:shadow-2xl transition-colors duration-300">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="liquid-glass-panel liquid-glass-refract p-6 sm:p-8 rounded-3xl transition-colors duration-300">
+          <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
             <div>
               <label className="block text-sm font-medium mb-2 text-neutral-700 dark:text-neutral-300">Correo Electrónico</label>
               <input 
@@ -73,7 +73,7 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-black dark:text-white"
+                className="w-full liquid-glass-input rounded-xl px-4 py-3 text-sm text-black dark:text-white"
                 placeholder="tu@ejemplo.com"
               />
             </div>
@@ -86,13 +86,13 @@ function LoginForm() {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-black dark:text-white pr-12"
+                  className="w-full liquid-glass-input rounded-xl px-4 py-3 text-sm text-black dark:text-white pr-12"
                   placeholder="••••••••"
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -107,7 +107,7 @@ function LoginForm() {
             <button 
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
+              className="w-full py-3.5 sm:py-4 liquid-glass-btn-primary font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -120,7 +120,7 @@ function LoginForm() {
 
           <p className="mt-8 text-center text-sm font-medium text-neutral-600 dark:text-neutral-400">
             ¿No tienes una cuenta?{" "}
-            <Link href="/register" className="text-blue-600 dark:text-blue-400 hover:underline">
+            <Link href="/register" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
               Regístrate
             </Link>
           </p>
@@ -132,7 +132,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex items-center justify-center p-6"><div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen liquid-bg flex items-center justify-center p-6"><div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>}>
       <LoginForm />
     </Suspense>
   );
