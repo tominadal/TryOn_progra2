@@ -1,66 +1,72 @@
 import Link from "next/link";
-import { MessageSquare, Camera, Briefcase } from "lucide-react";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { API_DOCS_URL, DOCS } from "@/lib/site";
 
-const GITHUB_URL = "https://github.com/tominadal/TryOn_progra2";
+const LINK_CLASS = "hover:text-blue-600 dark:hover:text-blue-400 transition-colors";
 
-/** GitHub mark. lucide-react no longer ships brand icons, so it is drawn inline. */
-function GithubIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-    </svg>
-  );
-}
+const CONSIGNA_LINKS = [
+  { label: "Cumplimiento de la cátedra", href: "/consignas" },
+  { label: "API REST con FastAPI", href: "/consignas#api" },
+  { label: "Seguridad y roles", href: "/consignas#seguridad" },
+  { label: "Testing y CI/CD", href: "/consignas#testing" },
+  { label: "Patrones y SOLID", href: "/consignas#patrones" },
+  { label: "Docker y despliegue", href: "/consignas#deploy" },
+];
+
+const DOC_LINK_IDS = ["requerimientos", "patrones", "clases", "negocio", "changelog"];
+const DOC_LINKS = DOCS.filter((d) => DOC_LINK_IDS.includes(d.id));
 
 export function Footer() {
   return (
     <footer className="w-full liquid-glass-panel border-t border-white/50 dark:border-white/10 py-12 px-4 sm:px-6 transition-all duration-300">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        
+
         {/* Brand */}
         <div className="space-y-4">
           <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-bold tracking-tighter text-black dark:text-white">
-            <img src="/logo.png" alt="TryOn Hub Logo" className="w-8 h-8 object-contain drop-shadow-[0_2px_8px_rgba(37,99,235,0.35)]" />
+            <img src="/logo.png" alt="TryOn Hub Logo" className="w-8 h-8 object-contain" />
             <span>TryOn <span className="text-blue-600 dark:text-blue-400">Hub</span></span>
           </Link>
           <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
             La nueva generación de probadores virtuales para e-commerce. Pruébalo antes de comprarlo, potenciado por generación 3D avanzada.
           </p>
-          <div className="flex gap-2.5 pt-2">
-            <a href="#" className="p-2.5 rounded-full liquid-glass-btn-secondary text-neutral-500 dark:text-neutral-400 hover:text-blue-500 transition-all"><MessageSquare className="w-4 h-4" /></a>
-            <a href="#" className="p-2.5 rounded-full liquid-glass-btn-secondary text-neutral-500 dark:text-neutral-400 hover:text-pink-500 transition-all"><Camera className="w-4 h-4" /></a>
-            <a href="#" className="p-2.5 rounded-full liquid-glass-btn-secondary text-neutral-500 dark:text-neutral-400 hover:text-blue-700 transition-all"><Briefcase className="w-4 h-4" /></a>
-            <a
-              href={GITHUB_URL}
+          <div className="pt-1">
+            <Link
+              href="/presentacion"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Código del proyecto en GitHub"
-              title="GitHub"
-              className="p-2.5 rounded-full liquid-glass-btn-secondary text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-all"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline underline-offset-4 transition-all group"
             >
-              <GithubIcon className="w-4 h-4" />
-            </a>
+              <span>Ver Presentación Interactiva (15 min)</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </Link>
           </div>
         </div>
 
-        {/* Links */}
+        {/* Consignas */}
         <div>
-          <h3 className="font-semibold mb-4 text-black dark:text-white">Producto</h3>
+          <h3 className="font-semibold mb-4 text-black dark:text-white">Consignas</h3>
           <ul className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
-            <li><Link href="/marketplace" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Marketplace</Link></li>
-            <li><Link href="/avatar" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Gemelo Digital</Link></li>
-            <li><Link href="/register" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Para Marcas</Link></li>
-            <li><Link href="/marketplace" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Precios</Link></li>
+            {CONSIGNA_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className={LINK_CLASS}>{link.label}</Link>
+              </li>
+            ))}
           </ul>
         </div>
 
-        {/* Resources */}
+        {/* Documentación */}
         <div>
-          <h3 className="font-semibold mb-4 text-black dark:text-white">Recursos</h3>
+          <h3 className="font-semibold mb-4 text-black dark:text-white">Documentación</h3>
           <ul className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
-            <li><a href={`${GITHUB_URL}#readme`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Documentación</a></li>
-            <li><a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Referencia API</a></li>
-            <li><Link href="/ayuda" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Centro de Ayuda</Link></li>
+            <li><Link href="/documentacion" className={LINK_CLASS}>Toda la documentación</Link></li>
+            {DOC_LINKS.map((doc) => (
+              <li key={doc.id}>
+                <a href={doc.href} target="_blank" rel="noopener noreferrer" className={LINK_CLASS}>{doc.title}</a>
+              </li>
+            ))}
+            <li><a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" className={LINK_CLASS}>Referencia de la API</a></li>
+            <li><Link href="/ayuda" className={LINK_CLASS}>Centro de Ayuda</Link></li>
           </ul>
         </div>
 
@@ -69,8 +75,8 @@ export function Footer() {
           <h3 className="font-semibold mb-4 text-black dark:text-white">Mantente Actualizado</h3>
           <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Suscríbete a nuestro boletín para las últimas novedades.</p>
           <div className="flex flex-col sm:flex-row gap-2">
-            <input 
-              type="email" 
+            <input
+              type="email"
               placeholder="Correo electrónico"
               className="w-full liquid-glass-input rounded-xl px-3.5 py-2.5 text-sm text-black dark:text-white placeholder:text-neutral-400"
             />
@@ -80,12 +86,12 @@ export function Footer() {
           </div>
         </div>
       </div>
-      
+
       <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-neutral-200/60 dark:border-white/10 text-center flex flex-col md:flex-row justify-between items-center gap-4">
         <p className="text-sm text-neutral-500 dark:text-neutral-400">&copy; 2026 TryOn Hub. Todos los derechos reservados.</p>
         <div className="flex flex-wrap justify-center gap-4 text-sm text-neutral-500 dark:text-neutral-400">
-          <a href="#" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Política de Privacidad</a>
-          <a href="#" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Términos de Servicio</a>
+          <Link href="/privacidad" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Política de Privacidad</Link>
+          <Link href="/terminos" className="hover:text-neutral-900 dark:hover:text-white transition-colors">Términos de Servicio</Link>
         </div>
       </div>
     </footer>

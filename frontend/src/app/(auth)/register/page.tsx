@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/api";
-import { Eye, EyeOff, User, Store } from "lucide-react";
+import { Eye, EyeSlash, User, Storefront } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
@@ -88,7 +88,7 @@ export default function RegisterPage() {
                       : "liquid-glass-btn-secondary text-neutral-600 dark:text-neutral-300"
                   }`}
                 >
-                  <Store className="w-4 h-4" /> Marca
+                  <Storefront className="w-4 h-4" /> Marca
                 </button>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeSlash className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>

@@ -5,9 +5,25 @@ from sqlalchemy.orm import Session
 
 from app.domain.database import get_db
 from app.domain.repositories.user_repository import user_repo
-from app.services.auth_service import verify_password, create_access_token
+import logging
+
+from app.services.auth_service import (
+    verify_password,
+    create_access_token,
+    create_password_reset_token,
+    verify_password_reset_token,
+    get_password_hash,
+)
 from app.config.settings import settings
-from app.dto.auth import Token
+from app.dto.auth import (
+    Token,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    ResetPasswordRequest,
+    MessageResponse,
+)
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -42,3 +58,39 @@ def login_access_token(
         data={"sub": user.email, "role": role_val}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+FORGOT_PASSWORD_MESSAGE = (
+    "Si el correo está registrado, vas a recibir instrucciones para restablecer tu contraseña."
+)
+
+
+@router.post("/forgot-password", response_model=ForgotPasswordResponse)
+def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """Starts a password recovery. The answer is identical whether or not the e-mail exists
+    (prevents account enumeration)."""
+    user = user_repo.get_by_email(db, email=payload.email)
+    reset_url = None
+    if user and user.is_active:
+        token = create_password_reset_token(user.email, user.hashed_password)
+        link = f"{settings.FRONTEND_URL.rstrip('/')}/recuperar?token={token}"
+        logger.info("Password reset requested for %s", user.email)
+        if settings.ENVIRONMENT.lower() != "production":
+            # No e-mail provider yet: outside production the link is returned for testing.
+            reset_url = link
+    return {"message": FORGOT_PASSWORD_MESSAGE, "reset_url": reset_url}
+
+
+@router.post("/reset-password", response_model=MessageResponse)
+def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """Sets a new password using a valid, unused recovery token."""
+    user = verify_password_reset_token(db, payload.token)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El enlace de recuperación es inválido o ya expiró.",
+        )
+    user.hashed_password = get_password_hash(payload.new_password)
+    db.add(user)
+    db.commit()
+    return {"message": "Contraseña actualizada. Ya podés iniciar sesión."}

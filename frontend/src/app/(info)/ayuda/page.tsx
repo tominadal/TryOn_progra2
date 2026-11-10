@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronDown, LifeBuoy } from "lucide-react";
+import { CaretDown, Lifebuoy } from "@phosphor-icons/react/dist/ssr";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FAQ_ITEMS, groupFaqs } from "@/lib/faqs";
@@ -20,7 +20,7 @@ export default function HelpPage() {
       <main className="flex-1 pt-28 md:pt-24 pb-16 px-4 sm:px-6 max-w-3xl mx-auto w-full">
         <header className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl liquid-glass-pill liquid-glass-refract text-blue-600 dark:text-blue-400 mb-5">
-            <LifeBuoy className="w-7 h-7" />
+            <Lifebuoy className="w-7 h-7" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Centro de Ayuda</h1>
           <p className="text-neutral-600 dark:text-neutral-400 max-w-xl mx-auto text-sm leading-relaxed">
@@ -65,7 +65,7 @@ export default function HelpPage() {
                     >
                       <summary className="flex items-center justify-between gap-4 cursor-pointer list-none px-5 py-4 text-sm sm:text-base font-semibold [&::-webkit-details-marker]:hidden">
                         {item.question}
-                        <ChevronDown className="w-4 h-4 shrink-0 text-neutral-500 dark:text-neutral-400 transition-transform duration-300 group-open:rotate-180 group-open:text-blue-500" />
+                        <CaretDown className="w-4 h-4 shrink-0 text-neutral-500 dark:text-neutral-400 transition-transform duration-300 group-open:rotate-180 group-open:text-blue-500" />
                       </summary>
                       <div className="px-5 pb-5 pt-1 space-y-3 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300 border-t border-neutral-200/50 dark:border-white/10">
                         {item.answer.split("\n\n").map((paragraph, index) => (

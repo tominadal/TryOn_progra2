@@ -7,26 +7,25 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
 import {
-  Upload,
+  UploadSimple,
   Package,
-  Box,
-  Trash2,
-  Pencil,
+  Cube,
+  Trash,
+  PencilSimple,
   Copy,
   X,
-  ExternalLink,
-  FileSpreadsheet,
-  Search,
-  RefreshCw,
-  AlertTriangle,
+  ArrowSquareOut,
+  FileXls,
+  MagnifyingGlass,
+  ArrowsClockwise,
+  Warning,
   Bell,
   Plus,
-  Sparkles,
+  Sparkle,
   Ruler,
   Palette,
-  Layers,
-  ArrowLeft,
-} from "lucide-react";
+  Stack,
+} from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { fetchApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
@@ -511,7 +510,7 @@ export default function BrandDashboard() {
         setActiveTab("catalog");
         toast.success(
           generate3D
-            ? "¡Producto subido! El gemelo digital 3D se ha generado exitosamente."
+            ? "¡Producto subido! El modelado 3D se generó exitosamente."
             : "¡Producto subido exitosamente!"
         );
         loadGarments();
@@ -541,10 +540,6 @@ export default function BrandDashboard() {
         {/* ── HEADER & ACCIÓN RÁPIDA ───────────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 border-b border-neutral-200/70 dark:border-white/10 pb-5">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full liquid-glass-pill text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Centro de Control B2B · Gemelos Digitales 3D</span>
-            </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard de Marca</h1>
             <p className="text-neutral-600 dark:text-neutral-400 mt-1 text-sm sm:text-base">
               Gestiona tu catálogo, diseña moldería 3D en centímetros e importa lotes masivos.
@@ -552,16 +547,6 @@ export default function BrandDashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {activeTab !== "catalog" && (
-              <button
-                type="button"
-                onClick={() => setActiveTab("catalog")}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold liquid-glass-btn-secondary text-neutral-700 dark:text-neutral-200 transition-all"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Ver Catálogo ({garments.length})</span>
-              </button>
-            )}
             <button
               type="button"
               onClick={() => {
@@ -576,65 +561,59 @@ export default function BrandDashboard() {
           </div>
         </div>
 
-        {/* ── TARJETAS KPI INTERACTIVAS ────────────────────────────────────── */}
+        {/* ── INDICADORES (informativos, no interactivos) ──────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-6">
-          <button
-            type="button"
-            onClick={() => setActiveTab("catalog")}
-            className={`liquid-glass-card p-4 sm:p-5 rounded-3xl flex items-center gap-4 text-left transition-all ${
-              activeTab === "catalog" ? "ring-2 ring-blue-500/40" : "hover:scale-[1.01]"
-            }`}
-          >
+          <div className="liquid-glass-card p-4 sm:p-5 rounded-3xl flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-blue-500/15 dark:bg-blue-500/25 border border-blue-400/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
               <Package className="w-6 h-6" />
             </div>
             <div className="min-w-0">
               <p className="text-2xl font-bold leading-tight">{garments.length}</p>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-semibold truncate">
-                Productos Activos
+                Prendas en catálogo
               </p>
             </div>
-          </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("studio")}
-            className={`liquid-glass-card p-4 sm:p-5 rounded-3xl flex items-center gap-4 text-left transition-all ${
-              activeTab === "studio" ? "ring-2 ring-emerald-500/40" : "hover:scale-[1.01]"
-            }`}
-          >
+          <div className="liquid-glass-card p-4 sm:p-5 rounded-3xl flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 dark:bg-emerald-500/25 border border-emerald-400/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-              <Box className="w-6 h-6" />
+              <Cube className="w-6 h-6" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-2xl font-bold leading-tight">
                 {garments.filter((g) => g.is_processed).length}
+                <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400"> / {garments.length}</span>
               </p>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-semibold truncate">
-                Modelos 3D Generados
+                Con modelado 3D activo
               </p>
+              <div className="mt-1.5 h-1.5 w-full rounded-full bg-neutral-200/80 dark:bg-neutral-800/80 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                  style={{
+                    width: `${garments.length ? Math.round((garments.filter((g) => g.is_processed).length / garments.length) * 100) : 0}%`,
+                  }}
+                />
+              </div>
             </div>
-          </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("import")}
-            className={`liquid-glass-card p-4 sm:p-5 rounded-3xl flex items-center gap-4 text-left transition-all ${
-              activeTab === "import" ? "ring-2 ring-purple-500/40" : "hover:scale-[1.01]"
-            }`}
-          >
+          <div className="liquid-glass-card p-4 sm:p-5 rounded-3xl flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-purple-500/15 dark:bg-purple-500/25 border border-purple-400/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
               <Bell className="w-6 h-6" />
             </div>
             <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-bold leading-tight truncate">
-                {observerFeed?.stats.jobs_completed ?? 0} Lotes / {observerFeed?.notifications.length ?? 0} Alertas
+              <p className="text-2xl font-bold leading-tight">
+                {observerFeed?.stats.jobs_completed ?? 0}
+                <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                  {" "}lotes · {observerFeed?.notifications.length ?? 0} alertas
+                </span>
               </p>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-semibold truncate">
-                Carga Excel & Monitor Observer
+                Importaciones masivas
               </p>
             </div>
-          </button>
+          </div>
         </div>
 
         {/* ── BARRA DE PESTAÑAS LIQUID GLASS (SEGMENTED CONTROL) ────────────── */}
@@ -672,7 +651,7 @@ export default function BrandDashboard() {
                 : "text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5"
             }`}
           >
-            {editingGarment ? <Pencil className="w-4 h-4 shrink-0" /> : <Box className="w-4 h-4 shrink-0" />}
+            {editingGarment ? <PencilSimple className="w-4 h-4 shrink-0" /> : <Cube className="w-4 h-4 shrink-0" />}
             <span>
               {editingGarment ? `2. Editando: ${editingGarment.name}` : "2. Subir Nuevo Producto (Estudio 3D)"}
             </span>
@@ -687,7 +666,7 @@ export default function BrandDashboard() {
                 : "text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5"
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4 shrink-0" />
+            <FileXls className="w-4 h-4 shrink-0" />
             <span>3. Carga Masiva Excel & Observer</span>
           </button>
         </div>
@@ -707,7 +686,7 @@ export default function BrandDashboard() {
 
               <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
                 <div className="relative flex-1 sm:w-64">
-                  <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <MagnifyingGlass className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchQuery}
@@ -738,7 +717,7 @@ export default function BrandDashboard() {
                   title="Actualizar catálogo"
                   className="p-2.5 rounded-xl liquid-glass-btn-secondary transition-all"
                 >
-                  <RefreshCw className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
+                  <ArrowsClockwise className="w-4 h-4 text-neutral-600 dark:text-neutral-300" />
                 </button>
               </div>
             </div>
@@ -836,16 +815,16 @@ export default function BrandDashboard() {
 
             {/* Tabla Completa de Escritorio (>= md) */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[1180px] text-left text-sm whitespace-nowrap">
                 <thead className="bg-white/40 dark:bg-white/5 border-b border-neutral-200/70 dark:border-white/10">
                   <tr>
-                    <th className="px-6 py-4 font-semibold">Prenda</th>
-                    <th className="px-4 py-4 font-semibold">Fit / Variantes de Color</th>
-                    <th className="px-4 py-4 font-semibold">Talles Disponibles</th>
-                    <th className="px-4 py-4 font-semibold">Moldería Base (Talle M)</th>
+                    <th className="px-6 py-4 font-semibold min-w-[260px]">Prenda</th>
+                    <th className="px-4 py-4 font-semibold">Fit / Colores</th>
+                    <th className="px-4 py-4 font-semibold">Talles</th>
+                    <th className="px-4 py-4 font-semibold">Moldería base M (cm)</th>
                     <th className="px-4 py-4 font-semibold">SKU</th>
                     <th className="px-4 py-4 font-semibold">Precio</th>
-                    <th className="px-4 py-4 font-semibold">Estado 3D</th>
+                    <th className="px-4 py-4 font-semibold">Modelado 3D</th>
                     <th className="px-6 py-4 font-semibold text-right">Acciones</th>
                   </tr>
                 </thead>
@@ -874,7 +853,7 @@ export default function BrandDashboard() {
                           className={`border-b border-neutral-200/50 dark:border-white/5 transition-colors ${
                             isBeingEdited
                               ? "bg-amber-500/15"
-                              : "hover:bg-white/40 dark:hover:bg-white/5"
+                              : ""
                           }`}
                         >
                           <td className="px-6 py-4 font-medium">
@@ -891,14 +870,14 @@ export default function BrandDashboard() {
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
-                                  <Box className="w-5 h-5 m-3.5 text-neutral-400" />
+                                  <Cube className="w-5 h-5 m-3.5 text-neutral-400" />
                                 )}
                               </div>
                               <div className="min-w-0">
-                                <p className="font-bold text-neutral-900 dark:text-white truncate max-w-[220px]">
+                                <p className="font-bold text-neutral-900 dark:text-white truncate max-w-[260px]">
                                   {g.name}
                                 </p>
-                                <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-[220px]">
+                                <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-[260px]">
                                   {g.material || "Denim 100% Algodón"}
                                 </p>
                               </div>
@@ -987,7 +966,7 @@ export default function BrandDashboard() {
                                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/15 border border-blue-400/30 text-blue-700 dark:text-blue-300 hover:bg-blue-500/25 transition-colors"
                               >
                                 <span>Ver</span>
-                                <ExternalLink className="w-3.5 h-3.5" />
+                                <ArrowSquareOut className="w-3.5 h-3.5" />
                               </Link>
                               <button
                                 type="button"
@@ -1004,7 +983,7 @@ export default function BrandDashboard() {
                                 title="Editar prenda en el Estudio 3D"
                                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-400/30 text-amber-800 dark:text-amber-300 hover:bg-amber-500/25 transition-colors"
                               >
-                                <Pencil className="w-3.5 h-3.5" />
+                                <PencilSimple className="w-3.5 h-3.5" />
                                 <span>Editar</span>
                               </button>
                               <button
@@ -1014,7 +993,7 @@ export default function BrandDashboard() {
                                 title="Eliminar prenda"
                                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-red-500/15 border border-red-400/30 text-red-700 dark:text-red-300 hover:bg-red-500/25 transition-colors disabled:opacity-50"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash className="w-3.5 h-3.5" />
                                 <span>Eliminar</span>
                               </button>
                             </div>
@@ -1525,7 +1504,7 @@ export default function BrandDashboard() {
               {/* Tarjeta 3: Propiedades Físicas, Fotografía y Publicación */}
               <div className="liquid-glass-panel p-5 sm:p-6 rounded-3xl space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-neutral-200/70 dark:border-white/10 pb-3">
-                  <Layers className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Stack className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   <div>
                     <h2 className="text-lg font-bold">3. Propiedades Textiles y Fotografía</h2>
                     <p className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -1686,7 +1665,7 @@ export default function BrandDashboard() {
                     />
                     {productFile ? (
                       <div className="flex items-center gap-3">
-                        <Upload className="w-6 h-6 text-blue-500 shrink-0" />
+                        <UploadSimple className="w-6 h-6 text-blue-500 shrink-0" />
                         <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 break-all">
                           {productFile.name}
                         </p>
@@ -1711,7 +1690,7 @@ export default function BrandDashboard() {
                       </div>
                     ) : (
                       <>
-                        <Upload className="w-7 h-7 text-neutral-400 group-hover:text-blue-500 transition-colors mb-1.5" />
+                        <UploadSimple className="w-7 h-7 text-neutral-400 group-hover:text-blue-500 transition-colors mb-1.5" />
                         <p className="text-sm font-medium">Arrastra o haz clic para subir fotografía</p>
                         <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                           PNG, JPG, WEBP (Máx. 5MB)
@@ -1768,7 +1747,7 @@ export default function BrandDashboard() {
                     <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
                       {editingGarment
                         ? "Si está desactivado, actualiza instantáneamente los parámetros 3D sin consumir IA."
-                        : "Generar automáticamente el gemelo digital paramétrico para este producto."}
+                        : "Generar automáticamente el modelado 3D paramétrico de esta prenda."}
                     </p>
                   </div>
                   <span
@@ -1819,7 +1798,7 @@ export default function BrandDashboard() {
                     ) : editingGarment ? (
                       "Guardar Cambios de la Prenda"
                     ) : generate3D ? (
-                      "Subir y Generar Gemelo 3D"
+                      "Subir y Generar Modelado 3D"
                     ) : (
                       "Publicar Producto"
                     )}
@@ -1836,14 +1815,14 @@ export default function BrandDashboard() {
                     <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
                       Simulación WebGL en Tiempo Real
                     </span>
-                    <h3 className="text-lg font-bold">Previsualizador del Gemelo 3D</h3>
+                    <h3 className="text-lg font-bold">Previsualizador del Modelado 3D</h3>
                   </div>
                   <span className="px-2.5 py-1 rounded-full text-xs font-bold liquid-glass-pill text-emerald-700 dark:text-emerald-300">
                     {productFit}
                   </span>
                 </div>
 
-                <div className="w-full h-[360px] sm:h-[420px] rounded-2xl liquid-glass-card overflow-hidden relative border border-blue-500/25 shadow-inner">
+                <div className="w-full h-[360px] sm:h-[420px] rounded-2xl overflow-hidden relative border border-blue-500/25 shadow-inner bg-cover bg-center" style={{ backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,0.10), rgba(255,255,255,0.28)), url(/images/boutique_3d_bg.jpg)" }}>
                   <Canvas dpr={[1, 1.5]} camera={{ position: [0, -0.05, 1.62], fov: 42 }}>
                     <ambientLight intensity={0.68} />
                     <directionalLight position={[4, 6, 4]} intensity={1.55} />
@@ -1944,7 +1923,7 @@ export default function BrandDashboard() {
             <div className="liquid-glass-panel p-6 sm:p-8 rounded-3xl space-y-5">
               <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 dark:bg-emerald-500/25 border border-emerald-400/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <FileSpreadsheet className="w-6 h-6" />
+                  <FileXls className="w-6 h-6" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold">Carga Masiva por Excel</h2>
@@ -1971,7 +1950,7 @@ export default function BrandDashboard() {
                     onChange={(e) => setExcelFile(e.target.files?.[0] || null)}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
-                  <FileSpreadsheet className="w-8 h-8 text-emerald-500 mb-2" />
+                  <FileXls className="w-8 h-8 text-emerald-500 mb-2" />
                   {excelFile ? (
                     <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 break-all">
                       {excelFile.name}
@@ -2095,7 +2074,7 @@ export default function BrandDashboard() {
             <div className="liquid-glass-panel liquid-glass-refract rounded-3xl max-w-md w-full p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full bg-red-500/15 border border-red-400/40 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-6 h-6" />
+                  <Warning className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold">Eliminar Prenda</h3>
@@ -2104,7 +2083,7 @@ export default function BrandDashboard() {
               </div>
 
               <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">
-                ¿Estás seguro de que deseas eliminar <strong>{garmentToDelete.name}</strong>? Esta acción eliminará la prenda del catálogo de tu marca, su gemelo digital 3D y la quitará de los carritos activos.
+                ¿Estás seguro de que deseas eliminar <strong>{garmentToDelete.name}</strong>? Esta acción eliminará la prenda del catálogo de tu marca, su modelado 3D y la quitará de los carritos activos.
               </p>
 
               <div className="flex items-center justify-end gap-3 pt-2">
@@ -2129,7 +2108,7 @@ export default function BrandDashboard() {
                     </>
                   ) : (
                     <>
-                      <Trash2 className="w-4 h-4" />
+                      <Trash className="w-4 h-4" />
                       <span>Eliminar definitivamente</span>
                     </>
                   )}

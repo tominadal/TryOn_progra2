@@ -6,7 +6,7 @@ import { fetchApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Search, Filter, Grid3X3, List } from "lucide-react";
+import { MagnifyingGlass, Funnel, SquaresFour, List, ArrowRight } from "@phosphor-icons/react";
 
 interface Garment {
   id: number;
@@ -70,7 +70,7 @@ export default function MarketplacePage() {
           <div>
             <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Filtros</h2>
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <MagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input 
                 type="text" 
                 placeholder="Buscar modelo o color..." 
@@ -83,7 +83,7 @@ export default function MarketplacePage() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
             <div className="space-y-3.5">
-              <h3 className="font-semibold flex items-center gap-2"><Filter className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Fit (Jeans)</h3>
+              <h3 className="font-semibold flex items-center gap-2"><Funnel className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Fit (Jeans)</h3>
               <div className="space-y-2.5 text-sm text-neutral-600 dark:text-neutral-300 font-medium">
                 <label className="flex items-center gap-3 cursor-pointer hover:text-black dark:hover:text-white transition-colors">
                   <input type="checkbox" checked={selectedFits.includes("Straight")} onChange={() => handleFitChange("Straight")} className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 accent-blue-600" /> Straight / Recto
@@ -129,7 +129,7 @@ export default function MarketplacePage() {
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'liquid-glass-btn-primary shadow-sm' : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'}`}
               >
-                <Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5" />
+                <SquaresFour className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button 
                 onClick={() => setViewMode("list")}
@@ -197,8 +197,8 @@ export default function MarketplacePage() {
                     </div>
                     <div className="flex justify-between items-center gap-2 mt-5">
                       <span className="text-xl sm:text-2xl font-black">{formatPrice(garment.price)}</span>
-                      <span className="text-xs sm:text-sm font-bold px-3.5 sm:px-4 py-2 liquid-glass-btn-secondary rounded-xl text-neutral-800 dark:text-neutral-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-all shrink-0">
-                        Comprar &rarr;
+                      <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-3.5 sm:px-4 py-2 liquid-glass-btn-secondary rounded-xl text-neutral-800 dark:text-neutral-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-all shrink-0">
+                        Comprar <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
                   </div>

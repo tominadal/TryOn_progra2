@@ -21,7 +21,7 @@ import {
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
-import { ShoppingCart, Ruler, Palette, CheckCircle2, Info, User as UserIcon } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Ruler, Palette, CheckCircle, Warning, Info, User as UserIcon } from "@phosphor-icons/react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows, Box } from "@react-three/drei";
 import { ParametricMannequin, ParametricPants } from "@/components/avatar";
@@ -131,26 +131,26 @@ function calculateFitDiagnostic(
 
   const formatSignedCm = (v: number) => (v > 0 ? `+${v} cm` : `${v} cm`);
 
-  let badgeText = `✨ Calce Ideal (${formatSignedCm(waistDeltaCm)} cintura)`;
+  let badgeText = `Calce Ideal (${formatSignedCm(waistDeltaCm)} cintura)`;
   let badgeClass =
     "bg-white/90 dark:bg-slate-900/90 text-emerald-800 dark:text-emerald-300 border-emerald-500/50";
   let dotClass = "bg-emerald-500";
-  let detailTitle = "✨ Diagnóstico Antropométrico: Calce Recomendado";
+  let detailTitle = "Diagnóstico Antropométrico: Calce Recomendado";
   let detailBody = `Tu cintura (${avatarCm.waistCm} cm) y cadera (${avatarCm.hipCm} cm) calzan de forma óptima en el talle ${selectedSize} (cintura ${garmentCm.waistCm} cm · cadera ${garmentCm.hipCm} cm · tiro/largo ${garmentCm.inseamCm} cm).`;
 
   if (isTooSmall) {
-    badgeText = `⚠️ Talla Chica (${formatSignedCm(waistDeltaCm)} cintura)`;
+    badgeText = `Talla Chica (${formatSignedCm(waistDeltaCm)} cintura)`;
     badgeClass =
       "bg-white/90 dark:bg-slate-900/90 text-amber-800 dark:text-amber-300 border-amber-500/50";
     dotClass = "bg-amber-500";
-    detailTitle = "⚠️ Diagnóstico Antropométrico: Talla Ajustada / Pequeña";
+    detailTitle = "Diagnóstico Antropométrico: Talla Ajustada / Pequeña";
     detailBody = `Tu avatar mide ${avatarCm.waistCm} cm de cintura y ${avatarCm.hipCm} cm de cadera, mientras que el talle ${selectedSize} ofrece ${garmentCm.waistCm} cm de cintura (${formatSignedCm(waistDeltaCm)}) y ${garmentCm.hipCm} cm de cadera (${formatSignedCm(hipDeltaCm)}). Se visualiza tensión textil en 3D.`;
   } else if (isTooBig) {
-    badgeText = `⚠️ Talla Holgada (${formatSignedCm(waistDeltaCm)} cintura)`;
+    badgeText = `Talla Holgada (${formatSignedCm(waistDeltaCm)} cintura)`;
     badgeClass =
       "bg-white/90 dark:bg-slate-900/90 text-purple-800 dark:text-purple-300 border-purple-500/50";
     dotClass = "bg-purple-500";
-    detailTitle = "⚠️ Diagnóstico Antropométrico: Talla Holgada / Grande";
+    detailTitle = "Diagnóstico Antropométrico: Talla Holgada / Grande";
     detailBody = `Para tu cintura (${avatarCm.waistCm} cm) y cadera (${avatarCm.hipCm} cm), el talle ${selectedSize} (${garmentCm.waistCm} cm cintura · ${garmentCm.hipCm} cm cadera) deja una holgura de ${formatSignedCm(waistDeltaCm)} en cintura y acumulación sobre el calzado.`;
   }
 
@@ -399,7 +399,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           href="/marketplace"
           className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass-pill text-xs sm:text-sm text-neutral-600 dark:text-neutral-300 hover:text-black dark:hover:text-white mb-6 sm:mb-8 transition-all"
         >
-          ← Volver al Catálogo
+          <ArrowLeft className="w-4 h-4" />
+          Volver al Catálogo
         </Link>
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
@@ -548,7 +549,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   />
                   {(product.model_3d_url || product.metadata_json?.scale_x) && (
                     <div className="absolute top-4 left-4 flex items-center gap-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-200 bg-white/90 dark:bg-slate-900/85 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-emerald-500/50 shadow-md">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       Try-On 3D disponible
                     </div>
                   )}
@@ -711,7 +712,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
                 {isTryOnActive && (
                   <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-2 animate-in fade-in duration-300">
-                    ✨ El color se aplica en tiempo real en el Probador 3D
+                    El color se aplica en tiempo real en el Probador 3D
                   </p>
                 )}
               </div>

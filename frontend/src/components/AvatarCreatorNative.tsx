@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
-import { User, Shirt, Scissors, Ruler } from "lucide-react";
+import { User, TShirt, Scissors, Ruler, ArrowRight } from "@phosphor-icons/react";
 import {
   ANTHROPOMETRIC_SPECS,
   cmToMorphFactor,
@@ -240,7 +240,7 @@ export function AvatarCreatorNative({
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
     { id: "body", label: "Medidas (cm)", icon: <User className="w-5 h-5" /> },
-    { id: "style", label: "Estilo", icon: <Shirt className="w-5 h-5" /> },
+    { id: "style", label: "Estilo", icon: <TShirt className="w-5 h-5" /> },
   ];
 
   return (
@@ -817,7 +817,8 @@ export function AvatarCreatorNative({
             onClick={handleSave}
             className="w-full py-3.5 sm:py-4 liquid-glass-btn-primary font-bold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
           >
-            Guardar Gemelo Digital →
+            Guardar Gemelo Digital
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>

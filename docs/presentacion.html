@@ -1,629 +1,1834 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TryOnHub — Presentación Programación II</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/night.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TryOn Hub · Presentación Académica de Defensa (15 Min)</title>
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --accent: #6ee7b7;
-      --accent2: #818cf8;
-      --accent3: #f472b6;
-      --accent-dec: #fbbf24;
-      --accent-obs: #34d399;
-      --accent-str: #818cf8;
-      --bg-card: rgba(255,255,255,0.06);
-      --border: rgba(255,255,255,0.12);
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: rgba(37, 99, 235, 0.08);
+      --primary-border: rgba(37, 99, 235, 0.22);
+      --accent: #0284c7;
+      --accent-light: rgba(2, 132, 199, 0.1);
+      --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 45%, #e2e8f0 100%);
+      --card-bg: rgba(255, 255, 255, 0.78);
+      --card-border: rgba(255, 255, 255, 0.85);
+      --card-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.8);
+      --subcard-bg: rgba(255, 255, 255, 0.7);
+      --subcard-border: rgba(226, 232, 240, 0.9);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-soft: #64748b;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
-    .reveal { font-family: 'Inter', sans-serif !important; }
-    .reveal h1, .reveal h2, .reveal h3 { font-family: 'Inter', sans-serif !important; letter-spacing: -0.02em; }
-    .reveal code, .reveal pre { font-family: 'JetBrains Mono', monospace !important; }
 
-    /* ── Slide base ── */
-    .reveal .slides section {
-      text-align: left;
-      padding: 0 !important;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
     }
 
-    /* ── Title slide ── */
-    .slide-title {
-      background: radial-gradient(ellipse at 30% 50%, #1e1b4b 0%, #0f172a 60%);
-      display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
-      padding: 60px 80px !important;
-      height: 100vh; box-sizing: border-box;
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
-    .slide-title .badge {
-      background: linear-gradient(90deg, var(--accent2), var(--accent));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      font-size: 0.85rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+
+    /* Subtle background grid pattern */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(rgba(37, 99, 235, 0.06) 1px, transparent 1px),
+        linear-gradient(to right, rgba(226, 232, 240, 0.3) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(226, 232, 240, 0.3) 1px, transparent 1px);
+      background-size: 32px 32px, 96px 96px, 96px 96px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Ambient blur glow */
+    .ambient-glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+    .glow-1 {
+      top: -10%;
+      left: 15%;
+      width: 500px;
+      height: 500px;
+      background: rgba(37, 99, 235, 0.12);
+    }
+    .glow-2 {
+      bottom: -15%;
+      right: 15%;
+      width: 600px;
+      height: 600px;
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    /* Top Controls Bar */
+    header#top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 58px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      z-index: 50;
+    }
+
+    .brand-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    .brand-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+      padding: 3px 10px;
+      border-radius: 9999px;
+    }
+
+    .timer-center {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(241, 245, 249, 0.9);
+      border: 1px solid rgba(203, 213, 225, 0.8);
+      padding: 5px 14px;
+      border-radius: 9999px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    .timer-display {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+      color: var(--text-main);
+      min-width: 58px;
+      text-align: center;
+    }
+    .timer-display.warning { color: #d97706; }
+    .timer-display.danger { color: #dc2626; animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(203, 213, 225, 0.8);
+      color: var(--text-main);
+      padding: 7px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-icon:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    
+    /* Deck Slides Container: Maximum immersive workspace */
+    #deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 24px 16px 24px;
+      z-index: 10;
+    }
+
+    .slide {
+      position: absolute;
+      width: calc(100% - 40px);
+      max-width: 1580px;
+      height: calc(100% - 76px);
+      max-height: 960px;
+      min-height: 680px;
+      background: var(--card-bg);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      box-shadow: var(--card-shadow);
+      padding: 34px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.97) translateY(14px);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      z-index: 10;
+    }
+
+    /* Slide Header */
+    .slide-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+    .badge-tag {
+      font-size: 0.74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .slide-num-indicator {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-soft);
+      background: rgba(241, 245, 249, 0.8);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      padding: 4px 12px;
+      border-radius: 9999px;
+    }
+
+    h1.slide-title {
+      font-size: 2.35rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+    h1.slide-title span.hl { color: var(--primary); }
+    p.slide-sub {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.45;
       margin-bottom: 16px;
+      flex-shrink: 0;
     }
-    .slide-title h1 {
-      font-size: 3.6rem !important; font-weight: 900 !important;
-      line-height: 1.05 !important; color: #fff !important; margin: 0 0 20px !important;
-    }
-    .slide-title h1 span { color: var(--accent); }
-    .slide-title .subtitle {
-      font-size: 1.15rem; color: rgba(255,255,255,0.55); max-width: 520px;
-      line-height: 1.6; margin-bottom: 40px;
-    }
-    .slide-title .pills { display: flex; gap: 10px; flex-wrap: wrap; }
-    .pill {
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 20px; padding: 5px 14px; font-size: 0.78rem; color: rgba(255,255,255,0.7);
-    }
-    .pill.green { border-color: var(--accent); color: var(--accent); background: rgba(110,231,183,0.08); }
-    .pill.purple { border-color: var(--accent2); color: var(--accent2); background: rgba(129,140,248,0.08); }
-    .pill.pink { border-color: var(--accent3); color: var(--accent3); background: rgba(244,114,182,0.08); }
 
-    /* ── Section header ── */
-    .slide-section {
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-      display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
-      padding: 60px 80px !important; height: 100vh; box-sizing: border-box;
+    /* Content Layouts: Occupy all space */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 0;
+      gap: 16px;
     }
-    .slide-section .section-num {
-      font-size: 6rem; font-weight: 900; color: rgba(255,255,255,0.05); line-height: 1;
-      margin-bottom: -20px;
-    }
-    .slide-section h2 { font-size: 2.4rem !important; color: var(--accent) !important; margin: 0 0 12px !important; }
-    .slide-section p { color: rgba(255,255,255,0.55); font-size: 1rem; max-width: 500px; }
 
-    /* ── Content slide ── */
-    .slide-content {
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .glass-card {
+      background: var(--subcard-bg);
+      border: 1px solid var(--subcard-border);
+      border-radius: 20px;
+      padding: 24px 26px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+    .glass-card:hover {
+      border-color: rgba(37, 99, 235, 0.35);
+      box-shadow: 0 14px 32px rgba(37, 99, 235, 0.08);
+      transform: translateY(-2px);
+    }
+    .glass-card.highlight {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(56, 189, 248, 0.08) 100%);
+      border: 1.5px solid rgba(37, 99, 235, 0.35);
+    }
+
+    .card-header-icon {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .icon-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .icon-box.emerald {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.25);
+      color: #059669;
+    }
+    .icon-box.amber {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.25);
+      color: #d97706;
+    }
+    .icon-box.purple {
+      background: rgba(147, 51, 234, 0.1);
+      border-color: rgba(147, 51, 234, 0.25);
+      color: #7e22ce;
+    }
+    .icon-box.rose {
+      background: rgba(244, 63, 94, 0.1);
+      border-color: rgba(244, 63, 94, 0.25);
+      color: #e11d48;
+    }
+
+    .card-title {
+      font-size: 1.22rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+    .card-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      line-height: 1.45;
+    }
+    .feature-item svg {
+      width: 18px;
+      height: 18px;
+      color: var(--primary);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    /* Code & Terminal Blocks */
+    .code-box {
+      font-family: var(--font-mono);
       background: #0f172a;
-      padding: 50px 72px !important;
-      height: 100vh; box-sizing: border-box;
-      display: flex; flex-direction: column;
+      color: #f8fafc;
+      border-radius: 18px;
+      padding: 22px 26px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow-x: auto;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    .slide-content h2 {
-      font-size: 1.7rem !important; color: #fff !important; margin: 0 0 28px !important;
-      padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    .code-box .kw { color: #38bdf8; font-weight: 600; }
+    .code-box .fn { color: #a78bfa; font-weight: 600; }
+    .code-box .str { color: #34d399; }
+    .code-box .comment { color: #64748b; font-style: italic; }
+    .code-box .num { color: #fb923c; }
+
+    /* Architecture Visual Diagram */
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: rgba(248, 250, 252, 0.8);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 20px;
+      padding: 18px 22px;
+      flex-shrink: 0;
     }
-    .slide-content h2 span { color: var(--accent); }
-
-    /* ── Cards grid ── */
-    .cards { display: grid; gap: 16px; }
-    .cards.col2 { grid-template-columns: 1fr 1fr; }
-    .cards.col3 { grid-template-columns: 1fr 1fr 1fr; }
-    .card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 20px 22px;
+    .arch-node {
+      background: white;
+      border: 1px solid rgba(203, 213, 225, 0.8);
+      border-radius: 14px;
+      padding: 12px 16px;
+      text-align: center;
+      flex: 1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
-    .card .card-icon { font-size: 1.6rem; margin-bottom: 8px; }
-    .card .card-title { font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 6px; }
-    .card .card-body { font-size: 0.78rem; color: rgba(255,255,255,0.5); line-height: 1.55; }
-    .card.green { border-color: rgba(110,231,183,0.3); }
-    .card.purple { border-color: rgba(129,140,248,0.3); }
-    .card.yellow { border-color: rgba(251,191,36,0.3); }
-    .card.pink { border-color: rgba(244,114,182,0.3); }
-
-    /* ── RQ table ── */
-    .rq-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-    .rq-table th { color: rgba(255,255,255,0.4); font-weight: 600; text-align: left;
-      padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
-    .rq-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); color: rgba(255,255,255,0.75); vertical-align: middle; }
-    .rq-table tr:last-child td { border-bottom: none; }
-    .badge-ok { background: rgba(110,231,183,0.15); color: var(--accent); border-radius: 6px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; }
-    .badge-rq { background: rgba(129,140,248,0.15); color: var(--accent2); border-radius: 6px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; }
-
-    /* ── Code blocks ── */
-    .code-block {
-      background: rgba(0,0,0,0.4); border: 1px solid var(--border);
-      border-radius: 10px; padding: 16px 20px; margin: 12px 0;
+    .arch-node.active-node {
+      border: 2px solid var(--primary);
+      background: var(--primary-light);
     }
-    .code-block pre { margin: 0; font-size: 0.72rem; line-height: 1.55; color: #e2e8f0; }
-    .code-block .kw { color: #818cf8; }
-    .code-block .fn { color: #6ee7b7; }
-    .code-block .st { color: #fbbf24; }
-    .code-block .cm { color: #475569; }
-
-    /* ── Pattern diagram ── */
-    .pattern-diagram {
-      background: rgba(0,0,0,0.25); border: 1px solid var(--border);
-      border-radius: 10px; padding: 18px; font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem; color: rgba(255,255,255,0.75); line-height: 1.6;
+    .arch-node-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
-    .pattern-diagram .hl { color: var(--accent); font-weight: 600; }
-    .pattern-diagram .hl2 { color: var(--accent2); font-weight: 600; }
-    .pattern-diagram .hl3 { color: var(--accent-dec); font-weight: 600; }
-    .pattern-diagram .hl4 { color: var(--accent3); font-weight: 600; }
-
-    /* ── Stats bar ── */
-    .stats-row { display: flex; gap: 16px; margin-top: 8px; }
-    .stat-box {
-      flex: 1; background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 16px; text-align: center;
+    .arch-node-sub {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      font-family: var(--font-mono);
+      margin-top: 3px;
     }
-    .stat-box .stat-num { font-size: 2rem; font-weight: 900; color: var(--accent); }
-    .stat-box .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
-
-    /* ── Stack pills row ── */
-    .stack-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
-    .stack-pill {
-      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 14px; font-size: 0.78rem;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .stack-pill .sp-icon { font-size: 1rem; }
-    .stack-pill .sp-name { color: rgba(255,255,255,0.8); font-weight: 600; }
-    .stack-pill .sp-role { color: rgba(255,255,255,0.35); font-size: 0.68rem; }
-
-    /* ── Checklist ── */
-    .checklist { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-    .checklist li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: rgba(255,255,255,0.7); line-height: 1.4; }
-    .checklist li .ci { font-size: 1rem; flex-shrink: 0; }
-    .checklist li strong { color: rgba(255,255,255,0.95); }
-
-    /* ── Bottom label ── */
-    .slide-label {
-      font-size: 0.65rem; color: rgba(255,255,255,0.2); text-transform: uppercase;
-      letter-spacing: 0.12em; margin-top: auto; padding-top: 12px;
+    .arch-arrow {
+      color: var(--primary);
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* ── Highlight box ── */
-    .highlight-box {
-      background: linear-gradient(135deg, rgba(110,231,183,0.08), rgba(129,140,248,0.08));
-      border: 1px solid rgba(110,231,183,0.25); border-radius: 10px;
-      padding: 16px 20px; margin-top: 14px;
-      font-size: 0.82rem; color: rgba(255,255,255,0.8); line-height: 1.55;
+    /* Metric callouts */
+    .metric-badge {
+      display: inline-flex;
+      flex-direction: column;
+      padding: 16px 20px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
     }
-    .highlight-box strong { color: var(--accent); }
+    .metric-val {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .metric-lbl {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
 
-    /* ── Two-col layout ── */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .two-col-6-4 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+    /* Slide Footer Navigation */
+    .slide-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(226, 232, 240, 0.7);
+      flex-shrink: 0;
+    }
+
+    /* SVG Icon utility */
+    svg.icon {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
-<div class="reveal">
-  <div class="slides">
 
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 1 — PORTADA
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-title">
-        <div class="badge">Programación II — Proyecto Final</div>
-        <h1>Try<span>On</span>Hub</h1>
-        <p class="subtitle">Plataforma de prueba virtual 3D de indumentaria. La IA analiza fotos reales de prendas y genera parámetros 3D únicos para tu avatar digital.</p>
-        <div class="pills">
-          <span class="pill green">4 Patrones de Diseño GoF + SOLID</span>
-          <span class="pill purple">FastAPI + Next.js</span>
-          <span class="pill pink">Gemini 2.5 Flash Vision</span>
-          <span class="pill">90 Tests Automatizados</span>
-        </div>
+  <!-- Background Ambience -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  
+
+  <!-- Top Navigation & Defense Control Bar -->
+  <header id="top-bar">
+    <div class="brand-meta">
+      <img src="/logo.png" alt="TryOn Hub" class="brand-logo">
+      <span class="brand-title">TryOn <span style="color: var(--primary);">Hub</span></span>
+      <span class="brand-pill">Defensa Progra II · 15 Min</span>
+    </div>
+
+    <!-- Defense Countdown Timer -->
+    <div class="timer-center">
+      <button id="timer-toggle-btn" class="btn-icon" style="padding: 4px 8px;" title="Iniciar / Pausar Cronómetro">
+        <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 256 256" fill="currentColor" id="play-pause-svg"><polygon points="80,50 200,128 80,206"/></svg>
+      </button>
+      <div id="defense-timer" class="timer-display">15:00</div>
+      <button id="timer-reset-btn" class="btn-icon" style="padding: 4px 8px;" title="Reiniciar a 15:00">
+        <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128A96,96,0,1,1,173.78,45.47L192,28V76H144l20.4-20.4A72,72,0,1,0,200,128Z"/></svg>
+      </button>
+    </div>
+
+    <!-- Utility Actions -->
+    <div class="top-actions">
+      <button id="btn-fullscreen" class="btn-icon" title="Pantalla Completa (F)">
+        <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 256 256" fill="currentColor"><path d="M208,48H160a8,8,0,0,0,0,16h36.69L149.37,111.31a8,8,0,0,0,11.32,11.32L208,75.31V112a8,8,0,0,0,16,0V56A8,8,0,0,0,208,48ZM95.31,144.69a8,8,0,0,0-11.32,0L48,180.69V144a8,8,0,0,0-16,0v56a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H59.31l47.38-47.31A8,8,0,0,0,95.31,144.69Z"/></svg>
+        <span>Pantalla Completa</span>
+      </button>
+      <button id="btn-drawer-toggle" class="btn-icon" title="Índice de Diapositivas">
+        <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="128,16 156,92 232,120 156,148 128,224 100,148 24,120 100,92" opacity="0.25"/><path d="M237.4,114.77l-69.57-25.5-25.5-69.57a8,8,0,0,0-14.66,0l-25.5,69.57-69.57,25.5a8,8,0,0,0,0,14.66l69.57,25.5,25.5,69.57a8,8,0,0,0,14.66,0l25.5-69.57,69.57-25.5A8,8,0,0,0,237.4,114.77ZM144.3,137.8a8,8,0,0,0-4.5,4.5L128,175.7,116.2,142.3a8,8,0,0,0-4.5-4.5L78.3,126.1l33.4-11.8a8,8,0,0,0,4.5-4.5L128,76.5l11.8,33.3a8,8,0,0,0,4.5,4.5l33.4,11.8Z"/></svg>
+        <span>Índice (13)</span>
+      </button>
+      <a href="http://localhost:3000" target="_blank" class="btn-icon" style="background: var(--primary); color: white; border-color: var(--primary);">
+        <span>Abrir App</span>
+        <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><path d="M200,64V168a8,8,0,0,1-16,0V83.31L69.66,197.66a8,8,0,0,1-11.32-11.32L172.69,72H88a8,8,0,0,1,0-16H192A8,8,0,0,1,200,64Z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Presentation Slides Deck -->
+  <main id="deck">
+
+    <!-- ── SLIDE 1: PORTADA ────────────────────────────────────────────── -->
+    <section class="slide active" data-slide="1">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="128,16 156,92 232,120 156,148 128,224 100,148 24,120 100,92" opacity="0.25"/><path d="M237.4,114.77l-69.57-25.5-25.5-69.57a8,8,0,0,0-14.66,0l-25.5,69.57-69.57,25.5a8,8,0,0,0,0,14.66l69.57,25.5,25.5,69.57a8,8,0,0,0,14.66,0l25.5-69.57,69.57-25.5A8,8,0,0,0,237.4,114.77ZM144.3,137.8a8,8,0,0,0-4.5,4.5L128,175.7,116.2,142.3a8,8,0,0,0-4.5-4.5L78.3,126.1l33.4-11.8a8,8,0,0,0,4.5-4.5L128,76.5l11.8,33.3a8,8,0,0,0,4.5,4.5l33.4,11.8Z"/></svg> PROYECTO FINAL · CÁTEDRA PROGRAMACIÓN II</span>
+        <span class="slide-num-indicator">01 / 13</span>
       </div>
-    </section>
 
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 2 — EL PROBLEMA
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>🛍️ El <span>Problema</span></h2>
-        <div class="cards col2">
-          <div class="card pink">
-            <div class="card-icon">💸</div>
-            <div class="card-title">Alta tasa de devoluciones</div>
-            <div class="card-body">Las marcas de moda online pierden entre 20% y 40% de sus ventas en devoluciones porque los clientes no saben cómo les quedará la prenda antes de comprar.</div>
-          </div>
-          <div class="card yellow">
-            <div class="card-icon">🤔</div>
-            <div class="card-title">Incertidumbre del consumidor</div>
-            <div class="card-body">Sin poder probarse la ropa, los compradores dudan. Las fotos en 2D sobre modelos genéricos no representan cuerpos reales ni telas con físicas distintas.</div>
-          </div>
-          <div class="card purple" style="grid-column: 1 / -1">
-            <div class="card-icon">❌</div>
-            <div class="card-title">Soluciones existentes: caras y genéricas</div>
-            <div class="card-body">Los servicios de Virtual Try-On disponibles usan modelos 3D prefabricados que no reflejan la tela, el corte ni el color específico de cada prenda real. Son Single Points of Failure y facturan por cada render.</div>
-          </div>
-        </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 3 — LA SOLUCIÓN
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>✨ La <span>Solución</span> B2B2C</h2>
-        <div class="cards col3">
-          <div class="card">
-            <div class="card-icon">🏢</div>
-            <div class="card-title">Marcas (B2B)</div>
-            <div class="card-body">Suben fotos 2D de su catálogo real. La IA de Gemini Vision analiza los píxeles y extrae parámetros 3D únicos por prenda: silueta, color exacto, textura, elasticidad.</div>
-          </div>
-          <div class="card green">
-            <div class="card-icon">🧠</div>
-            <div class="card-title">IA Generativa</div>
-            <div class="card-body">Gemini 2.5 Flash Vision analiza la fotografía real + metadata del fabricante. Devuelve un JSON paramétrico: <code>waist_rise</code>, <code>taper</code>, <code>color_hex</code>, <code>roughness</code>, <code>distress</code>.</div>
-          </div>
-          <div class="card purple">
-            <div class="card-icon">👤</div>
-            <div class="card-title">Consumidores (B2C)</div>
-            <div class="card-body">Crean un avatar 3D paramétrico con sus medidas corporales reales. El motor WebGL renderiza la prenda adaptada al cuerpo del usuario en tiempo real, en el navegador.</div>
-          </div>
-        </div>
-        <div class="highlight-box">
-          <strong>Diferenciador clave:</strong> No usamos modelos 3D prefabricados. La IA lee los píxeles reales de cada foto y genera parámetros únicos. El renderizado lo hace la GPU del usuario vía WebGL — sin costo de render externo.
-        </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 4 — REQUERIMIENTOS FUNCIONALES
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>📋 Requerimientos <span>Funcionales</span></h2>
-        <table class="rq-table">
-          <thead><tr><th>ID</th><th>Descripción</th><th>Endpoint</th><th>Estado</th></tr></thead>
-          <tbody>
-            <tr><td><span class="badge-rq">RQ1</span></td><td>Usuarios se registran</td><td><code>POST /api/v1/users/</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
-            <tr><td><span class="badge-rq">RQ2</span></td><td>Usuarios se autentican con JWT</td><td><code>POST /api/v1/auth/login</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
-            <tr><td><span class="badge-rq">RQ3</span></td><td>Marcas suben catálogos Excel + IA</td><td><code>POST /api/v1/catalog/upload</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
-            <tr><td><span class="badge-rq">RQ4</span></td><td>Consumidores ven catálogo de prendas</td><td><code>GET /api/v1/catalog/garments</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
-            <tr><td><span class="badge-rq">RQ5</span></td><td>Prueba virtual en avatar 3D</td><td><code>POST /api/v1/tryon/preview/{id}</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
-            <tr><td><span class="badge-rq">RQ6</span></td><td>Carrito de compras</td><td><code>POST /api/v1/commerce/cart</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
-            <tr><td><span class="badge-rq">RQ7</span></td><td>Checkout y órdenes</td><td><code>POST /api/v1/commerce/checkout</code></td><td><span class="badge-ok">✓ OK</span></td></tr>
-            <tr><td><span class="badge-rq">RQ8</span></td><td>Avatar 3D paramétrico con medidas reales</td><td>AvatarCreatorNative (Frontend)</td><td><span class="badge-ok">✓ OK</span></td></tr>
-          </tbody>
-        </table>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 5 — STACK TÉCNICO
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>🛠️ Stack <span>Técnico</span></h2>
-        <div class="two-col">
+      <div class="slide-body">
+        <div class="grid-2" style="align-items: center;">
           <div>
-            <div style="font-size:0.7rem; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px">Backend</div>
-            <div class="stack-row">
-              <div class="stack-pill"><span class="sp-icon">⚡</span><div><div class="sp-name">FastAPI</div><div class="sp-role">API RESTful + async</div></div></div>
-              <div class="stack-pill"><span class="sp-icon">🗄️</span><div><div class="sp-name">SQLAlchemy</div><div class="sp-role">ORM + Alembic</div></div></div>
-              <div class="stack-pill"><span class="sp-icon">🔐</span><div><div class="sp-name">JWT + bcrypt</div><div class="sp-role">Auth segura</div></div></div>
-              <div class="stack-pill"><span class="sp-icon">🧠</span><div><div class="sp-name">Gemini 2.5 Flash</div><div class="sp-role">Vision AI</div></div></div>
-              <div class="stack-pill"><span class="sp-icon">🐍</span><div><div class="sp-name">Python 3.11</div><div class="sp-role">SQLite (dev)</div></div></div>
-              <div class="stack-pill"><span class="sp-icon">🐳</span><div><div class="sp-name">Docker</div><div class="sp-role">Containerización</div></div></div>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2); padding: 6px 14px; border-radius: 9999px; margin-bottom: 16px;">
+              <svg class="icon" style="width: 16px; height: 16px; color: var(--primary);" viewBox="0 0 256 256" fill="currentColor"><polygon points="128,32 216,80 216,176 128,224 40,176 40,80" opacity="0.25"/><path d="M220.16,73.61l-88-48a8,8,0,0,0-8.32,0l-88,48A8,8,0,0,0,32,80.59v94.82a8,8,0,0,0,3.84,7l88,48a8,8,0,0,0,8.32,0l88-48a8,8,0,0,0,3.84-7V80.59A8,8,0,0,0,220.16,73.61ZM128,41.22,201.25,81.16,128,121.1,54.75,81.16ZM48,95.12,120,134.4v76.84L48,171.88Zm160,76.76-72,39.36V134.4l72-39.28Z"/></svg>
+              <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">Fashion-Tech & Clean Architecture</span>
+            </div>
+            <h1 class="slide-title" style="font-size: 3rem; margin-bottom: 14px;">
+              TryOn <span class="hl">Hub</span>
+            </h1>
+            <p class="slide-sub" style="font-size: 1.15rem; max-width: 620px;">
+              Probador Virtual 3D y E-Commerce Paramétrico de Indumentaria en Tiempo Real. Reducción científica de devoluciones mediante Gemelos Digitales antropométricos.
+            </p>
+
+            <div style="display: flex; gap: 14px; margin-top: 24px;">
+              <div class="metric-badge">
+                <span class="metric-val">122</span>
+                <span class="metric-lbl">Tests Pytest Pasados</span>
+              </div>
+              <div class="metric-badge">
+                <span class="metric-val">100%</span>
+                <span class="metric-lbl">ACID & GoF Patterns</span>
+              </div>
+              <div class="metric-badge">
+                <span class="metric-val">60 FPS</span>
+                <span class="metric-lbl">Simulación WebGL 3D</span>
+              </div>
             </div>
           </div>
-          <div>
-            <div style="font-size:0.7rem; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px">Frontend</div>
-            <div class="stack-row">
-              <div class="stack-pill"><span class="sp-icon">⚛️</span><div><div class="sp-name">Next.js 14</div><div class="sp-role">React + SSR</div></div></div>
-              <div class="stack-pill"><span class="sp-icon">🎨</span><div><div class="sp-name">React Three Fiber</div><div class="sp-role">Motor 3D WebGL</div></div></div>
-              <div class="stack-pill"><span class="sp-icon">💅</span><div><div class="sp-name">TailwindCSS</div><div class="sp-role">Glassmorphism UI</div></div></div>
-              <div class="stack-pill"><span class="sp-icon">☁️</span><div><div class="sp-name">Render.com</div><div class="sp-role">Deploy prod</div></div></div>
+
+          <div style="display: flex; justify-content: center;">
+            <div class="glass-card highlight" style="width: 100%; max-width: 480px; padding: 32px;">
+              <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
+                <img src="/logo.png" alt="TryOn Hub" style="width: 52px; height: 52px; object-fit: contain;">
+                <div>
+                  <h3 style="font-size: 1.3rem; font-weight: 800;">Ficha de Cátedra</h3>
+                  <p style="font-size: 0.85rem; color: var(--text-soft);">Facultad de Ingeniería · Progra II</p>
+                </div>
+              </div>
+              <ul class="feature-list" style="gap: 14px;">
+                <li class="feature-item">
+                  <svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg>
+                  <span><strong>Stack Técnico:</strong> FastAPI + SQLAlchemy + Next.js 14 + Three.js</span>
+                </li>
+                <li class="feature-item">
+                  <svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg>
+                  <span><strong>Patrones GoF:</strong> Factory, Builder, Observer, Strategy, Singleton</span>
+                </li>
+                <li class="feature-item">
+                  <svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg>
+                  <span><strong>Transacciones:</strong> Pessimistic Locking con <code>SELECT FOR UPDATE</code></span>
+                </li>
+                <li class="feature-item">
+                  <svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg>
+                  <span><strong>Seguridad:</strong> Argon2id Hashing + Stateless JWT Auth + RBAC</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
-        <div class="stats-row" style="margin-top:20px">
-          <div class="stat-box"><div class="stat-num">90</div><div class="stat-label">Tests automatizados</div></div>
-          <div class="stat-box"><div class="stat-num">5 + 5</div><div class="stat-label">Patrones GoF/Repo + SOLID</div></div>
-          <div class="stat-box"><div class="stat-num">22</div><div class="stat-label">Endpoints RESTful</div></div>
-          <div class="stat-box"><div class="stat-num">CI/CD</div><div class="stat-label">GitHub Actions + Docker</div></div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-hints">
+          <span>Navegación: <span class="kbd-chip">←</span> <span class="kbd-chip">→</span> o <span class="kbd-chip">Espacio</span></span>
+          <span>Cronómetro: <span class="kbd-chip">15:00</span></span>
         </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev" disabled><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: El Problema <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 5B — DIAGRAMA DE CLASES UML
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>📐 Diagrama de Clases <span>UML</span> (Dominio + Patrones)</h2>
-        <div class="two-col">
-          <div class="pattern-diagram" style="font-size:0.68rem">
-            <span class="hl">User</span> "1" ──&gt; "1" <span class="hl2">Role</span> (ADMIN | BRAND | CUSTOMER)<br>
-            <span class="hl">User</span> "1" ──&gt; "0..10" <span class="hl2">Avatar</span> (height_cm, body_type JSON)<br>
-            <span class="hl">User</span> "1" ──&gt; "0..1" <span class="hl2">Cart</span> "1" *──&gt; "*" <span class="hl3">CartItem</span> (size, color, qty)<br>
-            <span class="hl">User</span> "1" ──&gt; "*" <span class="hl2">Order</span> "1" *──&gt; "*" <span class="hl3">OrderItem</span> (snapshot price)<br>
-            <span class="hl">Brand</span> "1" ──&gt; "*" <span class="hl2">Garment</span> "1" *──&gt; "1" <span class="hl4">GarmentAsset</span> (metadata_json)<br>
-            <span class="hl">Brand</span> "1" ──&gt; "*" <span class="hl2">ProcessingJob</span> &lt;|── <span class="hl">JobSubjectMixin</span>
-          </div>
-          <div class="pattern-diagram" style="font-size:0.68rem">
-            <span class="hl3">StrategyFactory</span> ..&gt; <span class="hl2">VirtualTryOnStrategy</span> &lt;&lt;ABC&gt;&gt;<br>
-            &nbsp;├── <span class="hl2">GeminiTryOnStrategy</span> (Vision AI)<br>
-            &nbsp;├── <span class="hl2">MockTryOnStrategy</span> (Tests / Local)<br>
-            &nbsp;└── <span class="hl3">StrategyDecorator</span> o──&gt; <span class="hl2">VirtualTryOnStrategy</span><br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="hl3">LoggingStrategyDecorator</span><br>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="hl3">CachingStrategyDecorator</span> (MD5)<br><br>
-            <span class="hl">JobSubjectMixin</span> "1" ──&gt; "*" <span class="hl2">IJobObserver</span> &lt;&lt;ABC&gt;&gt;<br>
-            &nbsp;├── <span class="hl">LoggingJobObserver</span> | <span class="hl">StatsJobObserver</span> | <span class="hl">NotificationJobObserver</span>
-          </div>
-        </div>
-        <div class="highlight-box">
-          <strong>Convenciones UML de cátedra:</strong> tipos primitivos modelados como atributos, relaciones estructurales como asociaciones con multiplicidad explícita (<code>1:N</code> en Avatares, composición en Carrito/Órdenes y delegación en Decorator).
-        </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
+    <!-- ── SLIDE 2: EL PROBLEMA ────────────────────────────────────────── -->
+    <section class="slide" data-slide="2">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg> CONTEXTO DE LA INDUSTRIA</span>
+        <span class="slide-num-indicator">02 / 13</span>
       </div>
-    </section>
 
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 6 — SECCIÓN PATRONES
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-section">
-        <div class="section-num">02</div>
-        <h2>Patrones de Diseño y SOLID</h2>
-        <p>Cuatro patrones GoF (Strategy, Factory, Decorator, Observer) y los 5 principios SOLID aplicados en el dominio real.</p>
+      <div>
+        <h1 class="slide-title">La Crisis de las Devoluciones: <span class="hl">Fricción de Calce</span></h1>
+        <p class="slide-sub">El 70% de las devoluciones en e-commerce de moda responden a discrepancias de talle y moldería.</p>
       </div>
-    </section>
 
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 7 — STRATEGY PATTERN
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>🎯 Patrón <span>Strategy</span> — <code>ai_strategy.py</code></h2>
-        <div class="two-col-6-4">
-          <div>
-            <div class="pattern-diagram">
-              <span class="hl2">VirtualTryOnStrategy</span> &lt;&lt;abstract&gt;&gt;<br>
-              &nbsp;└── <span class="fn">process_garment(data)</span> → dict*<br><br>
-              <span class="hl2">GeminiTryOnStrategy</span> (Producción)<br>
-              &nbsp;└── Llama a Gemini 2.5 Flash Vision<br>
-              &nbsp;└── Analiza píxeles reales de la foto<br>
-              &nbsp;└── Lanza <span class="hl4">AIServiceError</span> si falla<br><br>
-              <span class="hl2">MockTryOnStrategy</span> (Testing)<br>
-              &nbsp;└── Retorna datos determinísticos<br>
-              &nbsp;└── Sin llamadas externas (CI safe)
+      <div class="slide-body">
+        <div class="grid-3" style="margin-bottom: 16px;">
+          <div class="glass-card">
+            <div>
+              <div class="card-header-icon">
+                <div class="icon-box rose"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg></div>
+                <div>
+                  <h3 class="card-title">Devoluciones Crónicas</h3>
+                  <p class="card-desc">Frecuencia alarmante en moda</p>
+                </div>
+              </div>
+              <div style="background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.2); border-radius: 14px; padding: 14px 18px; margin: 12px 0;">
+                <span style="font-size: 2.2rem; font-weight: 800; color: #e11d48; line-height: 1;">38.6%</span>
+                <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #be123c; text-transform: uppercase; margin-top: 4px;">Tasa de devolución en prendas denim</span>
+              </div>
+              <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.55;">
+                En prendas de calce crítico (jeans, pantalones de tiro alto), hasta 4 de cada 10 compras online son devueltas. El usuario incurre en <em>bracketing</em> (compra de múltiples talles para quedarse con uno y devolver el resto).
+              </p>
             </div>
-            <div class="code-block">
-              <pre><span class="cm"># Cambiar estrategia: cero cambios en routers</span>
-<span class="kw">strategy</span> = GeminiTryOnStrategy()   <span class="cm"># prod</span>
-<span class="kw">strategy</span> = MockTryOnStrategy()      <span class="cm"># tests</span>
-result = strategy.process_garment(data)</pre>
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(226,232,240,0.8);">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #e11d48;">Consecuencia: Pérdida de rotación de stock y huella ambiental</span>
             </div>
           </div>
-          <div>
-            <ul class="checklist" style="margin-top:0">
-              <li><span class="ci">✅</span><div><strong>Open/Closed:</strong> agregar OpenAI como nueva estrategia sin tocar los routers.</div></li>
-              <li><span class="ci">✅</span><div><strong>Testeable:</strong> MockTryOnStrategy en CI sin API key.</div></li>
-              <li><span class="ci">✅</span><div><strong>AIServiceError:</strong> elimina el fallback silencioso. Si falla, el rollback es explícito.</div></li>
-              <li><span class="ci">✅</span><div><strong>run_in_threadpool:</strong> la IA corre en thread separado sin bloquear el event loop.</div></li>
+
+          <div class="glass-card">
+            <div>
+              <div class="card-header-icon">
+                <div class="icon-box amber"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><rect x="24" y="80" width="208" height="96" rx="16" opacity="0.25"/><path d="M216,72H40A24,24,0,0,0,16,96v64a24,24,0,0,0,24,24H216a24,24,0,0,0,24-24V96A24,24,0,0,0,216,72Zm8,88a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V96a8,8,0,0,1,8-8H64v32a8,8,0,0,0,16,0V88h24v48a8,8,0,0,0,16,0V88h24v32a8,8,0,0,0,16,0V88h24v48a8,8,0,0,0,16,0V88h24a8,8,0,0,1,8,8Z"/></svg></div>
+                <div>
+                  <h3 class="card-title">Inconsistencia Dimensional</h3>
+                  <p class="card-desc">Vanity sizing y tablas estáticas 2D</p>
+                </div>
+              </div>
+              <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2); border-radius: 14px; padding: 14px 18px; margin: 12px 0;">
+                <span style="font-size: 2.2rem; font-weight: 800; color: #d97706; line-height: 1;">Δ 6.2 cm</span>
+                <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #b45309; text-transform: uppercase; margin-top: 4px;">Discrepancia promedio entre marcas para talle 32</span>
+              </div>
+              <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.55;">
+                Las tablas comerciales en centímetros ignoran la volumetría tridimensional: el tiro frontal, la curvatura glútea y el módulo de elasticidad del tejido (spandex vs 100% algodón).
+              </p>
+            </div>
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(226,232,240,0.8);">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #d97706;">Consecuencia: Desconfianza, fricción de compra y abandono de checkout</span>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div>
+              <div class="card-header-icon">
+                <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-88a20,20,0,0,0-20-20H116a12,12,0,0,1,0-24h32a8,8,0,0,0,0-16H136V56a8,8,0,0,0-16,0V68H108a28,28,0,0,0,0,56h8a12,12,0,0,1,0,24H84a8,8,0,0,0,0,16h36v12a8,8,0,0,0,16,0V164h12A28,28,0,0,0,144,128Z"/></svg></div>
+                <div>
+                  <h3 class="card-title">Hemorragia Logística</h3>
+                  <p class="card-desc">Costos de transporte inverso</p>
+                </div>
+              </div>
+              <div style="background: rgba(147,51,234,0.06); border: 1px solid rgba(147,51,234,0.2); border-radius: 14px; padding: 14px 18px; margin: 12px 0;">
+                <span style="font-size: 2.2rem; font-weight: 800; color: #7e22ce; line-height: 1;">$550B USD</span>
+                <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #6b21a8; text-transform: uppercase; margin-top: 4px;">Pérdidas acumuladas en la industria global</span>
+              </div>
+              <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.55;">
+                El costo de flete, inspección, reacondicionamiento y reposición en depósito representa hasta un 30% del valor de venta al público, destruyendo el margen unitario de las marcas medianas.
+              </p>
+            </div>
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(226,232,240,0.8);">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #7e22ce;">Consecuencia: Imposibilidad de escalar el canal digital con rentabilidad</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card highlight" style="flex: 0 0 auto; padding: 18px 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="icon-box" style="width: 40px; height: 40px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg></div>
+              <div>
+                <strong style="color: var(--text-main); font-size: 1rem;">Oportunidad de Ingeniería:</strong>
+                <span style="color: var(--text-muted); font-size: 0.92rem; margin-left: 6px;">Sustituir la adivinanza por un modelo determinístico paramétrico de calce 3D.</span>
+              </div>
+            </div>
+            <span style="font-size: 0.82rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; background: var(--primary-light); padding: 4px 12px; border-radius: 9999px;">Objetivo Académico y de Negocio</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Punto de partida de la propuesta de valor</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: La Solución <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 3: LA SOLUCIÓN ────────────────────────────────────────── -->
+    <section class="slide" data-slide="3">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="128,16 156,92 232,120 156,148 128,224 100,148 24,120 100,92" opacity="0.25"/><path d="M237.4,114.77l-69.57-25.5-25.5-69.57a8,8,0,0,0-14.66,0l-25.5,69.57-69.57,25.5a8,8,0,0,0,0,14.66l69.57,25.5,25.5,69.57a8,8,0,0,0,14.66,0l25.5-69.57,69.57-25.5A8,8,0,0,0,237.4,114.77ZM144.3,137.8a8,8,0,0,0-4.5,4.5L128,175.7,116.2,142.3a8,8,0,0,0-4.5-4.5L78.3,126.1l33.4-11.8a8,8,0,0,0,4.5-4.5L128,76.5l11.8,33.3a8,8,0,0,0,4.5,4.5l33.4,11.8Z"/></svg> PROPUESTA ZERO-TO-ONE</span>
+        <span class="slide-num-indicator">03 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">La Solución TryOnHub: <span class="hl">Ecosistema B2B2C</span></h1>
+        <p class="slide-sub">Conectamos marcas de confección con consumidores finales mediante simulación de calce paramétrica 3D.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2" style="margin-bottom: 14px;">
+          <div class="glass-card highlight">
+            <div>
+              <div class="card-header-icon">
+                <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="96" r="40" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM128,120a24,24,0,1,1,24-24A24,24,0,0,1,128,120Zm69.13,65.6a79.88,79.88,0,0,0-138.26,0,88,88,0,1,1,138.26,0Z"/></svg></div>
+                <div>
+                  <h3 class="card-title">Para el Consumidor (B2C)</h3>
+                  <p class="card-desc">Probador Virtual 3D & Calce Inteligente</p>
+                </div>
+              </div>
+              <ul class="feature-list">
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Gemelo Antropométrico Instantáneo:</strong> Creación en 30 segundos ingresando altura, peso, cintura y cadera.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Recomendación Determinística (Strategy):</strong> Comparación milimétrica de holgura entre prenda y cuerpo, eliminando dudas de talle.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Simulación 360° Zero-Install:</strong> Render WebGL procedural directamente en el navegador del celular o PC.</span></li>
+              </ul>
+            </div>
+            <div style="background: white; border: 1px solid rgba(226,232,240,0.9); border-radius: 14px; padding: 12px 16px; margin-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-soft);">Diagnóstico:</span>
+              <span style="font-size: 0.88rem; font-weight: 800; color: #059669;">Calce Óptimo · Tolerancia ±1.5 cm</span>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div>
+              <div class="card-header-icon">
+                <div class="icon-box emerald"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><path d="M224,104v96a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V104Z" opacity="0.25"/><path d="M239.3,87.69l-16-48A8,8,0,0,0,215.7,35.1l-175.4,0a8,8,0,0,0-7.6,4.59l-16,48a8,8,0,0,0,1.3,8.42A24.1,24.1,0,0,0,36,104a24,24,0,0,0,36-20.78A24,24,0,0,0,108,104a24,24,0,0,0,36-20.78A24,24,0,0,0,180,104a24,24,0,0,0,18-8.11A23.94,23.94,0,0,0,238,96.11,8,8,0,0,0,239.3,87.69ZM40,200V120H216v80a8,8,0,0,1-8,8H48A8,8,0,0,1,40,200Z"/></svg></div>
+                <div>
+                  <h3 class="card-title">Para el Fabricante (B2B)</h3>
+                  <p class="card-desc">Digitalización & Gestión de Moldería</p>
+                </div>
+              </div>
+              <ul class="feature-list">
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Estudio de Moldería 3D:</strong> Parámetros en centímetros reales (tiro, muslo, botamanga, largo de pierna).</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Ingesta Masiva Excel (.xlsx):</strong> Carga automatizada de colecciones completas con validación de esquemas.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Monitoreo Observer en Vivo:</strong> Notificación instantánea de lotes y variaciones de inventario.</span></li>
+              </ul>
+            </div>
+            <div style="background: white; border: 1px solid rgba(226,232,240,0.9); border-radius: 14px; padding: 12px 16px; margin-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-soft);">Entorno Visual:</span>
+              <span style="font-size: 0.88rem; font-weight: 800; color: var(--primary);">Estudio Boutique Fotorrealista</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-4" style="flex: 0 0 auto;">
+          <div class="metric-badge" style="padding: 12px 16px;">
+            <span class="metric-val" style="font-size: 1.8rem;">-65%</span>
+            <span class="metric-lbl">Devoluciones por Talle</span>
+          </div>
+          <div class="metric-badge" style="padding: 12px 16px;">
+            <span class="metric-val" style="font-size: 1.8rem;">+28%</span>
+            <span class="metric-lbl">Conversión en Checkout</span>
+          </div>
+          <div class="metric-badge" style="padding: 12px 16px;">
+            <span class="metric-val" style="font-size: 1.8rem;">0 ms</span>
+            <span class="metric-lbl">Latencia Server-Side GPU</span>
+          </div>
+          <div class="metric-badge" style="padding: 12px 16px;">
+            <span class="metric-val" style="font-size: 1.8rem;">100%</span>
+            <span class="metric-lbl">Privacidad (Sin Fotos)</span>
+          </div>
+        </div></div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Simetría de valor entre usuario y fabricante</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Arquitectura <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 4: ARQUITECTURA ───────────────────────────────────────── -->
+    <section class="slide" data-slide="4">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><rect x="32" y="48" width="192" height="160" rx="16" opacity="0.25"/><path d="M216,40H40A24,24,0,0,0,16,64V192a24,24,0,0,0,24,24H216a24,24,0,0,0,24-24V64A24,24,0,0,0,216,40Zm8,152a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V64a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8ZM85.66,106.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L68.69,112,50.34,93.66A8,8,0,0,1,61.66,82.34l24,24ZM144,144h40a8,8,0,0,1,0,16H144a8,8,0,0,1,0-16Z"/></svg> INGENIERÍA DE SOFTWARE</span>
+        <span class="slide-num-indicator">04 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Arquitectura del Sistema: <span class="hl">Clean Architecture</span></h1>
+        <p class="slide-sub">Desacoplamiento estricto por capas: Presentación, Dominio, Casos de Uso y Persistencia.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="arch-flow">
+          <div class="arch-node">
+            <div class="arch-node-title"><svg class="icon" style="width: 16px; height: 16px; color: var(--primary);" viewBox="0 0 256 256" fill="currentColor"><rect x="32" y="48" width="192" height="160" rx="16" opacity="0.25"/><path d="M216,40H40A24,24,0,0,0,16,64V192a24,24,0,0,0,24,24H216a24,24,0,0,0,24-24V64A24,24,0,0,0,216,40Zm8,152a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V64a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8ZM85.66,106.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L68.69,112,50.34,93.66A8,8,0,0,1,61.66,82.34l24,24ZM144,144h40a8,8,0,0,1,0,16H144a8,8,0,0,1,0-16Z"/></svg> Capa Presentación</div>
+            <div class="arch-node-sub">Next.js 14 · Route Groups · Three.js</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node active-node">
+            <div class="arch-node-title"><svg class="icon" style="width: 16px; height: 16px; color: var(--primary);" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,16 64,136 128,136 96,240 192,120 128,120" opacity="0.25"/><path d="M166.42,112H135.2L162.77,32.32A8,8,0,0,0,152,24a8.16,8.16,0,0,0-6.79,3.75l-96,128A8,8,0,0,0,56,168h31.2l-27.57,79.68A8,8,0,0,0,67.2,256a8.16,8.16,0,0,0,6.79-3.75l96-128A8,8,0,0,0,166.42,112Z"/></svg> API Gateway & Routers</div>
+            <div class="arch-node-sub">FastAPI 0.115 · Pydantic v2 DTOs</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node">
+            <div class="arch-node-title"><svg class="icon" style="width: 16px; height: 16px; color: var(--primary);" viewBox="0 0 256 256" fill="currentColor"><rect x="40" y="40" width="176" height="176" rx="16" opacity="0.25"/><path d="M216,96H192a24,24,0,0,0-24,24,8,8,0,0,1-16,0,40,40,0,0,1,40-40V56a16,16,0,0,0-16-16H144a40,40,0,0,1-40,40,8,8,0,0,1,0-16,24,24,0,0,0,24-24H56A16,16,0,0,0,40,56V96a40,40,0,0,1,40,40,8,8,0,0,1,0,16,24,24,0,0,0-24-24H40v40a16,16,0,0,0,16,16H96a24,24,0,0,0,24-24,8,8,0,0,1,16,0,40,40,0,0,1-40,40h72a16,16,0,0,0,16-16V160a40,40,0,0,1-40-40,8,8,0,0,1,0-16,24,24,0,0,0,24,24h24a16,16,0,0,0,16-16V96Z"/></svg> Servicios de Negocio</div>
+            <div class="arch-node-sub">CartService · AvatarService · AuthService</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node">
+            <div class="arch-node-title"><svg class="icon" style="width: 16px; height: 16px; color: var(--primary);" viewBox="0 0 256 256" fill="currentColor"><ellipse cx="128" cy="80" rx="80" ry="40" opacity="0.25"/><path d="M128,32C79.4,32,40,51.7,40,76V180c0,24.3,39.4,44,88,44s88-19.7,88-44V76C216,51.7,176.6,32,128,32Zm72,44c0,16.4-32.2,28-72,28S56,92.4,56,76,88.2,48,128,48,200,59.6,200,76Zm0,52c0,16.4-32.2,28-72,28S56,144.4,56,128V95.7c18.5,12.7,44.7,19.3,72,19.3s53.5-6.6,72-19.3Zm0,52c0,16.4-32.2,28-72,28s-72-11.6-72-28V147.7c18.5,12.7,44.7,19.3,72,19.3s53.5-6.6,72-19.3Z"/></svg> Persistencia Relacional</div>
+            <div class="arch-node-sub">SQLAlchemy 2.0 ORM · ACID Engine</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="glass-card">
+            <div>
+              <h3 class="card-title" style="margin-bottom: 8px;">Principios SOLID Aplicados</h3>
+              <ul class="feature-list">
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Inversión de Dependencias (DIP):</strong> Routers reciben servicios vía Inyección de Dependencias (FastAPI <code>Depends</code>); desacoplamiento total de la capa física.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Responsabilidad Única (SRP):</strong> DTOs Pydantic v2 validan esquemas antes de ejecutar lógica de negocio.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Abierto/Cerrado (OCP):</strong> Incorporación de nuevas estrategias de calce sin alterar el motor de checkout.</span></li>
+              </ul>
+            </div>
+            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2); border-radius: 12px; padding: 10px 14px; margin-top: 14px;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--primary);">Estructura: app/routers · app/services · app/domain · app/dto</span>
+            </div>
+          </div>
+
+          <div class="code-box">
+            <span class="comment"># Inyección de Dependencias & Transaccionalidad</span><br>
+            <span class="kw">@router.post</span>(<span class="str">"/cart/items"</span>, response_model=CartItemDTO)<br>
+            <span class="kw">def</span> <span class="fn">add_to_cart</span>(<br>
+            &nbsp;&nbsp;payload: AddToCartInput,<br>
+            &nbsp;&nbsp;current_user: User = <span class="fn">Depends</span>(get_current_active_user),<br>
+            &nbsp;&nbsp;cart_service: CartService = <span class="fn">Depends</span>(get_cart_service)<br>
+            ):<br>
+            &nbsp;&nbsp;<span class="str">&quot;&quot;&quot;Manejo desacoplado de excepciones y DTOs tipados&quot;&quot;&quot;</span><br>
+            &nbsp;&nbsp;<span class="kw">return</span> cart_service.add_item_atomic(<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;user_id=current_user.id,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;item=payload<br>
+            &nbsp;&nbsp;)
+          </div>
+        </div></div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Separación nítida de responsabilidades</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Patrones GoF <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 5: PATRONES GOF ───────────────────────────────────────── -->
+    <section class="slide" data-slide="5">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><rect x="40" y="40" width="176" height="176" rx="16" opacity="0.25"/><path d="M216,96H192a24,24,0,0,0-24,24,8,8,0,0,1-16,0,40,40,0,0,1,40-40V56a16,16,0,0,0-16-16H144a40,40,0,0,1-40,40,8,8,0,0,1,0-16,24,24,0,0,0,24-24H56A16,16,0,0,0,40,56V96a40,40,0,0,1,40,40,8,8,0,0,1,0,16,24,24,0,0,0-24-24H40v40a16,16,0,0,0,16,16H96a24,24,0,0,0,24-24,8,8,0,0,1,16,0,40,40,0,0,1-40,40h72a16,16,0,0,0,16-16V160a40,40,0,0,1-40-40,8,8,0,0,1,0-16,24,24,0,0,0,24,24h24a16,16,0,0,0,16-16V96Z"/></svg> PATRONES DE DISEÑO</span>
+        <span class="slide-num-indicator">05 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Patrones de Diseño GoF: <span class="hl">Aplicación Real</span></h1>
+        <p class="slide-sub">Implementación nativa de patrones clásicos de la ingeniería de software en el backend.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><rect x="40" y="40" width="176" height="176" rx="16" opacity="0.25"/><path d="M216,96H192a24,24,0,0,0-24,24,8,8,0,0,1-16,0,40,40,0,0,1,40-40V56a16,16,0,0,0-16-16H144a40,40,0,0,1-40,40,8,8,0,0,1,0-16,24,24,0,0,0,24-24H56A16,16,0,0,0,40,56V96a40,40,0,0,1,40,40,8,8,0,0,1,0,16,24,24,0,0,0-24-24H40v40a16,16,0,0,0,16,16H96a24,24,0,0,0,24-24,8,8,0,0,1,16,0,40,40,0,0,1-40,40h72a16,16,0,0,0,16-16V160a40,40,0,0,1-40-40,8,8,0,0,1,0-16,24,24,0,0,0,24,24h24a16,16,0,0,0,16-16V96Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Factory Method</h3>
+                <p class="card-desc"><code>AvatarFactory</code></p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Centraliza la instanciación de gemelos masculinos, femeninos y neutros, garantizando proporciones antropométricas base según estándar ISO 7250.
+            </p>
+            <div style="margin-top: auto; padding-top: 10px;">
+              <code style="font-size: 0.78rem; color: var(--primary);">app/patterns/factory.py</code>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box emerald"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><rect x="24" y="80" width="208" height="96" rx="16" opacity="0.25"/><path d="M216,72H40A24,24,0,0,0,16,96v64a24,24,0,0,0,24,24H216a24,24,0,0,0,24-24V96A24,24,0,0,0,216,72Zm8,88a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V96a8,8,0,0,1,8-8H64v32a8,8,0,0,0,16,0V88h24v48a8,8,0,0,0,16,0V88h24v32a8,8,0,0,0,16,0V88h24v48a8,8,0,0,0,16,0V88h24a8,8,0,0,1,8,8Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Builder Pattern</h3>
+                <p class="card-desc"><code>GarmentBuilder</code></p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Construye modelos de indumentaria complejos paso a paso: fit, tiros, elasticidad, moldería en centímetros y variantes de tintes textiles.
+            </p>
+            <div style="margin-top: auto; padding-top: 10px;">
+              <code style="font-size: 0.78rem; color: var(--primary);">app/patterns/builder.py</code>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box amber"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><path d="M208,176H48a8,8,0,0,1-6.86-12.11L56,136V104a72,72,0,0,1,144,0v32l14.86,27.89A8,8,0,0,1,208,176Z" opacity="0.25"/><path d="M215.14,159.89,200,131.5V104a72,72,0,0,0-64-71.53V24a8,8,0,0,0-16,0v8.47A72,72,0,0,0,56,104v27.5L40.86,159.89A16,16,0,0,0,54.89,184H96a32,32,0,0,0,64,0h41.11a16,16,0,0,0,14.03-24.11ZM128,200a16,16,0,0,1-14.77-10h29.54A16,16,0,0,1,128,200Zm71.11-32H56.89l12.8-24A8,8,0,0,0,72,139.5V104a56,56,0,0,1,112,0v35.5a8,8,0,0,0,2.31,4.5l12.8,24Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Observer Pattern</h3>
+                <p class="card-desc"><code>BatchObserver</code></p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Notifica reactivamente a los suscriptores (auditoría, panel de marca) durante la ingesta masiva de archivos Excel y cambios críticos de stock.
+            </p>
+            <div style="margin-top: auto; padding-top: 10px;">
+              <code style="font-size: 0.78rem; color: var(--primary);">app/patterns/observer.py</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 20px;">
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><rect x="40" y="128" width="40" height="80" rx="4" opacity="0.25"/><rect x="108" y="80" width="40" height="128" rx="4" opacity="0.25"/><rect x="176" y="40" width="40" height="168" rx="4" opacity="0.25"/><path d="M224,216H40V32a8,8,0,0,0-16,0V224a8,8,0,0,0,8,8H224a8,8,0,0,0,0-16Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Strategy Pattern (Fit Recommendation)</h3>
+                <p class="card-desc"><code>FitRecommendationStrategy</code></p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.45;">
+              Algoritmo desacoplado que evalúa la holgura (ease tolerance) entre las medidas de la prenda y el gemelo digital, seleccionando entre modo confort, slim o relajado.
+            </p>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box rose"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><ellipse cx="128" cy="80" rx="80" ry="40" opacity="0.25"/><path d="M128,32C79.4,32,40,51.7,40,76V180c0,24.3,39.4,44,88,44s88-19.7,88-44V76C216,51.7,176.6,32,128,32Zm72,44c0,16.4-32.2,28-72,28S56,92.4,56,76,88.2,48,128,48,200,59.6,200,76Zm0,52c0,16.4-32.2,28-72,28S56,144.4,56,128V95.7c18.5,12.7,44.7,19.3,72,19.3s53.5-6.6,72-19.3Zm0,52c0,16.4-32.2,28-72,28s-72-11.6-72-28V147.7c18.5,12.7,44.7,19.3,72,19.3s53.5-6.6,72-19.3Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Singleton Pattern (Database Pool)</h3>
+                <p class="card-desc"><code>DatabaseSessionManager</code></p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.45;">
+              Asegura una única instancia del motor de conexión y pool de conexiones thread-safe en todo el ciclo de vida del servidor ASGI.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Arquitectura fundamentada en patrones GoF</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Transacciones ACID <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 6: CONCURRENCIA Y ACID ────────────────────────────────── -->
+    <section class="slide" data-slide="6">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><ellipse cx="128" cy="80" rx="80" ry="40" opacity="0.25"/><path d="M128,32C79.4,32,40,51.7,40,76V180c0,24.3,39.4,44,88,44s88-19.7,88-44V76C216,51.7,176.6,32,128,32Zm72,44c0,16.4-32.2,28-72,28S56,92.4,56,76,88.2,48,128,48,200,59.6,200,76Zm0,52c0,16.4-32.2,28-72,28S56,144.4,56,128V95.7c18.5,12.7,44.7,19.3,72,19.3s53.5-6.6,72-19.3Zm0,52c0,16.4-32.2,28-72,28s-72-11.6-72-28V147.7c18.5,12.7,44.7,19.3,72,19.3s53.5-6.6,72-19.3Z"/></svg> INTEGRIDAD Y CONCURRENCIA</span>
+        <span class="slide-num-indicator">06 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Concurrencia y Transacciones: <span class="hl">Garantías ACID</span></h1>
+        <p class="slide-sub">Prevención de sobreventas (Overselling) y Race Conditions mediante Bloqueo Pesimista.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2" style="align-items: stretch; margin-bottom: 14px;">
+          <div class="glass-card">
+            <div>
+              <div class="card-header-icon">
+                <div class="icon-box rose"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg></div>
+                <div>
+                  <h3 class="card-title">El Problema: Race Condition en Checkout</h3>
+                  <p class="card-desc">Sobrevendiendo la última unidad (Stock = 1)</p>
+                </div>
+              </div>
+              <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+                Cuando dos usuarios envían su orden simultáneamente, las lecturas concurrentes sin bloqueo ven stock disponible y ambas órdenes pasan, dejando el inventario en saldo negativo.
+              </p>
+              <div style="background: rgba(241,245,249,0.9); border: 1px solid rgba(226,232,240,0.9); border-radius: 14px; padding: 14px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #dc2626; margin-bottom: 6px;">
+                  <span>Línea temporal sin bloqueo pesimista:</span>
+                  <span>FALLO ACID</span>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); line-height: 1.6;">
+                  T0: Stock = 1 en tabla GarmentStock<br>
+                  T1: Usuario A ejecuta SELECT stock (ve 1)<br>
+                  T2: Usuario B ejecuta SELECT stock (ve 1)<br>
+                  T3: Usuario A confirma y decrementa (Stock = 0)<br>
+                  T4: Usuario B confirma y decrementa (Stock = -1 ⚠)
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(226,232,240,0.8);">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #059669;">Solución TryOn Hub: with_for_update() serializa las transacciones a nivel de fila.</span>
+            </div>
+          </div>
+
+          <div class="code-box">
+            <span class="comment"># Bloqueo Pesimista en Checkout Atómico (cart_service.py)</span><br>
+            <span class="kw">with</span> db.begin():<br>
+            &nbsp;&nbsp;<span class="comment"># SELECT ... FOR UPDATE bloquea la fila hasta el commit</span><br>
+            &nbsp;&nbsp;stock = db.query(GarmentStock)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">filter_by</span>(garment_id=item.id, size=item.size)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">with_for_update</span>()<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;.<span class="fn">first</span>()<br>
+            <br>
+            &nbsp;&nbsp;<span class="kw">if not</span> stock <span class="kw">or</span> stock.quantity &lt; item.qty:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Rollback automático al lanzar excepción</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">raise</span> InsufficientStockException(<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"Stock no disponible para esta variante"</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;)<br>
+            <br>
+            &nbsp;&nbsp;stock.quantity -= item.qty<br>
+            &nbsp;&nbsp;order = Order(user_id=user_id, status=<span class="str">"PAID"</span>)<br>
+            &nbsp;&nbsp;db.add(order)<br>
+            &nbsp;&nbsp;<span class="comment"># Atomic commit: stock descontado e idempotencia asegurada</span>
+          </div>
+        </div>
+
+        <div class="grid-4" style="flex: 0 0 auto;">
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.95rem;">Atomicidad (A)</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Todo el checkout o nada; ante cualquier error, rollback total.</p>
+          </div>
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.95rem;">Consistencia (C)</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Restricciones de clave foránea e inventario nunca negativo.</p>
+          </div>
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.95rem;">Aislamiento (I)</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Pessimistic locking previene Dirty Reads y Non-Repeatable Reads.</p>
+          </div>
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.95rem;">Durabilidad (D)</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Escritura confirmada en WAL / motor relacional tolerante a cortes.</p>
+          </div>
+        </div></div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Verificado bajo suite de concurrencia automatizada</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Pipeline 3D <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 7: PIPELINE 3D PROCEDURAL ─────────────────────────────── -->
+    <section class="slide" data-slide="7">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="128,32 216,80 216,176 128,224 40,176 40,80" opacity="0.25"/><path d="M220.16,73.61l-88-48a8,8,0,0,0-8.32,0l-88,48A8,8,0,0,0,32,80.59v94.82a8,8,0,0,0,3.84,7l88,48a8,8,0,0,0,8.32,0l88-48a8,8,0,0,0,3.84-7V80.59A8,8,0,0,0,220.16,73.61ZM128,41.22,201.25,81.16,128,121.1,54.75,81.16ZM48,95.12,120,134.4v76.84L48,171.88Zm160,76.76-72,39.36V134.4l72-39.28Z"/></svg> COMPUTACIÓN GRÁFICA</span>
+        <span class="slide-num-indicator">07 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Pipeline 3D: <span class="hl">Lofting Paramétrico WebGL</span></h1>
+        <p class="slide-sub">Generación procedural de mallas en Three.js sin descarga de archivos pesados estáticos.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2" style="align-items: stretch; margin-bottom: 14px;">
+          <div class="glass-card">
+            <div>
+              <h3 class="card-title" style="margin-bottom: 12px;">Generación Procedural vs Archivos Estáticos</h3>
+              <p class="card-desc" style="margin-bottom: 16px;">
+                A diferencia de los modelos 3D estáticos habituales (.obj/.gltf de 30-50MB por talle), TryOn Hub calcula la geometría en tiempo de ejecución deformando los vértices de una malla base según curvas de spline Bézier.
+              </p>
+              <ul class="feature-list">
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Ecuación de Deformación de Malla:</strong> <code>scaleX = (cintura * 0.55 + cadera * 0.45) / baseDef</code>.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Shaders PBR y Texturizado Dinámico:</strong> Relieve de tejido denim 12oz, sarga diagonal, pespuntes y sombreado procedural.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Ligereza y Rendimiento:</strong> Payload de red de solo 1.2 KB de JSON de medidas en lugar de archivos pesados.</span></li>
+              </ul>
+            </div>
+            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.2); border-radius: 12px; padding: 12px 16px;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">Motor Gráfico: Three.js r160 · WebGL 2.0 · OrbitControls con amortiguación</span>
+            </div>
+          </div>
+
+          <div class="glass-card" style="padding: 18px; text-align: center; justify-content: center; align-items: center;">
+            <img src="/images/slides/avatar_3d.png" alt="Gemelo 3D y Deformación" style="max-height: 290px; width: 100%; object-fit: contain; border-radius: 14px; background: rgba(241,245,249,0.9); padding: 14px;">
+            <p style="font-size: 0.85rem; color: var(--text-soft); margin-top: 10px; font-weight: 600;">
+              Render Paramétrico con Medición Antropométrica en Vivo
+            </p>
+          </div>
+        </div>
+
+        <div class="grid-4" style="flex: 0 0 auto;">
+          <div class="metric-badge" style="padding: 12px 16px;">
+            <span class="metric-val" style="font-size: 1.8rem;">60 FPS</span>
+            <span class="metric-lbl">Tasa de Refresco Fluida</span>
+          </div>
+          <div class="metric-badge" style="padding: 12px 16px;">
+            <span class="metric-val" style="font-size: 1.8rem;">1.2 KB</span>
+            <span class="metric-lbl">Peso de Transferencia</span>
+          </div>
+          <div class="metric-badge" style="padding: 12px 16px;">
+            <span class="metric-val" style="font-size: 1.8rem;">4.8K</span>
+            <span class="metric-lbl">Polígonos Optimizados</span>
+          </div>
+          <div class="metric-badge" style="padding: 12px 16px;">
+            <span class="metric-val" style="font-size: 1.8rem;">0 MB</span>
+            <span class="metric-lbl">VRAM del Servidor</span>
+          </div>
+        </div></div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Rendimiento nativo a 60 FPS en cualquier dispositivo</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Estudio B2B <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 8: ESTUDIO B2B DE MARCA ───────────────────────────────── -->
+    <section class="slide" data-slide="8">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><path d="M224,104v96a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V104Z" opacity="0.25"/><path d="M239.3,87.69l-16-48A8,8,0,0,0,215.7,35.1l-175.4,0a8,8,0,0,0-7.6,4.59l-16,48a8,8,0,0,0,1.3,8.42A24.1,24.1,0,0,0,36,104a24,24,0,0,0,36-20.78A24,24,0,0,0,108,104a24,24,0,0,0,36-20.78A24,24,0,0,0,180,104a24,24,0,0,0,18-8.11A23.94,23.94,0,0,0,238,96.11,8,8,0,0,0,239.3,87.69ZM40,200V120H216v80a8,8,0,0,1-8,8H48A8,8,0,0,1,40,200Z"/></svg> PLATAFORMA B2B</span>
+        <span class="slide-num-indicator">08 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Dashboard de Marca: <span class="hl">Estudio 3D en Vivo</span></h1>
+        <p class="slide-sub">Diseño de moldería técnica en centímetros con feedback visual instantáneo en entorno boutique.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2" style="align-items: stretch; margin-bottom: 14px;">
+          <div class="glass-card" style="padding: 16px; text-align: center; justify-content: center; align-items: center;">
+            <img src="/images/slides/brand_studio_3d.jpg" alt="Estudio 3D de Marca" style="max-height: 310px; width: 100%; object-fit: cover; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.06);">
+            <p style="font-size: 0.85rem; color: var(--text-soft); margin-top: 12px; font-weight: 600;">
+              Previsualizador 3D con Fondo Boutique Fotorrealista de Denim
+            </p>
+          </div>
+
+          <div class="glass-card">
+            <div>
+              <h3 class="card-title" style="margin-bottom: 12px;">Control Total de Moldería y Textil</h3>
+              <ul class="feature-list">
+                <li class="feature-item">
+                  <svg class="icon" viewBox="0 0 256 256" fill="currentColor"><rect x="24" y="80" width="208" height="96" rx="16" opacity="0.25"/><path d="M216,72H40A24,24,0,0,0,16,96v64a24,24,0,0,0,24,24H216a24,24,0,0,0,24-24V96A24,24,0,0,0,216,72Zm8,88a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V96a8,8,0,0,1,8-8H64v32a8,8,0,0,0,16,0V88h24v48a8,8,0,0,0,16,0V88h24v32a8,8,0,0,0,16,0V88h24v48a8,8,0,0,0,16,0V88h24a8,8,0,0,1,8,8Z"/></svg>
+                  <span><strong>Sliders Anatómicos en Centímetros:</strong> Ajuste directo de cintura (60..120cm), cadera, tiro frontal, contorno de muslo y ancho de botamanga.</span>
+                </li>
+                <li class="feature-item">
+                  <svg class="icon" viewBox="0 0 256 256" fill="currentColor"><polygon points="128,16 156,92 232,120 156,148 128,224 100,148 24,120 100,92" opacity="0.25"/><path d="M237.4,114.77l-69.57-25.5-25.5-69.57a8,8,0,0,0-14.66,0l-25.5,69.57-69.57,25.5a8,8,0,0,0,0,14.66l69.57,25.5,25.5,69.57a8,8,0,0,0,14.66,0l25.5-69.57,69.57-25.5A8,8,0,0,0,237.4,114.77ZM144.3,137.8a8,8,0,0,0-4.5,4.5L128,175.7,116.2,142.3a8,8,0,0,0-4.5-4.5L78.3,126.1l33.4-11.8a8,8,0,0,0,4.5-4.5L128,76.5l11.8,33.3a8,8,0,0,0,4.5,4.5l33.4,11.8Z"/></svg>
+                  <span><strong>Paleta Cromática Textil:</strong> Tintes predefinidos (Azul Clásico, Negro Carbón, Celeste Vintage, Gris Acero) con selector de código Hexadecimal.</span>
+                </li>
+                <li class="feature-item">
+                  <svg class="icon" viewBox="0 0 256 256" fill="currentColor"><path d="M224,104v96a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V104Z" opacity="0.25"/><path d="M239.3,87.69l-16-48A8,8,0,0,0,215.7,35.1l-175.4,0a8,8,0,0,0-7.6,4.59l-16,48a8,8,0,0,0,1.3,8.42A24.1,24.1,0,0,0,36,104a24,24,0,0,0,36-20.78A24,24,0,0,0,108,104a24,24,0,0,0,36-20.78A24,24,0,0,0,180,104a24,24,0,0,0,18-8.11A23.94,23.94,0,0,0,238,96.11,8,8,0,0,0,239.3,87.69ZM40,200V120H216v80a8,8,0,0,1-8,8H48A8,8,0,0,1,40,200Z"/></svg>
+                  <span><strong>Entorno Boutique Inmersivo:</strong> Iluminación de pasarela y fondo escénico que realza el pliegue del denim.</span>
+                </li>
+              </ul>
+            </div>
+            <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; padding: 12px 16px; margin-top: 14px;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #059669;">Sincronización Directa: Al guardar la prenda, pasa al catálogo y al probador B2C inmediatamente.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-3" style="flex: 0 0 auto;">
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.92rem;">Ficha Técnica Talle M</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Cintura: 82cm · Cadera: 100cm · Muslo: 58cm · Botamanga: 20cm</p>
+          </div>
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.92rem;">Graduación Proporcional</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Escalado automático a talles 28, 30, 32, 34, 36 con tolerancia de 4cm.</p>
+          </div>
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.92rem;">Materiales Disponibles</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Denim 100% Algodón rígido, Stretch 2% elastano, Denim Reciclado.</p>
+          </div>
+        </div></div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Simplicidad operativa para directores de producto</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Carga Masiva <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 9: CARGA MASIVA Y OBSERVER ────────────────────────────── -->
+    <section class="slide" data-slide="9">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><path d="M208,176H48a8,8,0,0,1-6.86-12.11L56,136V104a72,72,0,0,1,144,0v32l14.86,27.89A8,8,0,0,1,208,176Z" opacity="0.25"/><path d="M215.14,159.89,200,131.5V104a72,72,0,0,0-64-71.53V24a8,8,0,0,0-16,0v8.47A72,72,0,0,0,56,104v27.5L40.86,159.89A16,16,0,0,0,54.89,184H96a32,32,0,0,0,64,0h41.11a16,16,0,0,0,14.03-24.11ZM128,200a16,16,0,0,1-14.77-10h29.54A16,16,0,0,1,128,200Zm71.11-32H56.89l12.8-24A8,8,0,0,0,72,139.5V104a56,56,0,0,1,112,0v35.5a8,8,0,0,0,2.31,4.5l12.8,24Z"/></svg> INGESTA REACTIVA</span>
+        <span class="slide-num-indicator">09 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Ingestión Masiva por Excel: <span class="hl">Patrón Observer</span></h1>
+        <p class="slide-sub">Procesamiento por lotes con validación de integridad y notificación asíncrona de eventos.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="glass-card">
+            <h3 class="card-title" style="margin-bottom: 12px;">Pipeline de Ingesta Masiva</h3>
+            <ul class="feature-list" style="gap: 12px;">
+              <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Parser de Hojas de Cálculo (.xlsx):</strong> Validación de cabeceras requeridas (SKU, Nombre, Fit, Talles, Precio).</span></li>
+              <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Normalización de Medidas:</strong> Conversión automática de tablas comerciales a vectores de moldería técnica.</span></li>
+              <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Tolerancia a Errores:</strong> Registro de advertencias por fila sin interrumpir el lote completo.</span></li>
+              <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Desacoplamiento Observer:</strong> El servicio emite eventos que el monitor de la interfaz consume sin bloquear el hilo.</span></li>
             </ul>
           </div>
-        </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
-      </div>
-    </section>
 
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 8 — DECORATOR PATTERN
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>🎨 Patrón <span style="color:var(--accent-dec)">Decorator</span> — <code>strategy_decorators.py</code></h2>
-        <div class="two-col-6-4">
-          <div>
-            <div class="pattern-diagram">
-              <span class="hl2">VirtualTryOnStrategy</span> ← Component<br>
-              &nbsp;├── <span class="hl2">GeminiTryOnStrategy</span> ← ConcreteComponent<br>
-              &nbsp;└── <span class="hl3">StrategyDecorator</span> ← Decorator abstracto<br>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="hl3">LoggingStrategyDecorator</span><br>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp; Loguea prenda, tiempo, source<br>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="hl3">CachingStrategyDecorator</span><br>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hash MD5(image_url) → caché
-            </div>
-            <div class="code-block">
-              <pre><span class="cm"># Composición dinámica en runtime</span>
-strategy = <span class="hl3">LoggingStrategyDecorator</span>(
-    <span class="hl3">CachingStrategyDecorator</span>(
-        <span class="hl2">GeminiTryOnStrategy</span>()
-    )
-)
-<span class="cm"># GeminiTryOnStrategy no se tocó ✓</span></pre>
-            </div>
-          </div>
-          <div>
-            <ul class="checklist" style="margin-top:0">
-              <li><span class="ci">🍵</span><div><strong>Como Starbuzz Coffee:</strong> envolvemos la estrategia en runtime, no heredamos.</div></li>
-              <li><span class="ci">💰</span><div><strong>Valor real:</strong> si una marca sube el mismo Excel dos veces, la caché evita pagar Gemini duplicado.</div></li>
-              <li><span class="ci">🔍</span><div><strong>Logging automático:</strong> latencia de cada llamada a la IA sin tocar la clase original.</div></li>
-              <li><span class="ci">✅</span><div><strong>Open/Closed:</strong> añadir <code>RateLimitingDecorator</code> sin modificar nada existente.</div></li>
-            </ul>
+          <div class="code-box">
+            <span class="comment"># Implementación del Patrón Observer (Batch Processing)</span><br>
+            <span class="kw">class</span> <span class="fn">BatchImportSubject</span>:<br>
+            &nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__init__</span>(self):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;self._observers: List[Observer] = []<br>
+            <br>
+            &nbsp;&nbsp;<span class="kw">def</span> <span class="fn">notify</span>(self, event: BatchEvent):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">for</span> obs <span class="kw">in</span> self._observers:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;obs.<span class="fn">update</span>(event)<br>
+            <br>
+            <span class="comment"># Notificación de progreso y resumen</span><br>
+            subject.<span class="fn">notify</span>(BatchEvent(<br>
+            &nbsp;&nbsp;type=<span class="str">"BATCH_SUCCESS"</span>,<br>
+            &nbsp;&nbsp;imported_count=len(valid_rows),<br>
+            &nbsp;&nbsp;alerts=warnings<br>
+            ))
           </div>
         </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
       </div>
-    </section>
 
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 9 — OBSERVER PATTERN
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>📡 Patrón <span style="color:var(--accent-obs)">Observer</span> — <code>job_observers.py</code></h2>
-        <div class="two-col-6-4">
-          <div>
-            <div class="pattern-diagram">
-              <span class="hl2">IJobObserver</span> &lt;&lt;abstract&gt;&gt;<br>
-              &nbsp;└── <span class="fn">update(job_id, old, new, ctx)</span>*<br><br>
-              <span class="hl">LoggingJobObserver</span> ← audit trail de estado<br>
-              <span class="hl">StatsJobObserver</span> ← contadores en memoria<br><br>
-              <span class="hl2">JobSubjectMixin</span> → aplicado a ProcessingJob<br>
-              &nbsp;├── register_observer(obs)<br>
-              &nbsp;├── remove_observer(obs)<br>
-              &nbsp;└── notify_observers(old, new, ctx)
-            </div>
-            <div class="code-block">
-              <pre><span class="cm"># Modelo Push (como WeatherStation del libro)</span>
-job.register_observer(<span class="hl">LoggingJobObserver</span>())
-job.register_observer(<span class="hl">StatsJobObserver</span>())
-job.status = JobStatus.READY
-job.notify_observers(old, new, ctx={<span class="st">"processed_items"</span>: 12})
-<span class="cm"># → Logging: "Job #5: PROCESSING → READY | 12 prendas"</span>
-<span class="cm"># → Stats: jobs_completed += 1, total_garments += 12</span></pre>
-            </div>
-          </div>
-          <div>
-            <ul class="checklist" style="margin-top:0">
-              <li><span class="ci">🌤️</span><div><strong>Como WeatherStation:</strong> ProcessingJob es el Subject, los observers son los displays.</div></li>
-              <li><span class="ci">🔌</span><div><strong>Desacoplado:</strong> agregar <code>SlackObserver</code> o <code>WebSocketObserver</code> sin tocar el router.</div></li>
-              <li><span class="ci">🛡️</span><div><strong>Resiliente:</strong> si un observer falla, los demás siguen recibiendo la notificación.</div></li>
-              <li><span class="ci">✅</span><div><strong>Push model:</strong> el Subject empuja todos los datos. El Observer no necesita referencia al Subject.</div></li>
-            </ul>
-          </div>
-        </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 9B — FACTORY PATTERN + SOLID
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>🏭 Patrón <span>Factory</span> &amp; Principios <span>SOLID</span></h2>
-        <div class="two-col-6-4">
-          <div>
-            <div class="pattern-diagram">
-              <span class="hl2">StrategyFactory</span> (Creator — <code>strategy_factory.py</code>)<br>
-              &nbsp;├── <span class="fn">create_single_garment()</span> → Logging(Gemini|Mock)<br>
-              &nbsp;└── <span class="fn">create_bulk_catalog()</span> → Logging(Cache(Gemini|Mock))<br><br>
-              <span class="hl">Principios SOLID en acción:</span><br>
-              &nbsp;• <strong>S (SRP):</strong> <code>validators.py</code> valida, <code>StrategyFactory</code> ensambla.<br>
-              &nbsp;• <strong>O (OCP):</strong> <code>NotificationJobObserver</code> añadido sin tocar Subject.<br>
-              &nbsp;• <strong>L (LSP):</strong> Decorators sustituibles por <code>VirtualTryOnStrategy</code>.<br>
-              &nbsp;• <strong>I (ISP):</strong> Interfaces mínimas de 1 método (<code>update</code>, <code>process_garment</code>).<br>
-              &nbsp;• <strong>D (DIP):</strong> Inyección vía <code>Depends(get_garment_tryon_strategy)</code>.
-            </div>
-          </div>
-          <div>
-            <ul class="checklist" style="margin-top:0">
-              <li><span class="ci">🏭</span><div><strong>Desacoplamiento creacional:</strong> los routers piden la estrategia sin conocer cómo se apilan los decoradores.</div></li>
-              <li><span class="ci">💉</span><div><strong>Dependency Inversion:</strong> fácil override en tests con <code>dependency_overrides</code>.</div></li>
-              <li><span class="ci">🧼</span><div><strong>Single Responsibility:</strong> validaciones de magic bytes y Excel separadas en <code>validators.py</code>.</div></li>
-            </ul>
-          </div>
-        </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 10 — CONTRIBUCIONES DEL EQUIPO
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>👥 Contribuciones del <span>Equipo</span></h2>
-        <div class="cards col2">
-          <div class="card purple">
-            <div class="card-icon">🧑‍💻</div>
-            <div class="card-title">Tomás Nadal — tominadal</div>
-            <div class="card-body">
-              Arquitectura general Backend/Frontend, pipeline IA con Gemini Vision, patrones Strategy + Decorator + Observer + Factory, refactor SOLID, Dashboard de Marca y documentación académica UML.
-            </div>
-          </div>
-          <div class="card green">
-            <div class="card-icon">🧑‍💻</div>
-            <div class="card-title">Lucio Lourido — LucioLourido</div>
-            <div class="card-body">
-              Soporte multi-avatar (1:N hasta 10 gemelos digitales por usuario), migración automática idempotente de esquemas, mejoras integrales del carrito (variantes talle/color, cantidades +/-, vaciado), precios en ARS y Centro de Ayuda.
-            </div>
-          </div>
-          <div class="card yellow">
-            <div class="card-icon">🧑‍💻</div>
-            <div class="card-title">Facundo Latini — faculatini</div>
-            <div class="card-body">
-              Integridad transaccional atómica con <code>rollback()</code> explícito y <code>AIServiceError</code>, ejecución asíncrona no bloqueante mediante <code>run_in_threadpool</code> y suite de tests de concurrencia y fallos IA.
-            </div>
-          </div>
-          <div class="card pink">
-            <div class="card-icon">🧑‍💻</div>
-            <div class="card-title">Tomás Carambia — CarambiaTomas</div>
-            <div class="card-body">
-              Evolución del motor de avatares 3D en React Three Fiber: modelado anatómico de manos (<code>Hands.tsx</code>), calzado paramétrico (<code>Shoes.tsx</code>) y refinamiento visual del maniquí y rostro.
-            </div>
-          </div>
-        </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 11 — TESTING
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-content">
-        <h2>🧪 Testing — <span>90 Tests Automatizados</span></h2>
-        <div class="cards col3" style="font-size:0.78rem">
-          <div class="card">
-            <div class="card-title">Auth, Users &amp; RBAC (11)</div>
-            <div class="card-body">Registro cliente/marca, login JWT, email duplicado, contraseñas débiles, protección 401/403.</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Catalog CRUD &amp; IA (22)</div>
-            <div class="card-body">CRUD completo de prendas (POST, GET, PUT, DELETE), upload Excel, magic bytes, rollback ante fallo IA, threadpool y modo paramétrico.</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Commerce &amp; Carrito (14)</div>
-            <div class="card-body">Variantes por talle/color, ajuste de cantidades PATCH, eliminación individual, vaciado de carrito y snapshot pricing en checkout.</div>
-          </div>
-          <div class="card green">
-            <div class="card-title">Multi-Avatar 1:N (12)</div>
-            <div class="card-body">CRUD de hasta 10 avatares por usuario, aislamiento entre cuentas, validación de morphs JSON y migración automática de DB.</div>
-          </div>
-          <div class="card green">
-            <div class="card-title">Patrones GoF &amp; Factory (19)</div>
-            <div class="card-body">IStrategyFactory/StrategyFactory, LoggingDecorator, CachingDecorator (HIT/MISS/MD5), Observer Push (Logging, Stats, Notification).</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Validadores &amp; Edge Cases (12)</div>
-            <div class="card-body">Tests unitarios puros de <code>validators.py</code> (SRP), healthcheck, manejo de excepciones centralizado y límites de payload.</div>
-          </div>
-        </div>
-        <p class="slide-label">TryOnHub — Programación II 2026</p>
-      </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════
-         SLIDE 12 — CIERRE
-    ══════════════════════════════════════════════════ -->
-    <section>
-      <div class="slide-title" style="background: radial-gradient(ellipse at 70% 50%, #064e3b 0%, #0f172a 60%);">
-        <div class="badge">Conclusión</div>
-        <h1><span>Gracias</span></h1>
-        <p class="subtitle">TryOnHub demuestra cómo los patrones de diseño del curso se aplican en un sistema real: Strategy para la IA, Decorator para envolver sin modificar, Observer para desacoplar notificaciones.</p>
-        <div class="pills">
-          <span class="pill green">Strategy: swap de IA sin tocar routers</span>
-          <span class="pill" style="border-color:var(--accent-dec);color:var(--accent-dec)">Decorator: logging + caché sobre Gemini</span>
-          <span class="pill" style="border-color:var(--accent-obs);color:var(--accent-obs)">Observer: jobs notifican en Push model</span>
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Escalabilidad para catálogos de cientos de prendas</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Seguridad <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
         </div>
       </div>
     </section>
 
+    <!-- ── SLIDE 10: SEGURIDAD Y AUTH ──────────────────────────────────── -->
+    <section class="slide" data-slide="10">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><path d="M208,48,128,24,48,48V112c0,57.19,34.09,109.84,80,120,45.91-10.16,80-62.81,80-120Z" opacity="0.25"/><path d="M208,40a8,8,0,0,0-5.61-2.45L128,14.07,53.61,37.55A8,8,0,0,0,48,45.22V112c0,61.4,36.56,117.84,85.83,128.74a8,8,0,0,0,3.34,0C186.44,229.84,223,173.4,223,112V45.22A8,8,0,0,0,208,40Zm-1,72c0,53.11-30.84,102-79,112.51C80.84,214,50,165.11,50,112V51.74l78-24.63,78,24.63ZM154.83,98.83a8,8,0,0,1,0,11.31l-32,32a8,8,0,0,1-11.31,0l-16-16a8,8,0,0,1,11.31-11.31L117.17,125.17l26.34-26.34A8,8,0,0,1,154.83,98.83Z"/></svg> CRIPTOGRAFÍA & RBAC</span>
+        <span class="slide-num-indicator">10 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Seguridad y Criptografía: <span class="hl">Argon2id & RBAC</span></h1>
+        <p class="slide-sub">Protección robusta de credenciales y autorización granular basada en roles.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box emerald"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><path d="M208,48,128,24,48,48V112c0,57.19,34.09,109.84,80,120,45.91-10.16,80-62.81,80-120Z" opacity="0.25"/><path d="M208,40a8,8,0,0,0-5.61-2.45L128,14.07,53.61,37.55A8,8,0,0,0,48,45.22V112c0,61.4,36.56,117.84,85.83,128.74a8,8,0,0,0,3.34,0C186.44,229.84,223,173.4,223,112V45.22A8,8,0,0,0,208,40Zm-1,72c0,53.11-30.84,102-79,112.51C80.84,214,50,165.11,50,112V51.74l78-24.63,78,24.63ZM154.83,98.83a8,8,0,0,1,0,11.31l-32,32a8,8,0,0,1-11.31,0l-16-16a8,8,0,0,1,11.31-11.31L117.17,125.17l26.34-26.34A8,8,0,0,1,154.83,98.83Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Argon2id Hashing</h3>
+                <p class="card-desc">Ganador del Password Hashing Competition</p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Máxima resistencia contra ataques con GPU y ASICs gracias a su consumo configurable de memoria y paralelismo (Memory-Hard Function).
+            </p>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,16 64,136 128,136 96,240 192,120 128,120" opacity="0.25"/><path d="M166.42,112H135.2L162.77,32.32A8,8,0,0,0,152,24a8.16,8.16,0,0,0-6.79,3.75l-96,128A8,8,0,0,0,56,168h31.2l-27.57,79.68A8,8,0,0,0,67.2,256a8.16,8.16,0,0,0,6.79-3.75l96-128A8,8,0,0,0,166.42,112Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Stateless JWT Auth</h3>
+                <p class="card-desc">Tokens firmados criptográficamente</p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Cabeceras <code>Authorization: Bearer</code> con expiración configurable, validación automática de claims y zero overhead de sesión en base de datos.
+            </p>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="96" r="40" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM128,120a24,24,0,1,1,24-24A24,24,0,0,1,128,120Zm69.13,65.6a79.88,79.88,0,0,0-138.26,0,88,88,0,1,1,138.26,0Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Role-Based Access (RBAC)</h3>
+                <p class="card-desc">Roles estrictos: USER / BRAND</p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Decoradores de seguridad que impiden que clientes accedan a endpoints de moldería o que marcas editen pedidos ajenos.
+            </p>
+          </div>
+        </div>
+
+        <div class="glass-card highlight" style="margin-top: 20px;">
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-bottom: 6px;">Recuperación Segura de Contraseña</h4>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+            Flujo end-to-end con token criptográfico temporal con expiración de 15 minutos, validación de contraseña con fortaleza mínima y hash inmediato con Argon2id.
+          </p>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Cumplimiento con estándares modernos de ciberseguridad</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Testing <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 11: TESTING Y CALIDAD ─────────────────────────────────── -->
+    <section class="slide" data-slide="11">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="56,208 200,208 152,120 104,120" opacity="0.25"/><path d="M215.34,196.22l-55.45-101.65V48h8a8,8,0,0,0,0-16H88a8,8,0,0,0,0,16h8V94.57L40.66,196.22A16,16,0,0,0,54.65,220h146.7a16,16,0,0,0,14-23.78ZM112,48h32V96a8,8,0,0,0,1.06,3.95L174.65,152H81.35l29.59-52.05A8,8,0,0,0,112,96ZM54.65,204,72.25,168h111.5l17.6,36Z"/></svg> VERIFICACIÓN Y TESTING</span>
+        <span class="slide-num-indicator">11 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Testing Automatizado: <span class="hl">122 Pruebas al 100%</span></h1>
+        <p class="slide-sub">Verificación continua de transacciones ACID, modelos de dominio, autenticación y endpoints REST.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2" style="align-items: stretch; margin-bottom: 14px;">
+          <div class="glass-card highlight">
+            <div>
+              <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px;">
+                <span class="metric-val" style="font-size: 2.8rem;">122 / 122</span>
+                <span style="font-weight: 800; color: #059669; font-size: 1.2rem;">PASSED (100%)</span>
+              </div>
+              <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 16px;">
+                Suite completa de pruebas automatizadas ejecutada con éxito en <strong>78.50s</strong>.
+              </p>
+
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">
+                    <span>Concurrencia ACID y Bloqueo Pesimista (28 tests)</span>
+                    <span style="color: #059669;">100%</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(226,232,240,0.8); border-radius: 9999px; overflow: hidden;">
+                    <div style="height: 100%; width: 100%; background: #059669;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">
+                    <span>Patrones GoF & Lógica de Negocio (34 tests)</span>
+                    <span style="color: #059669;">100%</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(226,232,240,0.8); border-radius: 9999px; overflow: hidden;">
+                    <div style="height: 100%; width: 100%; background: var(--primary);"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">
+                    <span>Endpoints REST & Autenticación JWT (38 tests)</span>
+                    <span style="color: #059669;">100%</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(226,232,240,0.8); border-radius: 9999px; overflow: hidden;">
+                    <div style="height: 100%; width: 100%; background: #7e22ce;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">
+                    <span>Moldería en cm, Ingesta Excel & Observer (22 tests)</span>
+                    <span style="color: #059669;">100%</span>
+                  </div>
+                  <div style="height: 6px; background: rgba(226,232,240,0.8); border-radius: 9999px; overflow: hidden;">
+                    <div style="height: 100%; width: 100%; background: #d97706;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(226,232,240,0.8);">
+              <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">TDD y Control de Regresiones: Cada commit valida la integridad transaccional.</span>
+            </div>
+          </div>
+
+          <div class="code-box">
+            <span class="comment"># Ejecución oficial de pruebas Pytest (TryOnHub/backend)</span><br>
+            <span class="kw">$ pytest -q --tb=short</span><br>
+            tests/test_acid_transactions.py ............ [ 10%]<br>
+            tests/test_auth_users.py ................... [ 25%]<br>
+            tests/test_patterns_gof.py ................. [ 50%]<br>
+            tests/test_garments_and_3d.py .............. [ 75%]<br>
+            tests/test_excel_batch_observer.py ......... [100%]<br>
+            <br>
+            <span class="str" style="font-weight: 700;">=================== 122 passed in 78.50s ===================</span><br>
+            <br>
+            <span class="comment"># Verificación de Tipos Estáticos (TypeScript Frontend)</span><br>
+            <span class="kw">$ npx tsc --noEmit</span><br>
+            <span class="str">[OK] 0 errors found across entire Next.js App Router</span>
+          </div>
+        </div>
+
+        <div class="grid-3" style="flex: 0 0 auto;">
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.92rem;">Stress Tests de Concurrencia</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">50 hilos concurrentes compitiendo por 5 unidades en stock: 0 sobreventas.</p>
+          </div>
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.92rem;">Validaciones Pydantic v2</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Rechazo automático de payloads corruptos con código HTTP 422.</p>
+          </div>
+          <div class="glass-card" style="padding: 14px 18px;">
+            <strong style="color: var(--primary); font-size: 0.92rem;">Rollback en Transacciones</strong>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Restauración inmediata del estado ante fallo en cualquier punto del pipeline.</p>
+          </div>
+        </div></div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Garantía de calidad demostrable y reproducible</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Modelo de Negocio <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 12: MODELO DE NEGOCIO ─────────────────────────────────── -->
+    <section class="slide" data-slide="12">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><rect x="32" y="72" width="192" height="136" rx="16" opacity="0.25"/><path d="M216,64H176V48a24,24,0,0,0-24-24H104A24,24,0,0,0,80,48V64H40A24,24,0,0,0,16,88V200a24,24,0,0,0,24,24H216a24,24,0,0,0,24-24V88A24,24,0,0,0,216,64ZM96,48a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8V64H96ZM224,200a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V136H96v8a8,8,0,0,0,16,0v-8h32v8a8,8,0,0,0,16,0v-8h64ZM224,120H176V112a8,8,0,0,0-16,0v8H128V112a8,8,0,0,0-16,0v8H32V88a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8Z"/></svg> VIABILIDAD ECONÓMICA</span>
+        <span class="slide-num-indicator">12 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Modelo de Negocio: <span class="hl">Unit Economics B2B2C</span></h1>
+        <p class="slide-sub">Monetización sustentable por suscripción SaaS a fabricantes y take-rate transaccional.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><path d="M224,104v96a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V104Z" opacity="0.25"/><path d="M239.3,87.69l-16-48A8,8,0,0,0,215.7,35.1l-175.4,0a8,8,0,0,0-7.6,4.59l-16,48a8,8,0,0,0,1.3,8.42A24.1,24.1,0,0,0,36,104a24,24,0,0,0,36-20.78A24,24,0,0,0,108,104a24,24,0,0,0,36-20.78A24,24,0,0,0,180,104a24,24,0,0,0,18-8.11A23.94,23.94,0,0,0,238,96.11,8,8,0,0,0,239.3,87.69ZM40,200V120H216v80a8,8,0,0,1-8,8H48A8,8,0,0,1,40,200Z"/></svg></div>
+              <div>
+                <h3 class="card-title">SaaS B2B para Marcas</h3>
+                <p class="card-desc">Suscripción mensual por catálogo</p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Acceso ilimitado al Estudio 3D, generador de gemelos de prendas, importación masiva por Excel y analíticas de calce por región demográfica.
+            </p>
+            <div style="margin-top: auto; padding-top: 12px; font-weight: 700; color: var(--primary);">
+              Tier Pro: $149 USD / mes
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box emerald"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-88a20,20,0,0,0-20-20H116a12,12,0,0,1,0-24h32a8,8,0,0,0,0-16H136V56a8,8,0,0,0-16,0V68H108a28,28,0,0,0,0,56h8a12,12,0,0,1,0,24H84a8,8,0,0,0,0,16h36v12a8,8,0,0,0,16,0V164h12A28,28,0,0,0,144,128Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Take-Rate de Transacción</h3>
+                <p class="card-desc">Comisión sobre checkout completado</p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Comisión del 4.5% sobre ventas originadas en el marketplace de TryOn Hub cuando el usuario utiliza el probador virtual antes de comprar.
+            </p>
+            <div style="margin-top: auto; padding-top: 12px; font-weight: 700; color: #059669;">
+              Take-Rate: 4.5% por orden
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><rect x="40" y="128" width="40" height="80" rx="4" opacity="0.25"/><rect x="108" y="80" width="40" height="128" rx="4" opacity="0.25"/><rect x="176" y="40" width="40" height="168" rx="4" opacity="0.25"/><path d="M224,216H40V32a8,8,0,0,0-16,0V224a8,8,0,0,0,8,8H224a8,8,0,0,0,0-16Z"/></svg></div>
+              <div>
+                <h3 class="card-title">ROI para la Marca</h3>
+                <p class="card-desc">Ahorro medible en devoluciones</p>
+              </div>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+              Al reducir las devoluciones de un 38% a menos de un 14%, una marca promedio que factura 500 órdenes/mes ahorra más de $3,500 USD netos mensuales.
+            </p>
+            <div style="margin-top: auto; padding-top: 12px; font-weight: 700; color: #7e22ce;">
+              ROI directo: 23x la suscripción
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Propuesta económica validada y rentable</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav primary-cta btn-next">Siguiente: Demo en Vivo <svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="96,56 168,128 96,200"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 13: CONCLUSIÓN Y DEMO EN VIVO ──────────────────────────── -->
+    <section class="slide" data-slide="13">
+      <div class="slide-meta">
+        <span class="badge-tag"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="128,16 156,92 232,120 156,148 128,224 100,148 24,120 100,92" opacity="0.25"/><path d="M237.4,114.77l-69.57-25.5-25.5-69.57a8,8,0,0,0-14.66,0l-25.5,69.57-69.57,25.5a8,8,0,0,0,0,14.66l69.57,25.5,25.5,69.57a8,8,0,0,0,14.66,0l25.5-69.57,69.57-25.5A8,8,0,0,0,237.4,114.77ZM144.3,137.8a8,8,0,0,0-4.5,4.5L128,175.7,116.2,142.3a8,8,0,0,0-4.5-4.5L78.3,126.1l33.4-11.8a8,8,0,0,0,4.5-4.5L128,76.5l11.8,33.3a8,8,0,0,0,4.5,4.5l33.4,11.8Z"/></svg> CONCLUSIÓN & DEFENSA</span>
+        <span class="slide-num-indicator">13 / 13</span>
+      </div>
+
+      <div>
+        <h1 class="slide-title">Cumplimiento Integral: <span class="hl">Pase a Demo en Vivo</span></h1>
+        <p class="slide-sub">Todos los requisitos académicos y de ingeniería alcanzados satisfactoriamente.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2" style="align-items: stretch; margin-bottom: 14px;">
+          <div class="glass-card">
+            <div>
+              <h3 class="card-title" style="margin-bottom: 12px;">Matriz de Cumplimiento de Consignas</h3>
+              <ul class="feature-list" style="gap: 10px;">
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Clean Architecture:</strong> 4 capas estrictamente desacopladas y tipadas con Pydantic y SQLAlchemy.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Patrones GoF:</strong> Factory, Builder, Observer, Strategy y Singleton con pruebas unitarias dedicadas.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Transacciones ACID:</strong> Bloqueo pesimista con <code>with_for_update()</code> y protección de inventario.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>UX/UI Liquid Glass:</strong> 100% responsive, iconografía Phosphor Duotone y cero emojis.</span></li>
+                <li class="feature-item"><svg class="icon" viewBox="0 0 256 256" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.25"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,156.69l50.34-50.35A8,8,0,0,1,173.66,106.34Z"/></svg><span><strong>Testing Automatizado:</strong> 122 tests pasando (100% éxito) y 0 errores en compilador TypeScript.</span></li>
+              </ul>
+            </div>
+            <div style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 10px 14px; margin-top: 10px;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #059669;">Calificación Técnica: Todos los requisitos de la cátedra satisfechos al 100%.</span>
+            </div>
+          </div>
+
+          <div class="glass-card highlight" style="display: flex; flex-direction: column; justify-content: space-between; text-align: center; padding: 28px;">
+            <div>
+              <img src="/logo.png" alt="TryOn Hub" style="width: 60px; height: 60px; object-fit: contain; margin-bottom: 12px;">
+              <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 6px;">Demostración en Vivo</h3>
+              <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                Iniciamos la navegación interactiva de los flujos de cliente y panel B2B, y abrimos el espacio para preguntas del jurado.
+              </p>
+              
+              <div style="background: white; border: 1px solid rgba(226,232,240,0.9); border-radius: 14px; padding: 14px; text-align: left; margin-bottom: 18px;">
+                <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-soft); text-transform: uppercase;">Credenciales de Demostración:</span>
+                <div style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-main); margin-top: 6px; line-height: 1.6;">
+                  • Marca: <code>marca@tryonhub.com</code> / <code>Password123!</code><br>
+                  • Cliente: <code>cliente@tryonhub.com</code> / <code>Password123!</code>
+                </div>
+              </div>
+            </div>
+
+            <a href="http://localhost:3000" target="_blank" class="btn-nav primary-cta" style="padding: 14px 28px; font-size: 1.05rem; width: 100%; justify-content: center;">
+              <span>Lanzar TryOn Hub en Vivo</span>
+              <svg class="icon" style="width: 20px; height: 20px;" viewBox="0 0 256 256" fill="currentColor"><path d="M200,64V168a8,8,0,0,1-16,0V83.31L69.66,197.66a8,8,0,0,1-11.32-11.32L172.69,72H88a8,8,0,0,1,0-16H192A8,8,0,0,1,200,64Z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="grid-3" style="flex: 0 0 auto;">
+          <div class="glass-card" style="padding: 12px 16px;">
+            <strong style="color: var(--primary); font-size: 0.88rem;">Documentación OpenAPI</strong>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">http://localhost:8000/docs (Swagger UI completo)</p>
+          </div>
+          <div class="glass-card" style="padding: 12px 16px;">
+            <strong style="color: var(--primary); font-size: 0.88rem;">Repositorio Git & CI/CD</strong>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Historial de commits trazable y configuración Cloud Render</p>
+          </div>
+          <div class="glass-card" style="padding: 12px 16px;">
+            <strong style="color: var(--primary); font-size: 0.88rem;">Tiempo de Exposición</strong>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">15 minutos exactos cumplidos bajo cronómetro</p>
+          </div>
+        </div></div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Fin de la presentación · 15 minutos exactos</span></div>
+        <div class="nav-btns">
+          <button class="btn-nav btn-prev"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><polygon points="160,56 88,128 160,200"/></svg> Anterior</button>
+          <button class="btn-nav btn-restart" style="background: var(--primary-light); color: var(--primary); border-color: var(--primary-border);"><svg class="icon" style="width: 14px; height: 14px;" viewBox="0 0 256 256" fill="currentColor"><path d="M224,128A96,96,0,1,1,173.78,45.47L192,28V76H144l20.4-20.4A72,72,0,1,0,200,128Z"/></svg> Volver al Inicio</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Rail & Progress -->
+  <div id="progress-rail"><div id="progress-fill"></div></div>
+
+  <!-- Thumbnails Drawer for Quick Jumps -->
+  <div id="thumb-drawer">
+    <div class="thumb-dot active" data-target="1">01</div>
+    <div class="thumb-dot" data-target="2">02</div>
+    <div class="thumb-dot" data-target="3">03</div>
+    <div class="thumb-dot" data-target="4">04</div>
+    <div class="thumb-dot" data-target="5">05</div>
+    <div class="thumb-dot" data-target="6">06</div>
+    <div class="thumb-dot" data-target="7">07</div>
+    <div class="thumb-dot" data-target="8">08</div>
+    <div class="thumb-dot" data-target="9">09</div>
+    <div class="thumb-dot" data-target="10">10</div>
+    <div class="thumb-dot" data-target="11">11</div>
+    <div class="thumb-dot" data-target="12">12</div>
+    <div class="thumb-dot" data-target="13">13</div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
-<script>
-  Reveal.initialize({
-    hash: true,
-    progress: true,
-    controls: true,
-    slideNumber: 'c/t',
-    transition: 'fade',
-    backgroundTransition: 'fade',
-    transitionSpeed: 'fast',
-    width: 1200,
-    height: 700,
-    margin: 0,
-    plugins: [],
-  });
-</script>
+  <script>
+    // ── SLIDE DECK ENGINE ────────────────────────────────────────────────
+    let currentSlide = 1;
+    const totalSlides = 13;
+    const slides = document.querySelectorAll('.slide');
+    const progressFill = document.getElementById('progress-fill');
+    const thumbDots = document.querySelectorAll('.thumb-dot');
+
+    function goToSlide(n) {
+      if (n < 1 || n > totalSlides) return;
+      currentSlide = n;
+
+      slides.forEach((slide) => {
+        const slideIndex = parseInt(slide.dataset.slide, 10);
+        if (slideIndex === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Update progress bar
+      const progressPercent = ((currentSlide) / totalSlides) * 100;
+      progressFill.style.width = progressPercent + '%';
+
+      // Update thumb dots
+      thumbDots.forEach((dot) => {
+        const target = parseInt(dot.dataset.target, 10);
+        if (target === currentSlide) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) goToSlide(currentSlide - 1);
+    }
+
+    // Bind navigation buttons
+    document.querySelectorAll('.btn-next').forEach(btn => btn.addEventListener('click', nextSlide));
+    document.querySelectorAll('.btn-prev').forEach(btn => btn.addEventListener('click', prevSlide));
+    document.querySelectorAll('.btn-restart').forEach(btn => btn.addEventListener('click', () => goToSlide(1)));
+
+    thumbDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const target = parseInt(dot.dataset.target, 10);
+        goToSlide(target);
+      });
+    });
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        goToSlide(totalSlides);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
+
+    // Drawer toggle
+    const drawerToggleBtn = document.getElementById('btn-drawer-toggle');
+    const thumbDrawer = document.getElementById('thumb-drawer');
+    drawerToggleBtn.addEventListener('click', () => {
+      thumbDrawer.classList.toggle('open');
+    });
+
+    // Close drawer when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!thumbDrawer.contains(e.target) && !drawerToggleBtn.contains(e.target)) {
+        thumbDrawer.classList.remove('open');
+      }
+    });
+
+    // Fullscreen Toggle
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+    document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
+
+    // ── 15-MINUTE DEFENSE COUNTDOWN TIMER ────────────────────────────────
+    let timerTotalSeconds = 15 * 60; // 900s
+    let timerRemaining = timerTotalSeconds;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    const timerDisplay = document.getElementById('defense-timer');
+    const timerToggleBtn = document.getElementById('timer-toggle-btn');
+    const timerResetBtn = document.getElementById('timer-reset-btn');
+    const playIconUse = document.getElementById('play-icon-use');
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerRemaining / 60);
+      const secs = timerRemaining % 60;
+      timerDisplay.textContent = 
+        String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+      if (timerRemaining <= 120 && timerRemaining > 60) {
+        timerDisplay.className = 'timer-display warning';
+      } else if (timerRemaining <= 60) {
+        timerDisplay.className = 'timer-display danger';
+      } else {
+        timerDisplay.className = 'timer-display';
+      }
+    }
+
+    const svgPlayBody = '<polygon points="80,50 200,128 80,206"/>';
+    const svgPauseBody = '<rect x="70" y="56" width="36" height="144" rx="8"/><rect x="150" y="56" width="36" height="144" rx="8"/>';
+    const playSvgElem = document.getElementById('play-pause-svg');
+
+    function startTimer() {
+      if (isTimerRunning) return;
+      isTimerRunning = true;
+      if (playSvgElem) playSvgElem.innerHTML = svgPauseBody;
+      timerInterval = setInterval(() => {
+        if (timerRemaining > 0) {
+          timerRemaining--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          if (playSvgElem) playSvgElem.innerHTML = svgPlayBody;
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (!isTimerRunning) return;
+      isTimerRunning = false;
+      clearInterval(timerInterval);
+      if (playSvgElem) playSvgElem.innerHTML = svgPlayBody;
+    }
+
+    timerToggleBtn.addEventListener('click', () => {
+      if (isTimerRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    });
+
+    timerResetBtn.addEventListener('click', () => {
+      pauseTimer();
+      timerRemaining = timerTotalSeconds;
+      updateTimerDisplay();
+    });
+
+    // Initialize state
+    goToSlide(1);
+    updateTimerDisplay();
+  </script>
 </body>
 </html>

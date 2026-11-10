@@ -107,7 +107,11 @@ body {
       background-color 0.32s ease;
   }
 
-  .liquid-glass-card:hover {
+  /* Hover states ONLY apply to interactive cards (links, buttons, details/summary, or explicit interactive cards) */
+  a.liquid-glass-card:hover,
+  button.liquid-glass-card:hover,
+  summary.liquid-glass-card:hover,
+  .liquid-glass-card-interactive:hover {
     border-color: rgba(59, 130, 246, 0.55);
     box-shadow:
       inset 0 1.5px 2px 0 var(--glass-specular-top),

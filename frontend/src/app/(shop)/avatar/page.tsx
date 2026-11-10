@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Copy, AlertTriangle, User as UserIcon } from "lucide-react";
+import { Plus, Trash, Copy, Warning, User as UserIcon } from "@phosphor-icons/react";
 import { fetchApi } from "@/lib/api";
 import {
   MAX_AVATARS,
@@ -329,7 +329,7 @@ export default function AvatarPage() {
                 onClick={() => setConfirmDeleteOpen(true)}
                 className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-red-600 dark:text-red-400 border border-red-300/60 dark:border-red-900/50 rounded-xl bg-red-500/10 hover:bg-red-500/20 backdrop-blur-md transition-all"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash className="w-4 h-4" />
                 Eliminar avatar
               </button>
             </div>
@@ -341,7 +341,7 @@ export default function AvatarPage() {
             <div className="liquid-glass-panel liquid-glass-refract rounded-3xl max-w-md w-full p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full bg-red-500/15 border border-red-400/40 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-6 h-6" />
+                  <Warning className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold">Eliminar Gemelo Digital</h3>

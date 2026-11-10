@@ -6,6 +6,7 @@ import { fetchApi } from "@/lib/api";
 import { formatPrice } from "@/lib/format";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { ArrowRight } from "@phosphor-icons/react";
 
 interface Garment {
   id: number;
@@ -79,17 +80,17 @@ export default function Home() {
             </div>
             <div className="pt-2 sm:pt-4">
               <Link href="/avatar" className="inline-flex items-center justify-center w-full sm:w-auto gap-2 px-6 py-4 liquid-glass-btn-primary font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95">
-                Personalizar mi Avatar &rarr;
+                Personalizar mi Avatar <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
           <div className="w-full lg:w-1/2 flex">
             <div className="w-full min-h-[360px] sm:min-h-[420px] lg:min-h-0 lg:h-full flex-1 liquid-glass-card rounded-3xl overflow-hidden relative p-1.5 flex">
-              <div className="w-full flex-1 rounded-[20px] overflow-hidden relative group">
+              <div className="w-full flex-1 rounded-[20px] overflow-hidden relative">
                 <img 
                   src="/images/about_fashion.png?v=2" 
                   alt="Tecnología 3D en el Estudio" 
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent"></div>
                 <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6">
@@ -160,8 +161,8 @@ export default function Home() {
                       <span className="text-lg sm:text-xl font-black shrink-0">{formatPrice(garment.price)}</span>
                     </div>
                     <div className="flex justify-end">
-                      <span className="text-xs sm:text-sm font-bold px-3.5 py-2 liquid-glass-btn-secondary rounded-xl text-neutral-800 dark:text-neutral-100 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-all">
-                        Comprar &rarr;
+                      <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-3.5 py-2 liquid-glass-btn-secondary rounded-xl text-neutral-800 dark:text-neutral-100 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-all">
+                        Comprar <ArrowRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
                   </div>
@@ -172,7 +173,7 @@ export default function Home() {
 
           <div className="text-center">
             <Link href="/marketplace" className="inline-flex items-center gap-2 px-7 sm:px-8 py-3.5 sm:py-4 liquid-glass-btn-secondary text-black dark:text-white font-bold rounded-full transition-all active:scale-95">
-              Ver Catálogo Completo &rarr;
+              Ver Catálogo Completo <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>

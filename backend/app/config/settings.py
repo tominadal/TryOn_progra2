@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # Password recovery
+    # "production" disables returning the reset link in the API response (it must be
+    # delivered by e-mail). Any other value (development/test) exposes it for local testing.
+    ENVIRONMENT: str = "development"
+    FRONTEND_URL: str = "http://localhost:3000"
+    PASSWORD_RESET_EXPIRE_MINUTES: int = 30
+
     # AI
     GEMINI_API_KEY: str = ""
     USE_MOCK_AI: bool = False

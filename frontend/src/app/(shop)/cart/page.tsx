@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
-import { Minus, Plus, Trash2, PackageCheck, AlertTriangle, ExternalLink } from "lucide-react";
+import { Minus, Plus, Trash, Package, Warning, ArrowSquareOut } from "@phosphor-icons/react";
 
 interface OrderItemSummary {
   garment_id: number | null;
@@ -219,7 +219,7 @@ export default function CartPage() {
               disabled={clearing}
               className="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-red-600 dark:text-red-400 border border-red-300/60 dark:border-red-900/50 rounded-xl bg-red-500/10 hover:bg-red-500/20 backdrop-blur-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash className="w-4 h-4" />
               {clearing ? "Vaciando..." : "Vaciar carrito"}
             </button>
           )}
@@ -230,7 +230,7 @@ export default function CartPage() {
             <div className="liquid-glass-panel liquid-glass-refract rounded-3xl max-w-md w-full p-6 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full bg-red-500/15 border border-red-400/40 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-6 h-6" />
+                  <Warning className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold">Vaciar Carrito</h3>
@@ -299,7 +299,7 @@ export default function CartPage() {
                       className="font-semibold text-base sm:text-lg truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors inline-flex items-center gap-1.5 w-fit max-w-full"
                     >
                       <span className="truncate">{item.garment_details?.name || `Prenda #${item.garment_id}`}</span>
-                      <ExternalLink className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                      <ArrowSquareOut className="w-3.5 h-3.5 opacity-60 shrink-0" />
                     </Link>
 
                     {/* Chosen variant: lets you tell apart the same garment in different sizes/colors */}
@@ -364,7 +364,7 @@ export default function CartPage() {
                     title="Quitar del carrito"
                     className="self-start p-2 rounded-xl text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash className="w-4 h-4" />
                   </button>
                 </div>
               ))}
@@ -402,7 +402,7 @@ export default function CartPage() {
           <section className="mt-12 pt-10 border-t border-neutral-200/70 dark:border-white/10">
             <div className="flex items-center gap-2.5 mb-6">
               <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <PackageCheck className="w-5 h-5" />
+                <Package className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold">Mis Pedidos Realizados</h2>

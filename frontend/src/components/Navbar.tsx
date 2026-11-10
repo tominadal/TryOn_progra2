@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ShoppingCart, User as UserIcon, Settings, LogOut, Shirt } from "lucide-react";
+import { ShoppingCart, User as UserIcon, Gear, SignOut, TShirt } from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { fetchApi } from "@/lib/api";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,7 @@ export function Navbar() {
 
   // "Marketplace" also covers product pages, which are part of the shopping flow
   const isHome = pathname === "/";
+  const isBrands = pathname.startsWith("/marcas");
   const isMarketplace = pathname.startsWith("/marketplace") || pathname.startsWith("/product");
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export function Navbar() {
         {/* Left Side: Brand */}
         <div className="flex items-center">
           <Link href="/" className="text-lg sm:text-xl font-bold tracking-tighter flex items-center gap-2.5 hover:opacity-85 transition-opacity text-black dark:text-white">
-            <img src="/logo.png" alt="TryOn Hub Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain drop-shadow-[0_2px_8px_rgba(37,99,235,0.35)]" />
+            <img src="/logo.png" alt="TryOn Hub Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
             <span>TryOn <span className="text-blue-600 dark:text-blue-400">Hub</span></span>
           </Link>
         </div>
@@ -63,6 +64,9 @@ export function Navbar() {
         <div className="order-3 md:order-none w-full md:w-auto flex justify-center md:absolute md:left-1/2 md:-translate-x-1/2 items-center gap-1.5 text-xs sm:text-sm font-medium pt-1 md:pt-0 border-t border-white/30 dark:border-white/5 md:border-0">
           <Link href="/" aria-current={isHome ? "page" : undefined} className={`${NAV_LINK_BASE} ${isHome ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE}`}>Inicio</Link>
           <Link href="/marketplace" aria-current={isMarketplace ? "page" : undefined} className={`${NAV_LINK_BASE} ${isMarketplace ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE}`}>Marketplace</Link>
+          {user?.role_id !== 2 && (
+            <Link href="/marcas" aria-current={isBrands ? "page" : undefined} className={`${NAV_LINK_BASE} ${isBrands ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE}`}>Para Marcas</Link>
+          )}
         </div>
 
         {/* Right Side: Actions */}
@@ -98,17 +102,17 @@ export function Navbar() {
                   
                   {user.role_id !== 2 && (
                     <Link href="/avatar" onClick={() => setDropdownOpen(false)} className="mx-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 dark:text-neutral-200 hover:bg-white/60 dark:hover:bg-white/10 flex items-center gap-2 transition-colors">
-                      <Shirt className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Mi Avatar 3D
+                      <TShirt className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Mi Avatar 3D
                     </Link>
                   )}
                   {user.role_id === 2 && (
                     <Link href="/brand/dashboard" onClick={() => setDropdownOpen(false)} className="mx-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 dark:text-neutral-200 hover:bg-white/60 dark:hover:bg-white/10 flex items-center gap-2 transition-colors">
-                      <Settings className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Brand Dashboard
+                      <Gear className="w-4 h-4 text-blue-600 dark:text-blue-400" /> Brand Dashboard
                     </Link>
                   )}
                   
                   <button onClick={() => { setDropdownOpen(false); logout(); router.push('/login'); }} className="mx-1.5 px-3 py-2 rounded-xl text-sm text-red-600 dark:text-red-400 hover:bg-red-500/10 flex items-center gap-2 text-left mt-1.5 border-t border-neutral-200/60 dark:border-white/10 pt-2.5 transition-colors">
-                    <LogOut className="w-4 h-4" /> Cerrar Sesión
+                    <SignOut className="w-4 h-4" /> Cerrar Sesión
                   </button>
                 </div>
               )}
