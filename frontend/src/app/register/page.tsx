@@ -53,9 +53,9 @@ export default function RegisterPage() {
     <div className="min-h-screen liquid-bg flex items-center justify-center p-4 sm:p-6 text-neutral-900 dark:text-neutral-50 font-sans transition-colors duration-300">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 sm:mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold tracking-tighter mb-2 text-black dark:text-white">
-            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain dark:invert drop-shadow-sm" />
-            TryOn <span className="text-neutral-500 dark:text-neutral-400">Hub</span>
+          <Link href="/" className="inline-flex items-center gap-2.5 text-2xl font-bold tracking-tighter mb-2 text-black dark:text-white">
+            <img src="/logo.png" alt="TryOn Hub Logo" className="w-10 h-10 object-contain drop-shadow-[0_2px_10px_rgba(37,99,235,0.4)]" />
+            <span>TryOn <span className="text-blue-600 dark:text-blue-400">Hub</span></span>
           </Link>
           <h1 className="text-2xl font-semibold mt-5 sm:mt-6">Crea una cuenta</h1>
           <p className="text-neutral-600 dark:text-neutral-400 mt-2 text-sm sm:text-base">Comienza tu experiencia de probador virtual</p>

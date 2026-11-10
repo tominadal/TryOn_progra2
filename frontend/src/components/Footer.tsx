@@ -19,9 +19,9 @@ export function Footer() {
         
         {/* Brand */}
         <div className="space-y-4">
-          <Link href="/" className="inline-flex items-center gap-2 text-xl font-bold tracking-tighter text-black dark:text-white">
-            <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain dark:invert drop-shadow-sm" />
-            TryOn <span className="text-neutral-500 dark:text-neutral-400">Hub</span>
+          <Link href="/" className="inline-flex items-center gap-2.5 text-xl font-bold tracking-tighter text-black dark:text-white">
+            <img src="/logo.png" alt="TryOn Hub Logo" className="w-8 h-8 object-contain drop-shadow-[0_2px_8px_rgba(37,99,235,0.35)]" />
+            <span>TryOn <span className="text-blue-600 dark:text-blue-400">Hub</span></span>
           </Link>
           <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
             La nueva generación de probadores virtuales para e-commerce. Pruébalo antes de comprarlo, potenciado por generación 3D avanzada.

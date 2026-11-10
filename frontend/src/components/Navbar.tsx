@@ -53,9 +53,9 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 md:py-0 md:h-16 flex flex-wrap items-center justify-between gap-y-2 relative">
         {/* Left Side: Brand */}
         <div className="flex items-center">
-          <Link href="/" className="text-lg sm:text-xl font-bold tracking-tighter flex items-center gap-2 hover:opacity-80 transition-opacity text-black dark:text-white">
-            <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain dark:invert drop-shadow-sm" />
-            TryOn <span className="text-neutral-500 dark:text-neutral-400">Hub</span>
+          <Link href="/" className="text-lg sm:text-xl font-bold tracking-tighter flex items-center gap-2.5 hover:opacity-85 transition-opacity text-black dark:text-white">
+            <img src="/logo.png" alt="TryOn Hub Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain drop-shadow-[0_2px_8px_rgba(37,99,235,0.35)]" />
+            <span>TryOn <span className="text-blue-600 dark:text-blue-400">Hub</span></span>
           </Link>
         </div>
 
