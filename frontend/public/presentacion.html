@@ -2101,15 +2101,15 @@
       </div>
     </section>
 
-    <!-- ── SLIDE 13: PERSISTENCIA, ROLLBACKS Y CHECKOUT ───────────────── -->
+    <!-- ── SLIDE 13: PERSISTENCIA, ATOMICIDAD E INMUTABILIDAD ──────────── -->
     <section class="slide" data-slide="13">
       <div class="slide-header-group">
         <div class="slide-meta">
           <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,80c0,26.51-39.4,48-88,48S40,106.51,40,80s39.4-48,88-48S216,53.49,216,80Z" opacity="0.2"/><path d="M128,24C74.17,24,32,48.6,32,80v96c0,31.4,42.17,56,96,56s96-24.6,96-56V80C224,48.6,181.83,24,128,24Zm80,104c0,9.62-7.88,19.43-21.61,26.92C170.93,163.35,150.19,168,128,168s-42.93-4.65-58.39-13.08C55.88,147.43,48,137.62,48,128V111.36c17.06,15,46.23,24.64,80,24.64s62.94-9.68,80-24.64ZM69.61,53.08C85.07,44.65,105.81,40,128,40s42.93,4.65,58.39,13.08C200.12,60.57,208,70.38,208,80s-7.88,19.43-21.61,26.92C170.93,115.35,150.19,120,128,120s-42.93-4.65-58.39-13.08C55.88,99.43,48,89.62,48,80S55.88,60.57,69.61,53.08ZM186.39,202.92C170.93,211.35,150.19,216,128,216s-42.93-4.65-58.39-13.08C55.88,195.43,48,185.62,48,176V159.36c17.06,15,46.23,24.64,80,24.64s62.94-9.68,80-24.64V176C208,185.62,200.12,195.43,186.39,202.92Z"/></svg> INTEGRIDAD TRANSACCIONAL</span>
           <span class="slide-num-indicator">13 / 17</span>
         </div>
-        <h1 class="slide-title">Persistencia Relacional, <span class="hl">Reversión Segura</span> y Compras</h1>
-        <p class="slide-sub">Integridad referencial con SQLAlchemy 2.0, precio histórico congelado en órdenes y reversión automática si falla la IA.</p>
+        <h1 class="slide-title">Persistencia Relacional, <span class="hl">Atomicidad</span> e Inmutabilidad</h1>
+        <p class="slide-sub">Diferenciales frente a un CRUD estándar: transacciones todo-o-nada ante fallos externos y aislamiento del historial contable.</p>
       </div>
 
       <div class="slide-body">
@@ -2118,22 +2118,22 @@
             <div class="card-header-icon">
               <div class="icon-box rose"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></svg></div>
               <div>
-                <h3 class="card-title">Resiliencia y Registro Contable</h3>
-                <p class="card-desc"><code>catalog.py</code> &amp; <code>OrderRepository</code></p>
+                <h3 class="card-title">Invariantes de Dominio y Persistencia</h3>
+                <p class="card-desc"><code>catalog.py</code>, <code>GarmentRepository</code> & <code>OrderRepository</code></p>
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Reversión Automática ante Fallo de IA:</strong> Si Gemini falla o vence el tiempo límite, ejecuta <code>db.rollback()</code> y devuelve HTTP 502 sin dejar prendas rotas en la base.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Precio Congelado en <code>OrderItem</code>:</strong> Al confirmar la compra guarda precio y variante <code>(talle, color)</code> aunque la marca modifique o borre la prenda después (<code>SET NULL</code>).</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Cero Consultas Redundantes:</strong> Precarga con <code>joinedload</code> en carrito y catálogo; límite de 99 unidades por ítem y suma automática de variantes iguales.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Atomicidad ante Fallo Externo:</strong> El alta/edición con IA ejecuta <code>db.flush()</code> e invoca Gemini en <code>run_in_threadpool</code>; si lanza <code>AIServiceError</code>, revierte con <code>db.rollback()</code> sin dejar prendas huérfanas.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Inmutabilidad por Snapshot en Órdenes:</strong> Al confirmar el checkout se congelan precio y variante <code>(talle, color)</code> en <code>OrderItem</code>; ediciones o bajas futuras (<code>SET NULL</code>) no alteran compras cerradas.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Desacoplamiento ORM y Carga Eager:</strong> Los repositorios encapsulan SQLAlchemy 2.0 y precargan relaciones con <code>joinedload</code>, evitando consultas N+1 y manteniendo los routers libres de SQL.</span></li>
             </ul>
-            <div class="card-footer-strip strip-emerald">Base Dual: SQLite local + PostgreSQL (psycopg2) automático</div>
+            <div class="card-footer-strip strip-emerald">Motor Dual: SQLite local + PostgreSQL (psycopg2) sin cambiar dominio</div>
           </div>
 
           <div class="diagram-panel">
-            <svg aria-label="Flujo de checkout y rollback de catálogo" role="img" viewBox="0 0 900 270" xmlns="http://www.w3.org/2000/svg">
+            <svg aria-label="Flujo de checkout inmutable y rollback atómico de catálogo" role="img" viewBox="0 0 900 270" xmlns="http://www.w3.org/2000/svg">
               <defs><marker id="arr13" markerHeight="10" markerWidth="10" orient="auto" refX="8" refY="3"><path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/></marker></defs>
-              <text fill="#2563eb" font-family="JetBrains Mono" font-size="14" font-weight="700" x="28" y="32">FLUJO 1 // CHECKOUT CON SNAPSHOT DE PRECIOS</text>
+              <text fill="#2563eb" font-family="JetBrains Mono" font-size="14" font-weight="700" x="28" y="32">FLUJO 1 // CHECKOUT ATÓMICO CON SNAPSHOT INMUTABLE</text>
               <rect fill="#eff6ff" height="54" rx="12" stroke="#2563eb" stroke-width="2" width="175" x="28" y="48"/>
               <text fill="#0f172a" font-family="Plus Jakarta Sans" font-size="17" font-weight="700" text-anchor="middle" x="115" y="80">Cart / CartItem</text>
               <rect fill="#eff6ff" height="54" rx="12" stroke="#2563eb" stroke-width="2" width="210" x="240" y="48"/>
@@ -2146,68 +2146,54 @@
               <path d="M450 75 H480" marker-end="url(#arr13)" stroke="#2563eb" stroke-width="2.5"/>
               <path d="M693 75 H722" marker-end="url(#arr13)" stroke="#2563eb" stroke-width="2.5"/>
 
-              <text fill="#e11d48" font-family="JetBrains Mono" font-size="14" font-weight="700" x="28" y="146">FLUJO 2 // TRANSACCIONALIDAD EN ALTA DE PRENDA + IA</text>
+              <text fill="#e11d48" font-family="JetBrains Mono" font-size="14" font-weight="700" x="28" y="146">FLUJO 2 // ATOMICIDAD EN ALTA / EDICIÓN DE PRENDA + IA</text>
               <rect fill="#fff1f2" height="92" rx="14" stroke="#f43f5e" stroke-width="2" width="845" x="28" y="162"/>
-              <text fill="#0f172a" font-family="Plus Jakarta Sans" font-size="16.5" font-weight="700" text-anchor="middle" x="450" y="198">POST /catalog/garment → db.add(Garment) → Inferencia Strategy (run_in_threadpool)</text>
-              <text fill="#be123c" font-family="JetBrains Mono" font-size="14.5" font-weight="700" text-anchor="middle" x="450" y="230">Si AIServiceError / Timeout → except: db.rollback() → HTTP 502 (Cero prendas rotas)</text>
+              <text fill="#0f172a" font-family="Plus Jakarta Sans" font-size="16.5" font-weight="700" text-anchor="middle" x="450" y="198">POST / PUT /catalog/garment → db.flush() → Inferencia Strategy (run_in_threadpool)</text>
+              <text fill="#be123c" font-family="JetBrains Mono" font-size="14.5" font-weight="700" text-anchor="middle" x="450" y="230">Si AIServiceError → except: db.rollback() → Cero prendas rotas ni estados parciales</text>
             </svg>
           </div>
         </div>
 
         <div class="grid-4">
-          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">13 Tablas Relacionales</strong><p style="font-size: 0.8rem; color: var(--text-muted);">Roles, Brands, Users, Avatars, Garments, Assets, Images, Jobs, Carts, Orders.</p></div>
-          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Cascadas Seguras</strong><p style="font-size: 0.8rem; color: var(--text-muted);">Borrar prenda limpia <code>CartItem</code> pero conserva <code>OrderItem</code> (<code>SET NULL</code>).</p></div>
-          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Schema Upgrades</strong><p style="font-size: 0.8rem; color: var(--text-muted);">Migración automática 1→N para multi-avatar y columnas al iniciar.</p></div>
-          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Validación Magic Bytes</strong><p style="font-size: 0.8rem; color: var(--text-muted);">Cabecera real PNG/JPG/GIF/WEBP verificada antes de guardar uploads.</p></div>
+          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">13 Tablas Desacopladas</strong><p style="font-size: 0.8rem; color: var(--text-muted);">Separa catálogo comercial (<code>Garment</code>), gemelo 3D (<code>GarmentAsset</code>) e historial (<code>OrderItem</code>).</p></div>
+          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Ciclo de Vida Diferenciado</strong><p style="font-size: 0.8rem; color: var(--text-muted);"><code>delete_with_relations()</code> limpia carritos activos pero preserva órdenes (<code>SET NULL</code>).</p></div>
+          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Variantes por Línea</strong><p style="font-size: 0.8rem; color: var(--text-muted);">Consolidación en carrito por clave compuesta <code>(prenda, talle, color)</code> con tope 99 u.</p></div>
+          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Evolución de Esquema</strong><p style="font-size: 0.8rem; color: var(--text-muted);"><code>schema_upgrades.py</code> adapta el modelo 1→N multi-avatar al iniciar sin perder datos.</p></div>
         </div>
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Comportamiento validado en <code>test_commerce.py</code> y <code>test_catalog.py</code></span></div>
+        <div class="footer-hints"><span>Invariantes transaccionales verificadas en <code>test_commerce.py</code> y <code>test_catalog.py</code></span></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
-          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Seguridad &amp; RBAC <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
+          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Seguridad & RBAC <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
         </div>
       </div>
     </section>
 
-    <!-- ── SLIDE 14: SEGURIDAD, AUTH & RBAC ────────────────────────────── -->
+    <!-- ── SLIDE 14: SEGURIDAD, RBAC & FRONTERAS DE DOMINIO ────────────── -->
     <section class="slide" data-slide="14">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></svg> SEGURIDAD, JWT &amp; RBAC</span>
+          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></svg> SEGURIDAD, RBAC & FRONTERAS</span>
           <span class="slide-num-indicator">14 / 17</span>
         </div>
-        <h1 class="slide-title">Seguridad Integral: <span class="hl">Claves, Tokens y Permisos</span></h1>
-        <p class="slide-sub">Sesiones verificadas por token JWT, control estricto por rol y propietario, y recuperación de contraseña de un solo uso.</p>
+        <h1 class="slide-title">Seguridad de Dominio: <span class="hl">RBAC, Ownership</span> y Fronteras</h1>
+        <p class="slide-sub">Aislamiento entre marcas y compradores, autorización declarativa por dependencia y validación binaria de entradas.</p>
       </div>
 
       <div class="slide-body">
         <div class="grid-3">
           <div class="glass-card">
             <div class="card-header-icon">
-              <div class="icon-box emerald"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M208,88H48a8,8,0,0,0-8,8V208a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V96A8,8,0,0,0,208,88Zm-80,72a20,20,0,1,1,20-20A20,20,0,0,1,128,160Z" opacity="0.2"/><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-80-96a28,28,0,0,0-8,54.83V184a8,8,0,0,0,16,0V166.83A28,28,0,0,0,128,112Zm0,40a12,12,0,1,1,12-12A12,12,0,0,1,128,152Z"/></svg></div>
-              <div>
-                <h3 class="card-title">Cifrado Bcrypt</h3>
-                <p class="card-desc">Salting aleatorio seguro</p>
-              </div>
-            </div>
-            <p class="card-copy">
-              Claves cifradas con <code>Bcrypt</code> y validación previa de complejidad mínima para rechazar contraseñas débiles desde el registro.
-            </p>
-            <div class="card-footer-strip strip-emerald"><code>app/services/auth_service.py</code></div>
-          </div>
-
-          <div class="glass-card">
-            <div class="card-header-icon">
               <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M96,240l16-80L48,136,160,16,144,96l64,24Z" opacity="0.2"/><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/></svg></div>
               <div>
-                <h3 class="card-title">Tokens Firmados (JWT)</h3>
-                <p class="card-desc">Validación sin estado en servidor</p>
+                <h3 class="card-title">Identidad Stateless</h3>
+                <p class="card-desc">JWT HS256 + Políticas de Clave</p>
               </div>
             </div>
             <p class="card-copy">
-              Tokens HS256 con usuario, rol y vencimiento validados en cada ruta protegida. Los enlaces de recuperación no permiten entrar a la API.
+              Sesiones sin estado con claims estándar (<code>sub</code>, <code>iat</code>, <code>role</code>, <code>exp</code>) validados vía <code>Depends()</code> y rechazo de credenciales débiles en el alta.
             </p>
             <div class="card-footer-strip strip-blue"><code>POST /api/v1/auth/login</code></div>
           </div>
@@ -2216,14 +2202,28 @@
             <div class="card-header-icon">
               <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M192,96a64,64,0,1,1-64-64A64,64,0,0,1,192,96Z" opacity="0.2"/><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></div>
               <div>
-                <h3 class="card-title">Roles + Propiedad</h3>
-                <p class="card-desc">3 Roles en Base de Datos</p>
+                <h3 class="card-title">RBAC + Ownership</h3>
+                <p class="card-desc">Aislamiento B2B y B2C</p>
               </div>
             </div>
             <p class="card-copy">
-              <strong>Administrador</strong>, <strong>Marca</strong> y <strong>Cliente</strong>. Verifica propiedad en cada acción para evitar editar prendas, avatares o carritos ajenos.
+              3 roles (<code>Admin</code>, <code>BrandManager</code>, <code>Customer</code>) más verificación de titularidad: bloquea ediciones entre marcas (<code>403</code>) y acota avatares (máx. 10) y carrito al usuario dueño.
             </p>
             <div class="card-footer-strip strip-purple"><code>_require_brand_manager()</code></div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-header-icon">
+              <div class="icon-box emerald"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M208,88H48a8,8,0,0,0-8,8V208a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V96A8,8,0,0,0,208,88Zm-80,72a20,20,0,1,1,20-20A20,20,0,0,1,128,160Z" opacity="0.2"/><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-80-96a28,28,0,0,0-8,54.83V184a8,8,0,0,0,16,0V166.83A28,28,0,0,0,128,112Zm0,40a12,12,0,1,1,12-12A12,12,0,0,1,128,152Z"/></svg></div>
+              <div>
+                <h3 class="card-title">Frontera de Entradas</h3>
+                <p class="card-desc"><code>validators.py</code> & DTOs</p>
+              </div>
+            </div>
+            <p class="card-copy">
+              Inspección de firma binaria (<em>magic bytes</em> PNG/JPG/GIF/WEBP) antes de escribir uploads en disco, verificación de columnas Excel y rangos antropométricos en <code>cm</code>.
+            </p>
+            <div class="card-footer-strip strip-emerald"><code>is_valid_image()</code> · <code>validate_excel_columns()</code></div>
           </div>
         </div>
 
@@ -2233,7 +2233,7 @@
             <div>
               <h4 style="font-size: 1rem; font-weight: 800; color: var(--primary); margin-bottom: 3px;">Recuperación de Contraseña de Un Solo Uso (<code>/recuperar</code>)</h4>
               <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.45;">
-                No revela si un correo existe. Emite un token válido por <strong>30 minutos</strong> atado a la huella SHA-256 (<code>pwf</code>) de la clave actual: apenas se cambia la contraseña, ese enlace queda anulado.
+                Evita enumeración de usuarios, no sirve para autenticar rutas de la API y vence a los <strong>30 minutos</strong>. Al ir ligado a la huella SHA-256 (<code>pwf</code>) de la clave actual, se invalida automáticamente apenas se completa el cambio.
               </p>
             </div>
           </div>
@@ -2241,23 +2241,23 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Validado en <code>test_auth_users.py</code> y pruebas de ownership en catálogo y avatares</span></div>
+        <div class="footer-hints"><span>Validado en <code>test_auth_users.py</code>, <code>test_catalog.py</code> y <code>test_extra.py</code></span></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
-          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Requerimientos &amp; Testing <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
+          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Requerimientos & Verificación <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
         </div>
       </div>
     </section>
 
-    <!-- ── SLIDE 15: REQUERIMIENTOS, INVEST & TESTING (122 TESTS) ───────── -->
+    <!-- ── SLIDE 15: TRAZABILIDAD, TESTABILIDAD Y VERIFICACIÓN (122 TESTS) ── -->
     <section class="slide" data-slide="15">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M208,216H48a8,8,0,0,1-6.86-12.12l30.48-50.8h0c13.23-2.48,32-1.41,56.37,10.92,32.25,16.33,54.75,12.91,67.5,7.65h0l19.34,32.23A8,8,0,0,1,208,216Z" opacity="0.2"/><path d="M221.69,199.77,160,96.92V40h8a8,8,0,0,0,0-16H88a8,8,0,0,0,0,16h8V96.92L34.31,199.77A16,16,0,0,0,48,224H208a16,16,0,0,0,13.72-24.23ZM110.86,103.25A7.93,7.93,0,0,0,112,99.14V40h32V99.14a7.93,7.93,0,0,0,1.14,4.11L183.36,167c-12,2.37-29.07,1.37-51.75-10.11-15.91-8.05-31.05-12.32-45.22-12.81ZM48,208l28.54-47.58c14.25-1.73,30.31,1.85,47.82,10.72,19,9.61,35,12.88,48,12.88a69.89,69.89,0,0,0,19.55-2.7L208,208Z"/></svg> REQUERIMIENTOS, INVEST &amp; QA</span>
+          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M208,216H48a8,8,0,0,1-6.86-12.12l30.48-50.8h0c13.23-2.48,32-1.41,56.37,10.92,32.25,16.33,54.75,12.91,67.5,7.65h0l19.34,32.23A8,8,0,0,1,208,216Z" opacity="0.2"/><path d="M221.69,199.77,160,96.92V40h8a8,8,0,0,0,0-16H88a8,8,0,0,0,0,16h8V96.92L34.31,199.77A16,16,0,0,0,48,224H208a16,16,0,0,0,13.72-24.23ZM110.86,103.25A7.93,7.93,0,0,0,112,99.14V40h32V99.14a7.93,7.93,0,0,0,1.14,4.11L183.36,167c-12,2.37-29.07,1.37-51.75-10.11-15.91-8.05-31.05-12.32-45.22-12.81ZM48,208l28.54-47.58c14.25-1.73,30.31,1.85,47.82,10.72,19,9.61,35,12.88,48,12.88a69.89,69.89,0,0,0,19.55-2.7L208,208Z"/></svg> TRAZABILIDAD & VERIFICACIÓN</span>
           <span class="slide-num-indicator">15 / 17</span>
         </div>
-        <h1 class="slide-title">Requerimientos y <span class="hl">122 Pruebas al 100%</span></h1>
-        <p class="slide-sub">Trazabilidad entre RF/RNF/INVEST (<code>requerimientos_casos_uso.md</code>), 122 tests Pytest y verificación TypeScript.</p>
+        <h1 class="slide-title">Trazabilidad de Diseño y <span class="hl">122 Pruebas al 100%</span></h1>
+        <p class="slide-sub">Testabilidad habilitada por sustitución polimórfica (LSP/DIP) y trazabilidad directa con RF, RNF e historias INVEST.</p>
       </div>
 
       <div class="slide-body">
@@ -2268,23 +2268,23 @@
               <span style="font-weight: 800; color: #059669; font-size: 1.05rem;">APROBADAS (100%)</span>
             </div>
             <p class="card-desc">
-              Ejecución completa sobre la rama principal + chequeo estricto TypeScript (<code>npx tsc --noEmit</code>) con <strong>0 errores</strong>.
+              Ejecución determinista sin red ni cuota de Gemini (<code>MockTryOnStrategy</code> + SQLite en memoria) y chequeo estricto <code>npx tsc --noEmit</code> con <strong>0 errores</strong>.
             </p>
             <div style="display: flex; flex-direction: column; gap: 9px; flex: 1 1 auto; justify-content: center;">
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_extra.py — Validaciones, archivos y bordes</span><span>41 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_extra.py — Validaciones binarias, archivos y casos borde</span><span>41 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: var(--primary); border-radius: 9999px;"></div></div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_patterns.py — Patrones Decorator, Observer y Factory</span><span>20 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_patterns.py — Contratos Decorator (MD5), Observer Push y Factory</span><span>20 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: var(--primary); border-radius: 9999px;"></div></div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_commerce.py — Carrito, variantes, compra y CORS</span><span>18 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_commerce.py — Carrito por variante, snapshot pricing y CORS</span><span>18 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: #0ea5e9; border-radius: 9999px;"></div></div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_catalog.py — Excel, reversión IA, catálogo y alertas</span><span>13 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_catalog.py — Lotes Excel, rollback IA, ownership y alertas</span><span>13 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: #0ea5e9; border-radius: 9999px;"></div></div>
               </div>
               <div>
@@ -2298,38 +2298,38 @@
             <div class="card-header-icon">
               <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M216,48V208a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V48a8,8,0,0,1,8-8H208A8,8,0,0,1,216,48Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM208,208V48H48V208H208Z"/></svg></div>
               <div>
-                <h3 class="card-title">Casos de Uso, Requisitos e Historias INVEST</h3>
-                <p class="card-desc">Detalle en <code>requerimientos_casos_uso.md</code></p>
+                <h3 class="card-title">Trazabilidad Formal (<code>requerimientos_casos_uso.md</code>)</h3>
+                <p class="card-desc">De especificación a contratos RESTful y pruebas</p>
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Requisitos RQ1–RQ6:</strong> Autenticación por roles, 10 Avatares en cm, Gestión B2B de prendas, Excel asíncrono con alertas, Probador 3D y Compra segura.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Calidad RNF1–RNF5 y 27 Rutas:</strong> Contraseñas cifradas, firma real de archivos, consultas optimizadas, integración continua y contenedores Docker.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>3 Casos de Uso y 6 Historias (HU-01..HU-06):</strong> Trazabilidad directa entre las historias de usuario y los módulos de pruebas automáticas.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>RQ1–RQ6 y 27 Endpoints RESTful:</strong> Cada requerimiento funcional mapea a recursos sustantivos con verbos HTTP semánticos y códigos de estado explícitos.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Atributos de Calidad RNF1–RNF5:</strong> Cómputo distribuido a 60 FPS, atomicidad ACID, aislamiento multi-tenant, prevención N+1 con <code>joinedload</code> y CI en GitHub Actions.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>3 Casos de Uso y 6 Historias INVEST (HU-01..HU-06):</strong> Criterios de aceptación verificados punto por punto mediante pruebas de integración automatizadas.</span></li>
             </ul>
-            <div class="card-footer-strip strip-blue">Docker Compose + Pruebas Automáticas Python 3.11 / Node 20</div>
+            <div class="card-footer-strip strip-blue">Integración Continua Automatizada · <code>.github/workflows/main.yml</code></div>
           </div>
         </div>
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Suite completa ejecutada: 122 pruebas aprobadas, 0 fallos</span></div>
+        <div class="footer-hints"><span>Arquitectura desacoplada verificable sin dependencias externas</span></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
-          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Modelo Económico y Lanzamiento <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
+          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Monetización & Escalabilidad <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
         </div>
       </div>
     </section>
 
-    <!-- ── SLIDE 16: MONETIZACIÓN B2B2C, LANZAMIENTO Y PRODUCCIÓN ────────── -->
+    <!-- ── SLIDE 16: MONETIZACIÓN HÍBRIDA Y ESCALABILIDAD ARQUITECTÓNICA ──── -->
     <section class="slide" data-slide="16">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,118.31V200a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V118.31h0A191.14,191.14,0,0,0,128,144,191.08,191.08,0,0,0,224,118.31Z" opacity="0.2"/><path d="M104,112a8,8,0,0,1,8-8h32a8,8,0,0,1,0,16H112A8,8,0,0,1,104,112ZM232,72V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V72A16,16,0,0,1,40,56H80V48a24,24,0,0,1,24-24h48a24,24,0,0,1,24,24v8h40A16,16,0,0,1,232,72ZM96,56h64V48a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8ZM40,72v41.62A184.07,184.07,0,0,0,128,136a184,184,0,0,0,88-22.39V72ZM216,200V131.63A200.25,200.25,0,0,1,128,152a200.19,200.19,0,0,1-88-20.36V200H216Z"/></svg> NEGOCIO, LANZAMIENTO Y ESCALADO EN LA NUBE</span>
+          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,118.31V200a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V118.31h0A191.14,191.14,0,0,0,128,144,191.08,191.08,0,0,0,224,118.31Z" opacity="0.2"/><path d="M104,112a8,8,0,0,1,8-8h32a8,8,0,0,1,0,16H112A8,8,0,0,1,104,112ZM232,72V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V72A16,16,0,0,1,40,56H80V48a24,24,0,0,1,24-24h48a24,24,0,0,1,24,24v8h40A16,16,0,0,1,232,72ZM96,56h64V48a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8ZM40,72v41.62A184.07,184.07,0,0,0,128,136a184,184,0,0,0,88-22.39V72ZM216,200V131.63A200.25,200.25,0,0,1,128,152a200.19,200.19,0,0,1-88-20.36V200H216Z"/></svg> MODELO DE NEGOCIO & ARQUITECTURA</span>
           <span class="slide-num-indicator">16 / 17</span>
         </div>
-        <h1 class="slide-title">Monetización, <span class="hl">Lanzamiento</span> y Producción</h1>
-        <p class="slide-sub">Ingresos híbridos, entrada inicial en indumentaria denim y evolución a producción en 4 etapas (<code>modelo_de_negocios.md</code>).</p>
+        <h1 class="slide-title">Monetización <span class="hl">Híbrida B2B2C</span> y Escalabilidad</h1>
+        <p class="slide-sub">Esquema de ingresos de <code>docs/modelo_de_negocios.md</code> y cómo el bajo acoplamiento permite escalar sin reescribir el dominio.</p>
       </div>
 
       <div class="slide-body">
@@ -2338,129 +2338,116 @@
             <div class="card-header-icon">
               <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M224,96v16a32,32,0,0,1-64,0V96H96v16a32,32,0,0,1-64,0V96L46.34,45.8A8,8,0,0,1,54,40H202a8,8,0,0,1,7.69,5.8Z" opacity="0.2"/><path d="M231.69,93.81,217.35,43.6A16.07,16.07,0,0,0,202,32H54A16.07,16.07,0,0,0,38.65,43.6L24.31,93.81A7.94,7.94,0,0,0,24,96v16a40,40,0,0,0,16,32v72a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V144a40,40,0,0,0,16-32V96A7.94,7.94,0,0,0,231.69,93.81ZM54,48H202l11.42,40H42.61Zm98,56v8a24,24,0,0,1-48,0v-8ZM51.06,132.2A24,24,0,0,1,40,112v-8H88v8a24,24,0,0,1-35.12,21.26A7.88,7.88,0,0,0,51.06,132.2ZM200,208H56V151.2a40.57,40.57,0,0,0,8,.8,40,40,0,0,0,32-16,40,40,0,0,0,64,0,40,40,0,0,0,32,16,40.57,40.57,0,0,0,8-.8Zm16-96a24,24,0,0,1-11.07,20.2,8.08,8.08,0,0,0-1.8,1.05A24,24,0,0,1,168,112v-8h48Z"/></svg></div>
               <div>
-                <h3 class="card-title">Planes Mensuales + Analítica</h3>
-                <p class="card-desc">Suscripción según catálogo</p>
+                <h3 class="card-title">1. Suscripción SaaS B2B</h3>
+                <p class="card-desc">Ingreso recurrente según catálogo</p>
               </div>
             </div>
-            <div style="font-family: var(--font-mono); font-size: 0.83rem; line-height: 1.72; background: rgba(255,255,255,0.88); padding: 12px 14px; border-radius: 14px; border: 1px solid var(--glass-border-outer);">
-              • <strong>Inicial:</strong> $49/mes (50 prendas + 100 IA)<br/>
-              • <strong>Crecimiento:</strong> $199/mes (500 prendas + Excel)<br/>
-              • <strong>Corporativo:</strong> $799+/mes (API + SLA 99.9%)
+            <div style="font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.72; background: rgba(255,255,255,0.88); padding: 11px 13px; border-radius: 14px; border: 1px solid var(--glass-border-outer);">
+              • <strong>Starter:</strong> USD $49/mes (50 SKUs + 100 IA)<br/>
+              • <strong>Growth:</strong> USD $199/mes (500 SKUs + Excel)<br/>
+              • <strong>Enterprise:</strong> USD $799+/mes (API + Soporte)
             </div>
             <p class="card-copy">
-              <strong>Datos de Demanda:</strong> Reportes anónimos que indican qué medidas en cm piden los clientes y hoy no encuentran talle.
+              <strong>B2C Gratuito:</strong> Hasta 10 avatares en <code>cm</code> sin costo para impulsar efectos de red cruzados y reducir devoluciones un <strong>25%–40%</strong>.
             </p>
-            <div class="card-footer-strip strip-blue">Ingresos recurrentes + Visor en su web</div>
+            <div class="card-footer-strip strip-blue">Adquisición B2C libre + Recurrencia SaaS B2B</div>
           </div>
 
           <div class="glass-card">
             <div class="card-header-icon">
               <div class="icon-box emerald"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M192,168a40,40,0,0,1-40,40H128V128h24A40,40,0,0,1,192,168ZM112,48a40,40,0,0,0,0,80h16V48Z" opacity="0.2"/><path d="M152,120H136V56h8a32,32,0,0,1,32,32,8,8,0,0,0,16,0,48.05,48.05,0,0,0-48-48h-8V24a8,8,0,0,0-16,0V40h-8a48,48,0,0,0,0,96h8v64H104a32,32,0,0,1-32-32,8,8,0,0,0-16,0,48.05,48.05,0,0,0,48,48h16v16a8,8,0,0,0,16,0V216h16a48,48,0,0,0,0-96Zm-40,0a32,32,0,0,1,0-64h8v64Zm40,80H136V136h16a32,32,0,0,1,0,64Z"/></svg></div>
               <div>
-                <h3 class="card-title">Comisión por Venta + Fases</h3>
-                <p class="card-desc">Margen operativo y nicho inicial</p>
+                <h3 class="card-title">2. Comisión, Créditos y Datos</h3>
+                <p class="card-desc">Ingresos variables alineados a venta</p>
               </div>
             </div>
-            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(59,130,246,0.22); border-radius: 14px; padding: 12px 14px; font-size: 0.85rem; line-height: 1.6;">
-              • <strong>Comisión por Venta:</strong> 5% – 8% por orden<br/>
-              • <strong>Créditos IA:</strong> $0.15/prenda (costo ~$0.002)<br/>
-              • <strong>Margen Bruto IA:</strong> &gt; 95%
+            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(59,130,246,0.22); border-radius: 14px; padding: 11px 13px; font-size: 0.84rem; line-height: 1.62;">
+              • <strong>Success Fee:</strong> 5% – 8% sobre GMV vendido<br/>
+              • <strong>Créditos IA Extra:</strong> $0.15/SKU (costo ~$0.002)<br/>
+              • <strong>Margen Bruto IA:</strong> > 95%
             </div>
             <p class="card-copy">
-              <strong>Etapa 1:</strong> 15–30 marcas locales de jeans. <strong>Etapa 2:</strong> Conectores para Tiendanube, Shopify, VTEX y suma de prendas superiores.
+              <strong>Data-as-a-Service B2B:</strong> Reportes anónimos de demanda insatisfecha por contorno en <code>cm</code> para ajustar curvas de producción textil.
             </p>
-            <div class="card-footer-strip strip-emerald">Retorno: reduce devoluciones un 25%–40%</div>
+            <div class="card-footer-strip strip-emerald">Go-To-Market: Nicho Denim D2C (15–30 marcas)</div>
+          </div>
+
+          <div class="glass-card highlight">
+            <div class="card-header-icon">
+              <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M224,80l-96,56L32,80l96-56Z" opacity="0.2"/><path d="M230.91,172A8,8,0,0,1,228,182.91l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,36,169.09l92,53.65,92-53.65A8,8,0,0,1,230.91,172ZM220,121.09l-92,53.65L36,121.09A8,8,0,0,0,28,134.91l96,56a8,8,0,0,0,8.06,0l96-56A8,8,0,1,0,220,121.09ZM24,80a8,8,0,0,1,4-6.91l96-56a8,8,0,0,1,8.06,0l96,56a8,8,0,0,1,0,13.82l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,24,80Zm23.88,0L128,126.74,208.12,80,128,33.26Z"/></svg></div>
+              <div>
+                <h3 class="card-title">3. Respaldo Arquitectónico</h3>
+                <p class="card-desc">Escalar sin reescribir el dominio</p>
+              </div>
+            </div>
+            <ul class="slide-points" style="gap: 7px;">
+              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Costo Marginal $0 por Prueba:</strong> IA <code>O(1)</code> al publicar (con caché MD5); el visor WebGL corre en el cliente sin gasto GPU en servidor.</span></li>
+              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Núcleo 3D Aislado:</strong> <code>LoftGeometry</code> y medidas en <code>cm</code> no dependen de planes, comisiones ni pasarelas de cobro.</span></li>
+              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Extensión por Capas (OCP/DIP):</strong> Cupos por plan, <em>Success Fee</em> o webhooks externos se suman en servicios sin tocar el dominio.</span></li>
+            </ul>
+            <div class="card-footer-strip strip-purple">Economía unitaria sostenida por bajo acoplamiento</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"><span>Alineación directa entre modelo comercial B2B2C y arquitectura desacoplada</span></div>
+        <div class="nav-btns">
+          <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
+          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Cierre Técnico <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SLIDE 17: SÍNTESIS DE INGENIERÍA Y EVOLUCIÓN FUTURA ─────────── -->
+    <section class="slide" data-slide="17">
+      <div class="slide-header-group">
+        <div class="slide-meta">
+          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M184,120v61.65a8,8,0,0,1-2.34,5.65l-34.35,34.35a8,8,0,0,1-13.57-4.53L128,176ZM136,72H74.35a8,8,0,0,0-5.65,2.34L34.35,108.69a8,8,0,0,0,4.53,13.57L80,128ZM40,216c37.65,0,50.69-19.69,54.56-28.18L68.18,161.44C59.69,165.31,40,178.35,40,216Z" opacity="0.2"/><path d="M223.85,47.12a16,16,0,0,0-15-15c-12.58-.75-44.73.4-71.41,27.07L132.69,64H74.36A15.91,15.91,0,0,0,63,68.68L28.7,103a16,16,0,0,0,9.07,27.16l38.47,5.37,44.21,44.21,5.37,38.49a15.94,15.94,0,0,0,10.78,12.92,16.11,16.11,0,0,0,5.1.83A15.91,15.91,0,0,0,153,227.3L187.32,193A15.91,15.91,0,0,0,192,181.64V123.31l4.77-4.77C223.45,91.86,224.6,59.71,223.85,47.12ZM74.36,80h42.33L77.16,119.52,40,114.34Zm74.41-9.45a76.65,76.65,0,0,1,59.11-22.47,76.46,76.46,0,0,1-22.42,59.16L128,164.68,91.32,128ZM176,181.64,141.67,216l-5.19-37.17L176,139.31Zm-74.16,9.5C97.34,201,82.29,224,40,224a8,8,0,0,1-8-8c0-42.29,23-57.34,32.86-61.85a8,8,0,0,1,6.64,14.56c-6.43,2.93-20.62,12.36-23.12,38.91,26.55-2.5,36-16.69,38.91-23.12a8,8,0,1,1,14.56,6.64Z"/></svg> SÍNTESIS TÉCNICA & EVOLUCIÓN</span>
+          <span class="slide-num-indicator">17 / 17</span>
+        </div>
+        <h1 class="slide-title">Cierre Conceptual: <span class="hl">MVP Actual</span> vs. Evolución Futura</h1>
+        <p class="slide-sub">Delimitación explícita entre lo construido y verificado en el repositorio y la hoja de ruta hacia producción.</p>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="glass-card highlight">
+            <div class="card-header-icon">
+              <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg></div>
+              <div>
+                <h3 class="card-title">MVP Actual (Implementado y Verificado)</h3>
+                <p class="card-desc">Valor de ingeniería funcional en el repositorio</p>
+              </div>
+            </div>
+            <ul class="slide-points">
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Calce Antropométrico en <code>cm</code>:</strong> Hasta 10 avatares por cuenta, malla continua C<sup>1</sup> (<code>LoftGeometry</code> a 60 FPS en WebGL) y diagnóstico <code>55% cintura · 35% cadera · 10% muslo</code>.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Arquitectura Limpia + SOLID + 5 Patrones GoF:</strong> Capas desacopladas (<code>Routers → Services → Repositories</code>) con Factory Method, Strategy, Decorator (Logs + Caché MD5) y Observer Push.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Transacciones y Seguridad:</strong> Rollback atómico ante fallos de IA, carrito por variantes, <em>snapshot pricing</em> en órdenes, JWT stateless, RBAC + ownership y reset de clave de un solo uso.</span></li>
+            </ul>
+            <div class="card-footer-strip strip-blue">Verificado: 13 Tablas · 27 Endpoints · 122 Tests Pytest OK · 0 Errores TS</div>
           </div>
 
           <div class="glass-card">
             <div class="card-header-icon">
               <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M240,128a80,80,0,0,1-80,80H72A56,56,0,1,1,85.92,97.74l0,.1A80,80,0,0,1,240,128Z" opacity="0.2"/><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg></div>
               <div>
-                <h3 class="card-title">Camino a Producción</h3>
-                <p class="card-desc">De Prototipo a Alta Demanda (4 Etapas)</p>
+                <h3 class="card-title">Evolución Futura (Roadmap Post-MVP)</h3>
+                <p class="card-desc">Pendiente para escala Enterprise (<code>modelo_de_negocios.md</code>)</p>
               </div>
             </div>
-            <ul class="slide-points" style="gap: 7px;">
-              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Etapa 1:</strong> PostgreSQL 16 + migraciones Alembic + Nube de archivos (S3/R2).</span></li>
-              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Etapa 2:</strong> Colas Redis/Celery + alertas guardadas + Cookies seguras.</span></li>
-              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Etapa 3–4:</strong> Bloqueo de stock + Pagos (MercadoPago/Stripe) + Monitoreo.</span></li>
-            </ul>
-            <div class="card-footer-strip strip-purple">Diagnóstico técnico en 8 dimensiones</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="slide-footer">
-        <div class="footer-hints"><span>Diferenciación transparente entre prototipo actual y arquitectura final en la nube</span></div>
-        <div class="nav-btns">
-          <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
-          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Cierre y Demo en Vivo <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── SLIDE 17: CONCLUSIÓN Y LANZAMIENTO DEMO EN VIVO ──────────────── -->
-    <section class="slide" data-slide="17">
-      <div class="slide-header-group">
-        <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M184,120v61.65a8,8,0,0,1-2.34,5.65l-34.35,34.35a8,8,0,0,1-13.57-4.53L128,176ZM136,72H74.35a8,8,0,0,0-5.65,2.34L34.35,108.69a8,8,0,0,0,4.53,13.57L80,128ZM40,216c37.65,0,50.69-19.69,54.56-28.18L68.18,161.44C59.69,165.31,40,178.35,40,216Z" opacity="0.2"/><path d="M223.85,47.12a16,16,0,0,0-15-15c-12.58-.75-44.73.4-71.41,27.07L132.69,64H74.36A15.91,15.91,0,0,0,63,68.68L28.7,103a16,16,0,0,0,9.07,27.16l38.47,5.37,44.21,44.21,5.37,38.49a15.94,15.94,0,0,0,10.78,12.92,16.11,16.11,0,0,0,5.1.83A15.91,15.91,0,0,0,153,227.3L187.32,193A15.91,15.91,0,0,0,192,181.64V123.31l4.77-4.77C223.45,91.86,224.6,59.71,223.85,47.12ZM74.36,80h42.33L77.16,119.52,40,114.34Zm74.41-9.45a76.65,76.65,0,0,1,59.11-22.47,76.46,76.46,0,0,1-22.42,59.16L128,164.68,91.32,128ZM176,181.64,141.67,216l-5.19-37.17L176,139.31Zm-74.16,9.5C97.34,201,82.29,224,40,224a8,8,0,0,1-8-8c0-42.29,23-57.34,32.86-61.85a8,8,0,0,1,6.64,14.56c-6.43,2.93-20.62,12.36-23.12,38.91,26.55-2.5,36-16.69,38.91-23.12a8,8,0,1,1,14.56,6.64Z"/></svg> CIERRE Y DEMOSTRACIÓN EN VIVO</span>
-          <span class="slide-num-indicator">17 / 17</span>
-        </div>
-        <h1 class="slide-title">Cumplimiento Integral: <span class="hl">Pase a Demo en Vivo</span></h1>
-        <p class="slide-sub">Resumen técnico y accesos directos a cada pantalla real de comprador, marca y documentación de API.</p>
-      </div>
-
-      <div class="slide-body">
-        <div class="grid-2">
-          <div class="glass-card">
-            <h3 class="card-title">Lista de Verificación Académica y Técnica</h3>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Arquitectura Limpia y SOLID:</strong> Capas Router, Service, Repository y esquemas Pydantic desacoplados por inyección de dependencias.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>5 Patrones de Diseño + UML:</strong> Factory, Decorator (Logs + Caché MD5), Observer, Strategy y Repository con diagramas de secuencia y estado.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Motor 3D Completo:</strong> 10 avatares en cm, diagnóstico 55/35/10, Carrito por variantes, Estudio B2B Boutique y Carga Masiva Excel.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Seguridad, Diseño y Calidad:</strong> Bcrypt, JWT, permisos por rol, enlace de un solo uso y <strong>122 pruebas aprobadas</strong>.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Infraestructura Cloud y Colas:</strong> Migrar <code>BackgroundTasks</code> y caché/alertas en memoria hacia <strong>Redis + Celery</strong>, archivos en <strong>S3/R2</strong> y migraciones versionadas con <strong>Alembic</strong>.</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Pagos Reales y Liquidación B2B:</strong> Integración con <strong>MercadoPago / Stripe</strong>, control de stock por talle y liquidación de comisiones (5%–8%).</span></li>
+              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Expansión Textil e Integraciones:</strong> Prendas superiores en 3D, inferencia de medidas en <code>cm</code> desde fotografía e integración con Tiendanube / Shopify.</span></li>
             </ul>
-            <div class="card-footer-strip strip-emerald">Documentación navegable dentro de la web: <code>/consignas</code> y <code>/documentacion</code></div>
-          </div>
-
-          <div class="glass-card highlight" style="text-align: center; justify-content: center; gap: 14px;">
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
-              <img src="/logo.png" alt="TryOn Hub" style="width: 54px; height: 54px; object-fit: contain;"/>
-              <h3 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">Demostración Interactiva</h3>
-              <p class="card-copy" style="max-width: 480px;">
-                Guión en vivo recomendado: <strong>Usuario B2C</strong> (<code>/marketplace</code> → <code>/avatar</code> → <code>/product/1</code> → <code>/cart</code>) → <strong>Marca B2B</strong> (<code>/brand/dashboard</code>).
-              </p>
-            </div>
-
-            <div style="background: rgba(255,255,255,0.92); border: 1px solid var(--glass-border-outer); border-radius: 16px; padding: 12px 16px; text-align: left;">
-              <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em;">Credenciales Reales (<code>seed.py</code>):</span>
-              <div style="display: grid; grid-template-columns: 1fr; gap: 5px; font-family: var(--font-mono); font-size: 0.83rem; color: var(--text-main); margin-top: 6px;">
-                <div>• <strong>Cliente B2C:</strong> <code>cliente@tryon.com</code> · clave <code>123456</code></div>
-                <div>• <strong>Marca B2B:</strong> <code>brand@tryon.com</code> · clave <code>123456</code></div>
-                <div>• <strong>Admin:</strong> <code>admin@tryon.com</code> · clave <code>123456</code></div>
-              </div>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <a class="btn-nav primary-cta" href="http://localhost:3000" style="padding: 12px 24px; font-size: 0.98rem; width: 100%; justify-content: center;" target="_blank" rel="noopener noreferrer">
-                <span>Abrir TryOn Hub en Vivo</span>
-                <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M192,64V168L88,64Z" opacity="0.2"/><path d="M192,56H88a8,8,0,0,0-5.66,13.66L128.69,116,58.34,186.34a8,8,0,0,0,11.32,11.32L140,127.31l46.34,46.35A8,8,0,0,0,200,168V64A8,8,0,0,0,192,56Zm-8,92.69-38.34-38.34h0L107.31,72H184Z"/></svg>
-              </a>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                <a class="btn-nav" href="http://localhost:3000/marketplace" style="justify-content:center; font-size:0.8rem; padding:7px 10px;" target="_blank" rel="noopener noreferrer">Marketplace</a>
-                <a class="btn-nav" href="http://localhost:3000/avatar" style="justify-content:center; font-size:0.8rem; padding:7px 10px;" target="_blank" rel="noopener noreferrer">Avatar 3D</a>
-                <a class="btn-nav" href="http://localhost:3000/product/1" style="justify-content:center; font-size:0.8rem; padding:7px 10px;" target="_blank" rel="noopener noreferrer">Probador 3D</a>
-                <a class="btn-nav" href="http://localhost:3000/cart" style="justify-content:center; font-size:0.8rem; padding:7px 10px;" target="_blank" rel="noopener noreferrer">Carrito</a>
-                <a class="btn-nav" href="http://localhost:3000/brand/dashboard" style="justify-content:center; font-size:0.8rem; padding:7px 10px;" target="_blank" rel="noopener noreferrer">Brand B2B</a>
-                <a class="btn-nav" href="http://localhost:8000/docs" style="justify-content:center; font-size:0.8rem; padding:7px 10px;" target="_blank" rel="noopener noreferrer">Swagger API</a>
-              </div>
-            </div>
+            <div class="card-footer-strip strip-purple">Extensibilidad preparada sobre los contratos actuales</div>
           </div>
         </div>
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>TryOn Hub · Programación II · Gracias por su atención</span></div>
+        <div class="footer-hints"><span>TryOn Hub · Programación II — Muchas gracias · Espacio abierto para preguntas</span></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav btn-restart" style="background: var(--primary-light); color: var(--primary); border-color: var(--primary-border);"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,128a88,88,0,1,1-88-88A88,88,0,0,1,216,128Z" opacity="0.2"/><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg> Volver al Inicio</button>
