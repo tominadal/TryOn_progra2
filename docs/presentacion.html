@@ -264,8 +264,9 @@
     /* Presentation Slide Header */
     .slide-header-group {
       flex-shrink: 0;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-      padding-bottom: clamp(7px, 1.1vh, 12px);
+      border-bottom: none;
+      padding-bottom: clamp(6px, 1vh, 10px);
+      margin-bottom: clamp(6px, 1vh, 10px);
     }
     .slide-meta {
       display: flex;
@@ -289,6 +290,7 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
     }
     .slide-num-indicator {
+      margin-left: auto;
       font-family: var(--font-mono);
       font-size: 0.84rem;
       font-weight: 700;
@@ -305,13 +307,13 @@
       line-height: 1.12;
       letter-spacing: -0.03em;
       color: var(--text-main);
-      margin-bottom: 4px;
+      margin-bottom: clamp(10px, 1.4vh, 16px);
     }
     h1.slide-title span.hl { color: var(--primary); }
     p.slide-sub {
-      font-size: clamp(0.92rem, 1.08vw, 1.08rem);
+      font-size: clamp(1.02rem, 1.18vw, 1.18rem);
       color: var(--text-muted);
-      line-height: 1.38;
+      line-height: 1.48;
     }
 
     /* Body & Layout — Keynote Proportions without dead white voids */
@@ -367,14 +369,14 @@
       min-height: 0;
     }
     .glass-card.highlight {
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.90) 0%, rgba(239, 246, 255, 0.78) 100%);
-      border: 1.5px solid rgba(59, 130, 246, 0.36);
+      background-color: rgba(255, 255, 255, 0.68);
+      border: 1px solid var(--glass-border-outer);
     }
     .card-footer-strip {
       margin-top: auto;
       padding: 9px 14px;
       border-radius: 12px;
-      font-size: 0.84rem;
+      font-size: 0.92rem;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -382,11 +384,15 @@
       gap: 8px;
       flex-shrink: 0;
     }
-    .strip-blue { background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #1d4ed8; }
-    .strip-emerald { background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #1d4ed8; }
-    .strip-rose { background: rgba(15, 23, 42, 0.05); border: 1px solid rgba(100, 116, 139, 0.24); color: #334155; }
-    .strip-amber { background: rgba(15, 23, 42, 0.05); border: 1px solid rgba(100, 116, 139, 0.24); color: #334155; }
-    .strip-purple { background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); color: #1d4ed8; }
+    .strip-blue,
+    .strip-emerald,
+    .strip-rose,
+    .strip-amber,
+    .strip-purple {
+      background: rgba(15, 23, 42, 0.05);
+      border: 1px solid rgba(100, 116, 139, 0.22);
+      color: #334155;
+    }
 
     .card-header-icon {
       display: flex;
@@ -394,23 +400,23 @@
       gap: 12px;
       flex-shrink: 0;
     }
-    .icon-box {
+    .icon-box,
+    .icon-box.emerald,
+    .icon-box.amber,
+    .icon-box.purple,
+    .icon-box.rose {
       width: 44px;
       height: 44px;
       border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(59, 130, 246, 0.11);
-      border: 1px solid rgba(59, 130, 246, 0.26);
-      color: var(--primary);
+      background: rgba(59, 130, 246, 0.12) !important;
+      border: 1px solid rgba(59, 130, 246, 0.28) !important;
+      color: var(--primary) !important;
       flex-shrink: 0;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
     }
-    .icon-box.emerald { background: rgba(59, 130, 246, 0.11); border-color: rgba(59, 130, 246, 0.26); color: var(--primary); }
-    .icon-box.amber { background: rgba(15, 23, 42, 0.06); border-color: rgba(100, 116, 139, 0.25); color: #334155; }
-    .icon-box.purple { background: rgba(59, 130, 246, 0.11); border-color: rgba(59, 130, 246, 0.26); color: var(--primary); }
-    .icon-box.rose { background: rgba(15, 23, 42, 0.06); border-color: rgba(100, 116, 139, 0.25); color: #334155; }
 
     .card-title {
       font-size: clamp(1.06rem, 1.22vw, 1.28rem);
@@ -420,14 +426,14 @@
       line-height: 1.2;
     }
     .card-desc {
-      font-size: clamp(0.84rem, 0.92vw, 0.95rem);
+      font-size: clamp(0.92rem, 1.02vw, 1.02rem);
       color: var(--text-muted);
-      line-height: 1.32;
+      line-height: 1.42;
     }
     .card-copy {
-      font-size: clamp(0.88rem, 0.96vw, 0.98rem);
+      font-size: clamp(0.98rem, 1.10vw, 1.12rem);
       color: var(--text-muted);
-      line-height: 1.5;
+      line-height: 1.58;
     }
 
     /* Keynote Slide Bullet Pills & Numbered Step Cards */
@@ -447,9 +453,9 @@
       border: 1px solid rgba(148, 163, 184, 0.22);
       border-radius: 14px;
       padding: clamp(8px, 1.1vh, 12px) 13px;
-      font-size: clamp(0.85rem, 0.94vw, 0.95rem);
+      font-size: clamp(0.96rem, 1.08vw, 1.06rem);
       color: var(--text-main);
-      line-height: 1.4;
+      line-height: 1.52;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
     }
     .slide-point svg.icon {
@@ -467,7 +473,7 @@
       background: var(--primary);
       color: #ffffff;
       font-family: var(--font-mono);
-      font-size: 0.78rem;
+      font-size: 0.86rem;
       font-weight: 800;
       display: inline-flex;
       align-items: center;
@@ -495,7 +501,7 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
     .pillar-tile h4 {
-      font-size: 0.92rem;
+      font-size: 1.02rem;
       font-weight: 800;
       color: var(--primary);
       display: flex;
@@ -503,14 +509,14 @@
       gap: 6px;
     }
     .pillar-tile p {
-      font-size: 0.83rem;
+      font-size: 0.94rem;
       color: var(--text-muted);
       line-height: 1.4;
     }
 
     code {
       font-family: var(--font-mono);
-      font-size: 0.85em;
+      font-size: 0.92em;
       background: rgba(37, 99, 235, 0.08);
       color: #1d4ed8;
       padding: 1px 6px;
@@ -537,7 +543,7 @@
       line-height: 1;
     }
     .metric-lbl {
-      font-size: 0.74rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: var(--text-muted);
       margin-top: 5px;
@@ -581,7 +587,7 @@
       gap: 6px;
     }
     .arch-node-sub {
-      font-size: 0.74rem;
+      font-size: 0.82rem;
       color: var(--text-soft);
       font-family: var(--font-mono);
       margin-top: 3px;
@@ -621,6 +627,8 @@
       flex: 1 1 0;
       min-height: 0;
       width: 100%;
+      cursor: zoom-in;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .app-frame-bar {
       height: 29px;
@@ -692,7 +700,7 @@
       background: transparent;
       color: var(--text-muted);
       font-family: var(--font-sans);
-      font-size: 0.76rem;
+      font-size: 0.85rem;
       font-weight: 700;
       padding: 6px 13px;
       border-radius: 9999px;
@@ -715,15 +723,15 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-top: 9px;
-      border-top: 1px solid rgba(148, 163, 184, 0.22);
+      padding-top: clamp(8px, 1.2vh, 14px);
+      border-top: none;
       flex-shrink: 0;
     }
     .footer-hints {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 0.8rem;
+      font-size: 0.88rem;
       color: var(--text-soft);
       font-weight: 500;
     }
@@ -855,7 +863,7 @@
     /* Comparativa Calce Lado a Lado (Slide 6) */
     .split-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1 1 0; min-height: 0; }
     .compare-tile { display: flex; flex-direction: column; min-height: 0; border-radius: 14px; border: 1px solid var(--glass-border-outer); overflow: hidden; background: #ffffff; }
-    .compare-head { padding: 6px 10px; font-size: 0.76rem; font-weight: 800; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(148,163,184,0.22); flex-shrink: 0; }
+    .compare-head { padding: 6px 10px; font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(148,163,184,0.22); flex-shrink: 0; }
     .compare-head.tight { background: rgba(244, 63, 94, 0.08); color: #be123c; }
     .compare-head.ideal { background: rgba(16, 185, 129, 0.10); color: #047857; }
 
@@ -879,14 +887,14 @@
     }
     #speaker-notes.open { display: flex; }
     .notes-header { display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #93c5fd; }
-    #speaker-notes-text { font-size: 0.9rem; line-height: 1.48; color: #e2e8f0; }
+    #speaker-notes-text { font-size: 0.98rem; line-height: 1.48; color: #e2e8f0; }
 
     svg.icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
 
     @media (max-width: 1180px) { .nav-sections { display: none; } }
     @media (max-height: 720px) {
       .slide { padding: 14px 20px; }
-      .slide-point { padding: 7px 10px; font-size: 0.82rem; }
+      .slide-point { font-size: clamp(0.96rem, 1.08vw, 1.06rem); line-height: 1.52; }
     }
 
     /* Versión imprimible / Exportar a PDF limpio (Ctrl+P o botón PDF) */
@@ -941,6 +949,59 @@
         break-after: auto !important;
       }
     }
+  
+    /* Clean Image Styling inside app-frame and compare-tile (no mac-os chrome / buttons) */
+    .app-frame:hover { border-color: rgba(37, 99, 235, 0.45); box-shadow: 0 16px 36px -12px rgba(37, 99, 235, 0.16); }
+    .app-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      flex: 1 1 0;
+      min-height: 0;
+    }
+    .compare-tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      flex: 1 1 0;
+      min-height: 0;
+    }
+
+    /* True Fullscreen Presentation Mode: Complete focus on slides without top-bar */
+    :fullscreen header#top-bar,
+    :-webkit-full-screen header#top-bar,
+    body.is-fullscreen header#top-bar {
+      display: none !important;
+    }
+
+    :fullscreen #deck,
+    :-webkit-full-screen #deck,
+    body.is-fullscreen #deck {
+      padding: 14px 18px !important;
+      height: 100vh !important;
+      width: 100vw !important;
+    }
+
+    :fullscreen .slide,
+    :-webkit-full-screen .slide,
+    body.is-fullscreen .slide {
+      width: calc(100vw - 32px) !important;
+      max-width: 1780px !important;
+      height: calc(100vh - 24px) !important;
+      max-height: 98vh !important;
+      border-radius: 22px !important;
+    }
+
+    :fullscreen #progress-rail,
+    :-webkit-full-screen #progress-rail,
+    body.is-fullscreen #progress-rail {
+      bottom: 0px !important;
+    }
+
   </style>
 </head>
 <body>
@@ -949,7 +1010,6 @@
     <div class="brand-meta">
       <img src="/logo.png" alt="TryOn Hub Logo" class="brand-logo-img"/>
       <span class="brand-title">TryOn <span class="hub">Hub</span></span>
-      <span class="brand-pill"><span class="pulse-dot"></span><span>Programación II</span></span>
     </div>
 
     <nav class="nav-sections" aria-label="Secciones de la presentación">
@@ -962,18 +1022,6 @@
     </nav>
 
     <div class="top-actions">
-      <button type="button" class="btn-glass" id="btn-notes-toggle" title="Notas del orador (Tecla N)">
-        <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M216,64V192H88V64Z" opacity="0.2"/><path d="M80,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H88A8,8,0,0,1,80,64Zm136,56H88a8,8,0,1,0,0,16H216a8,8,0,0,0,0-16Zm0,64H88a8,8,0,1,0,0,16H216a8,8,0,0,0,0-16ZM44,52A12,12,0,1,0,56,64,12,12,0,0,0,44,52Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,116Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,180Z"/></svg>
-        <span>Notas (N)</span>
-      </button>
-      <button type="button" class="btn-glass" onclick="window.print()" title="Exportar o imprimir a PDF (Ctrl+P)">
-        <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M208,88H152V32Z" opacity="0.2"/><path d="M156,208a8,8,0,0,1-8,8H120a8,8,0,0,1-8-8V152a8,8,0,0,1,16,0v48h20A8,8,0,0,1,156,208ZM92.65,145.49a8,8,0,0,0-11.16,1.86L68,166.24,54.51,147.35a8,8,0,1,0-13,9.3L58.17,180,41.49,203.35a8,8,0,0,0,13,9.3L68,193.76l13.49,18.89a8,8,0,0,0,13-9.3L77.83,180l16.68-23.35A8,8,0,0,0,92.65,145.49Zm98.94,25.82c-4-1.16-8.14-2.35-10.45-3.84-1.25-.82-1.23-1-1.12-1.9a4.54,4.54,0,0,1,2-3.67c4.6-3.12,15.34-1.73,19.82-.56a8,8,0,0,0,4.07-15.48c-2.11-.55-21-5.22-32.83,2.76a20.58,20.58,0,0,0-8.95,14.94c-2,15.89,13.65,20.42,23,23.12,12.06,3.49,13.12,4.92,12.78,7.59-.31,2.41-1.26,3.33-2.15,3.93-4.6,3.06-15.16,1.56-19.54.35A8,8,0,0,0,173.93,214a60.63,60.63,0,0,0,15.19,2c5.82,0,12.3-1,17.49-4.46a20.81,20.81,0,0,0,9.18-15.23C218,179,201.48,174.17,191.59,171.31ZM40,112V40A16,16,0,0,1,56,24h96a8,8,0,0,1,5.66,2.34l56,56A8,8,0,0,1,216,88v24a8,8,0,1,1-16,0V96H152a8,8,0,0,1-8-8V40H56v72a8,8,0,0,1-16,0ZM160,80h28.68L160,51.31Z"/></svg>
-        <span>PDF</span>
-      </button>
-      <button type="button" class="btn-glass" id="btn-drawer-toggle" title="Índice de diapositivas">
-        <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M112,56v48a8,8,0,0,1-8,8H56a8,8,0,0,1-8-8V56a8,8,0,0,1,8-8h48A8,8,0,0,1,112,56Zm88-8H152a8,8,0,0,0-8,8v48a8,8,0,0,0,8,8h48a8,8,0,0,0,8-8V56A8,8,0,0,0,200,48Zm-96,96H56a8,8,0,0,0-8,8v48a8,8,0,0,0,8,8h48a8,8,0,0,0,8-8V152A8,8,0,0,0,104,144Zm96,0H152a8,8,0,0,0-8,8v48a8,8,0,0,0,8,8h48a8,8,0,0,0,8-8V152A8,8,0,0,0,200,144Z" opacity="0.2"/><path d="M200,136H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,200,136Zm0,64H152V152h48v48ZM104,40H56A16,16,0,0,0,40,56v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,104,40Zm0,64H56V56h48v48Zm96-64H152a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V56A16,16,0,0,0,200,40Zm0,64H152V56h48v48Zm-96,32H56a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V152A16,16,0,0,0,104,136Zm0,64H56V152h48v48Z"/></svg>
-        <span>Índice (17)</span>
-      </button>
       <button type="button" class="btn-glass" id="btn-fullscreen" title="Pantalla Completa (F)">
         <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg>
         <span>Pantalla Completa</span>
@@ -989,72 +1037,61 @@
 
     <!-- ── SLIDE 01: PORTADA ────────────────────────────────────────────── -->
     <section class="slide active" data-slide="1">
-      <div class="slide-header-group" style="border:none; padding-bottom:0;">
+      <div class="slide-header-group" style="border:none; padding-bottom:0; margin-bottom:0;">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M194.82,151.43l-55.09,20.3-20.3,55.09a7.92,7.92,0,0,1-14.86,0l-20.3-55.09-55.09-20.3a7.92,7.92,0,0,1,0-14.86l55.09-20.3,20.3-55.09a7.92,7.92,0,0,1,14.86,0l20.3,55.09,55.09,20.3A7.92,7.92,0,0,1,194.82,151.43Z" opacity="0.2"/><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg> PROYECTO FINAL · PROGRAMACIÓN II</span>
-          <span class="slide-num-indicator">01 / 17</span>
+          <span class="slide-num-indicator">01 / 18</span>
         </div>
       </div>
 
-      <div class="slide-body">
-        <div class="grid-2" style="align-items: stretch; grid-template-columns: 0.9fr 1.1fr;">
-          <div class="glass-card highlight" style="justify-content: center; gap: 16px;">
-            <div>
-              <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light); border: 1px solid var(--primary-border); padding: 6px 14px; border-radius: 9999px; margin-bottom: 10px;">
-                <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M202.05,104c-.68,0-1.36,0-2.05,0a40,40,0,0,1-40-40H96a40,40,0,0,1-40,40c-.69,0-1.37,0-2,0L62.06,39A8,8,0,0,1,70,32H186a8,8,0,0,1,7.94,7Z" opacity="0.2"/><path d="M223.88,214l-22-176A16,16,0,0,0,186,24H70A16,16,0,0,0,54.12,38l-22,176A16,16,0,0,0,48,232H88.69a16,16,0,0,0,15.51-12.06l23.8-92,23.79,91.94A16,16,0,0,0,167.31,232H208a16,16,0,0,0,15.88-18ZM192.9,95.2A32.13,32.13,0,0,1,169,72h21ZM186,40l2,16H68l2-16ZM66,72H87A32.13,32.13,0,0,1,63.1,95.2ZM88.69,216H48L61,111.73A48.08,48.08,0,0,0,103.32,72H120V95Zm78.6-.06L136,95V72h16.68A48.08,48.08,0,0,0,195,111.73L208,216Z"/></svg>
-                <span style="font-size: 0.78rem; font-weight: 700; color: var(--primary); text-transform: uppercase;">Ecosistema B2B2C · Gemelo Digital Paramétrico</span>
-              </div>
-              <h1 class="slide-title" style="font-size: clamp(2.4rem, 3.6vw, 3.3rem); margin-bottom: 8px;">
-                TryOn <span class="hl">Hub</span>
+      <div class="slide-body" style="flex: 1 1 auto; min-height: 0;">
+        <div class="grid-2" style="align-items: stretch; grid-template-columns: 1fr 1.22fr; gap: clamp(16px, 2vw, 28px); height: 100%;">
+          <div class="glass-card" style="justify-content: center; gap: clamp(14px, 2vh, 22px); padding: clamp(28px, 4vh, 52px) clamp(28px, 3.2vw, 48px); background: linear-gradient(135deg, rgba(15, 23, 42, 0.86) 0%, rgba(15, 23, 42, 0.62) 100%), url('/images/hero_bg.png') 75% center / cover no-repeat; border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.4), 0 24px 50px -12px rgba(15, 23, 42, 0.35); border-radius: 24px; position: relative; overflow: hidden;">
+            <div style="position: relative; z-index: 2;">
+              <h1 class="slide-title" style="font-size: clamp(3.2rem, 4.6vw, 4.6rem); margin-bottom: 16px; letter-spacing: -0.04em; line-height: 1.04; font-weight: 800; color: #ffffff;">
+                TryOn <span style="background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Hub</span>
               </h1>
-              <p class="slide-sub" style="font-size: clamp(0.98rem, 1.12vw, 1.14rem); line-height: 1.46;">
+              <p class="slide-sub" style="font-size: clamp(1.15rem, 1.34vw, 1.35rem); line-height: 1.62; color: rgba(226, 232, 240, 0.94); max-width: 520px; text-shadow: 0 2px 10px rgba(0,0,0,0.4);">
                 Probador virtual 3D y marketplace paramétrico impulsado por medidas antropométricas reales en centímetros y visión multimodal Gemini.
               </p>
             </div>
+          </div>
 
-            <div class="grid-3" style="flex: 0 0 auto;">
-              <div class="metric-badge">
-                <span class="metric-val">122</span>
-                <span class="metric-lbl">Tests Pytest OK</span>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: clamp(12px, 1.4vh, 18px); height: 100%; min-height: 0;">
+            <div class="glass-card" style="justify-content: center; padding: clamp(18px, 2.6vh, 30px) clamp(20px, 2.2vw, 32px); border-radius: 20px; background: rgba(255, 255, 255, 0.82);">
+              <span style="font-size: 0.84rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary);">Universidad</span>
+              <div style="font-size: clamp(1.16rem, 1.32vw, 1.34rem); font-weight: 800; color: var(--text-main); line-height: 1.32; margin-top: 8px;">
+                Universidad Nacional de San Martín (UNSAM)
               </div>
-              <div class="metric-badge">
-                <span class="metric-val">13</span>
-                <span class="metric-lbl">Tablas SQL</span>
+              <span style="font-size: 0.94rem; color: var(--text-soft); font-weight: 600; margin-top: 5px;">Escuela de Ciencia y Tecnología</span>
+            </div>
+
+            <div class="glass-card" style="justify-content: center; padding: clamp(18px, 2.6vh, 30px) clamp(20px, 2.2vw, 32px); border-radius: 20px; background: rgba(255, 255, 255, 0.82);">
+              <span style="font-size: 0.84rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary);">Cátedra</span>
+              <div style="font-size: clamp(1.16rem, 1.32vw, 1.34rem); font-weight: 800; color: var(--text-main); line-height: 1.32; margin-top: 8px;">
+                Programación II
               </div>
-              <div class="metric-badge">
-                <span class="metric-val">60 FPS</span>
-                <span class="metric-lbl">WebGL en Cliente</span>
+              <span style="font-size: 0.94rem; color: var(--text-soft); font-weight: 600; margin-top: 5px;">Licenciatura en Ciencia de Datos</span>
+            </div>
+
+            <div class="glass-card" style="justify-content: center; padding: clamp(18px, 2.6vh, 30px) clamp(20px, 2.2vw, 32px); border-radius: 20px; background: rgba(255, 255, 255, 0.82);">
+              <span style="font-size: 0.84rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary);">Docentes</span>
+              <div style="font-size: clamp(1.12rem, 1.26vw, 1.28rem); font-weight: 800; color: var(--text-main); line-height: 1.38; margin-top: 8px;">
+                Dra. Rosana Matuk Herrera<br/>Lic. Santiago Blas Laguzza
               </div>
             </div>
 
-            <ul class="slide-points" style="flex: 0 0 auto;">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Backend:</strong> FastAPI · SQLAlchemy 2.0 · Pydantic v2 · Gemini 2.5 Flash</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Frontend:</strong> Next.js 16.3 (Route Groups) · React 19 · Three.js 0.185</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Ingeniería:</strong> Strategy, Decorator, Observer Push, Factory Method &amp; Repository</span></li>
-            </ul>
-          </div>
-
-          <div class="glass-card screenshot-card" style="justify-content: center;">
-            <div class="app-frame" style="flex: 0 0 auto; aspect-ratio: 16 / 10;">
-              <div class="app-frame-bar">
-                <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                <span>localhost:3000/ — Vista Real</span>
-                <span>Liquid Glass UI</span>
+            <div class="glass-card" style="justify-content: center; padding: clamp(18px, 2.6vh, 30px) clamp(20px, 2.2vw, 32px); border-radius: 20px; background: rgba(255, 255, 255, 0.82);">
+              <span style="font-size: 0.84rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary);">Colaboradores</span>
+              <div style="font-size: clamp(1.08rem, 1.22vw, 1.24rem); font-weight: 800; color: var(--text-main); line-height: 1.42; margin-top: 8px;">
+                Tomás Carambia · Facundo Latini<br/>Lucio Lourido · Tomás Nadal
               </div>
-              <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_home_hero.png', 'TryOn Hub — Pantalla de Inicio y Propuesta de Valor (localhost:3000/)')">
-                <img src="/images/slides/real_home_hero.png" alt="Pantalla de inicio real de TryOn Hub"/>
-                <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:13px;height:13px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar captura</span>
-              </button>
             </div>
           </div>
         </div>
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints">
-          <span>Navegar: <span class="kbd-chip">←</span> <span class="kbd-chip">→</span> o <span class="kbd-chip">Espacio</span></span>
-          <span>Clic en capturas para ampliar · <span class="kbd-chip">F</span> Pantalla Completa</span>
-        </div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev" disabled><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: El Problema <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1066,74 +1103,90 @@
     <section class="slide" data-slide="2">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg> CONTEXTO DE LA INDUSTRIA</span>
-          <span class="slide-num-indicator">02 / 17</span>
+          <span class="slide-num-indicator">02 / 18</span>
         </div>
         <h1 class="slide-title">Devoluciones en e-commerce: <span class="hl">Fricción de Calce</span></h1>
         <p class="slide-sub">En indumentaria —y particularmente en pantalones y denim— las tablas estáticas 2D no predicen el calce real.</p>
       </div>
 
-      <div class="slide-body">
-        <div class="grid-3">
-          <div class="glass-card">
-            <div class="card-header-icon">
-              <div class="icon-box rose"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg></div>
-              <div>
-                <h3 class="card-title">Devoluciones Crónicas</h3>
-                <p class="card-desc">Frecuencia en pantalones online</p>
+      <div class="slide-body" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: clamp(14px, 2vh, 22px); justify-content: space-between;">
+        <div class="grid-3" style="flex: 1 1 auto; min-height: 0; align-items: stretch; gap: clamp(14px, 1.8vw, 24px);">
+          <div class="glass-card" style="justify-content: space-between; padding: clamp(20px, 2.8vh, 32px) clamp(20px, 2.2vw, 30px); border-radius: 22px; background: rgba(255, 255, 255, 0.85); box-shadow: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95), 0 16px 36px -12px rgba(15, 23, 42, 0.08);">
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em; color: #dc2626; margin-bottom: 6px;">
+                Tasa de retorno en indumentaria y denim
               </div>
+              <div style="font-size: clamp(2.4rem, 3.4vw, 3.4rem); font-weight: 800; color: #0f172a; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 16px;">
+                25% – 40%
+              </div>
+              <h3 class="card-title" style="font-size: clamp(1.18rem, 1.35vw, 1.32rem); font-weight: 800; margin-bottom: 4px; color: var(--text-main);">
+                Devoluciones Crónicas
+              </h3>
+              <p class="card-desc" style="font-size: 0.94rem; color: var(--text-soft); font-weight: 600; margin-bottom: 14px;">
+                Frecuencia en pantalones online
+              </p>
+              <p class="card-copy" style="font-size: clamp(1.02rem, 1.15vw, 1.14rem); line-height: 1.6; color: var(--text-muted);">
+                Por miedo a errarle al talle, el comprador pide varios talles para devolver los que no le van o directamente abandona la compra.
+              </p>
             </div>
-            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(59,130,246,0.22); border-radius: 16px; padding: 14px 18px;">
-              <span style="font-size: 2.15rem; font-weight: 800; color: #1d4ed8; line-height: 1;">25% – 40%</span>
-              <span style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-top: 5px;">Tasa de retorno en indumentaria y denim</span>
+            <div class="card-footer-strip strip-rose" style="margin-top: 18px; border-radius: 12px; font-weight: 700; padding: 10px 14px; font-size: 0.92rem; text-align: center;">
+              Impacto: Menos ventas y altos costos de envío inverso
             </div>
-            <p class="card-copy">
-              Por miedo a errarle al talle, el comprador pide varios talles para devolver los que no le van o directamente abandona la compra.
-            </p>
-            <div class="card-footer-strip strip-rose">Impacto: Menos ventas y altos costos de envío inverso</div>
           </div>
 
-          <div class="glass-card">
-            <div class="card-header-icon">
-              <div class="icon-box amber"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M229.66,90.34,90.34,229.66a8,8,0,0,1-11.31,0L26.34,177a8,8,0,0,1,0-11.31L165.66,26.34a8,8,0,0,1,11.31,0L229.66,79A8,8,0,0,1,229.66,90.34Z" opacity="0.2"/><path d="M235.32,73.37,182.63,20.69a16,16,0,0,0-22.63,0L20.68,160a16,16,0,0,0,0,22.63l52.69,52.68a16,16,0,0,0,22.63,0L235.32,96A16,16,0,0,0,235.32,73.37ZM84.68,224,32,171.31l32-32,26.34,26.35a8,8,0,0,0,11.32-11.32L75.31,128,96,107.31l26.34,26.35a8,8,0,0,0,11.32-11.32L107.31,96,128,75.31l26.34,26.35a8,8,0,0,0,11.32-11.32L139.31,64l32-32L224,84.69Z"/></svg></div>
-              <div>
-                <h3 class="card-title">El Talle No Indica el Calce</h3>
-                <p class="card-desc">Talles arbitrarios entre marcas</p>
+          <div class="glass-card" style="justify-content: space-between; padding: clamp(20px, 2.8vh, 32px) clamp(20px, 2.2vw, 30px); border-radius: 22px; background: rgba(255, 255, 255, 0.85); box-shadow: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95), 0 16px 36px -12px rgba(15, 23, 42, 0.08);">
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em; color: #d97706; margin-bottom: 6px;">
+                Cintura, cadera, muslo y tiro varían
               </div>
+              <div style="font-size: clamp(2.4rem, 3.4vw, 3.4rem); font-weight: 800; color: #0f172a; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 16px;">
+                Talle ≠ Calce
+              </div>
+              <h3 class="card-title" style="font-size: clamp(1.18rem, 1.35vw, 1.32rem); font-weight: 800; margin-bottom: 4px; color: var(--text-main);">
+                El Talle No Indica el Calce
+              </h3>
+              <p class="card-desc" style="font-size: 0.94rem; color: var(--text-soft); font-weight: 600; margin-bottom: 14px;">
+                Talles arbitrarios entre marcas
+              </p>
+              <p class="card-copy" style="font-size: clamp(1.02rem, 1.15vw, 1.14rem); line-height: 1.6; color: var(--text-muted);">
+                Dos personas de igual altura y peso tienen cuerpos distintos. Una letra ("M") o número ("42") no muestra dónde faltará o sobrará tela.
+              </p>
             </div>
-            <div style="background: rgba(15,23,42,0.05); border: 1px solid rgba(100,116,139,0.22); border-radius: 16px; padding: 14px 18px;">
-              <span style="font-size: 2.15rem; font-weight: 800; color: #0f172a; line-height: 1;">Talle ≠ Calce</span>
-              <span style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-top: 5px;">Cintura, cadera, muslo y tiro varían</span>
+            <div class="card-footer-strip strip-amber" style="margin-top: 18px; border-radius: 12px; font-weight: 700; padding: 10px 14px; font-size: 0.92rem; text-align: center;">
+              Impacto: Desconfianza al comprar online
             </div>
-            <p class="card-copy">
-              Dos personas de igual altura y peso tienen cuerpos distintos. Una letra ("M") o número ("42") no muestra dónde faltará o sobrará tela.
-            </p>
-            <div class="card-footer-strip strip-amber">Impacto: Desconfianza al comprar online</div>
           </div>
 
-          <div class="glass-card">
-            <div class="card-header-icon">
-              <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M192,168a40,40,0,0,1-40,40H128V128h24A40,40,0,0,1,192,168ZM112,48a40,40,0,0,0,0,80h16V48Z" opacity="0.2"/><path d="M152,120H136V56h8a32,32,0,0,1,32,32,8,8,0,0,0,16,0,48.05,48.05,0,0,0-48-48h-8V24a8,8,0,0,0-16,0V40h-8a48,48,0,0,0,0,96h8v64H104a32,32,0,0,1-32-32,8,8,0,0,0-16,0,48.05,48.05,0,0,0,48,48h16v16a8,8,0,0,0,16,0V216h16a48,48,0,0,0,0-96Zm-40,0a32,32,0,0,1,0-64h8v64Zm40,80H136V136h16a32,32,0,0,1,0,64Z"/></svg></div>
-              <div>
-                <h3 class="card-title">Costo de Digitalizar en 3D</h3>
-                <p class="card-desc">Barrera actual para las marcas</p>
+          <div class="glass-card" style="justify-content: space-between; padding: clamp(20px, 2.8vh, 32px) clamp(20px, 2.2vw, 30px); border-radius: 22px; background: rgba(255, 255, 255, 0.85); box-shadow: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95), 0 16px 36px -12px rgba(15, 23, 42, 0.08);">
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em; color: #2563eb; margin-bottom: 6px;">
+                USD por prenda con modelado 3D manual
               </div>
+              <div style="font-size: clamp(2.4rem, 3.4vw, 3.4rem); font-weight: 800; color: #0f172a; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 16px;">
+                $50 – $150
+              </div>
+              <h3 class="card-title" style="font-size: clamp(1.18rem, 1.35vw, 1.32rem); font-weight: 800; margin-bottom: 4px; color: var(--text-main);">
+                Costo de Digitalizar en 3D
+              </h3>
+              <p class="card-desc" style="font-size: 0.94rem; color: var(--text-soft); font-weight: 600; margin-bottom: 14px;">
+                Barrera actual para las marcas
+              </p>
+              <p class="card-copy" style="font-size: clamp(1.02rem, 1.15vw, 1.14rem); line-height: 1.6; color: var(--text-muted);">
+                Modelar a mano cada prenda o generar imágenes con IA por cada clic del cliente (<em>USD $0.04–$0.15/clic</em> y 10–30 s de espera) es inviable para pymes.
+              </p>
             </div>
-            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(59,130,246,0.22); border-radius: 16px; padding: 14px 18px;">
-              <span style="font-size: 2.15rem; font-weight: 800; color: #1d4ed8; line-height: 1;">$50 – $150</span>
-              <span style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-top: 5px;">USD por prenda con modelado 3D manual</span>
+            <div class="card-footer-strip strip-purple" style="margin-top: 18px; border-radius: 12px; font-weight: 700; padding: 10px 14px; font-size: 0.92rem; text-align: center;">
+              Solución: 1 análisis IA por prenda + 3D gratis en el navegador
             </div>
-            <p class="card-copy">
-              Modelar a mano cada prenda o generar imágenes con IA por cada clic del cliente (<em>USD $0.04–$0.15/clic</em> y 10–30 s de espera) es inviable para pymes.
-            </p>
-            <div class="card-footer-strip strip-purple">Solución: 1 análisis IA por prenda + 3D gratis en el navegador</div>
           </div>
         </div>
 
-        <div class="glass-card highlight" style="padding: 13px 20px; flex: 0 0 auto;">
-          <div style="display: flex; align-items: center; gap: 14px;">
-            <div class="icon-box" style="width: 40px; height: 40px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:20px;height:20px;" aria-hidden="true"><path d="M96,240l16-80L48,136,160,16,144,96l64,24Z" opacity="0.2"/><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/></svg></div>
-            <p style="font-size: 0.94rem; line-height: 1.4;">
+        <div class="glass-card" style="padding: 16px 24px; flex: 0 0 auto; border-radius: 18px; background: rgba(255, 255, 255, 0.88); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 10px 28px -10px rgba(37, 99, 235, 0.15); border: 1px solid rgba(59, 130, 246, 0.3);">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(37, 99, 235, 0.24)); color: var(--primary); flex-shrink: 0;">
+              <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:24px;height:24px;" aria-hidden="true"><path d="M96,240l16-80L48,136,160,16,144,96l64,24Z" opacity="0.2"/><path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/></svg>
+            </div>
+            <p style="font-size: clamp(1.04rem, 1.16vw, 1.16rem); line-height: 1.55; color: var(--text-main);">
               <strong>Separación clave de cómputo:</strong> En lugar de renderizar en la nube con difusión 2D en cada visita, TryOn Hub infiere parámetros textiles <strong>1 sola vez al publicar la prenda</strong> y proyecta la geometría en tiempo real en la GPU del cliente.
             </p>
           </div>
@@ -1141,7 +1194,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Diagnóstico del mercado de indumentaria online y denim</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Idea de Negocio <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1153,8 +1206,7 @@
     <section class="slide" data-slide="3">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M232,56v64L168,56Z" opacity="0.2"/><path d="M232,48H168a8,8,0,0,0-5.66,13.66L188.69,88,136,140.69l-34.34-34.35a8,8,0,0,0-11.32,0l-72,72a8,8,0,0,0,11.32,11.32L96,123.31l34.34,34.35a8,8,0,0,0,11.32,0L200,99.31l26.34,26.35A8,8,0,0,0,240,120V56A8,8,0,0,0,232,48Zm-8,52.69L187.31,64H224Z"/></svg> ESTRATEGIA · ZERO TO ONE &amp; PATTERN BREAKERS</span>
-          <span class="slide-num-indicator">03 / 17</span>
+          <span class="slide-num-indicator">03 / 18</span>
         </div>
         <h1 class="slide-title">Idea de Negocio: <span class="hl">Creación de Valor</span></h1>
         <p class="slide-sub">Fundamento académico documentado en <code>resumen_ejecutivo.md</code> y <code>modelo_de_negocios.md</code>.</p>
@@ -1171,15 +1223,19 @@
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M200,48H56a8,8,0,0,0-8,8V200a8,8,0,0,0,8,8H200a8,8,0,0,0,8-8V56A8,8,0,0,0,200,48ZM152,152H104V104h48Z" opacity="0.2"/><path d="M152,96H104a8,8,0,0,0-8,8v48a8,8,0,0,0,8,8h48a8,8,0,0,0,8-8V104A8,8,0,0,0,152,96Zm-8,48H112V112h32Zm88,0H216V112h16a8,8,0,0,0,0-16H216V56a16,16,0,0,0-16-16H160V24a8,8,0,0,0-16,0V40H112V24a8,8,0,0,0-16,0V40H56A16,16,0,0,0,40,56V96H24a8,8,0,0,0,0,16H40v32H24a8,8,0,0,0,0,16H40v40a16,16,0,0,0,16,16H96v16a8,8,0,0,0,16,0V216h32v16a8,8,0,0,0,16,0V216h40a16,16,0,0,0,16-16V160h16a8,8,0,0,0,0-16Zm-32,56H56V56H200v95.87s0,.09,0,.13,0,.09,0,.13V200Z"/></svg><span><strong>Inflexión 1 — Gráficos 3D en el Navegador:</strong> Cualquier celular o PC deforma mallas 3D a 60 FPS sin instalar aplicaciones ni usar servidores de video.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M194.82,151.43l-55.09,20.3-20.3,55.09a7.92,7.92,0,0,1-14.86,0l-20.3-55.09-55.09-20.3a7.92,7.92,0,0,1,0-14.86l55.09-20.3,20.3-55.09a7.92,7.92,0,0,1,14.86,0l20.3,55.09,55.09,20.3A7.92,7.92,0,0,1,194.82,151.43Z" opacity="0.2"/><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg><span><strong>Inflexión 2 — IA Multimodal (Gemini 2.5 Flash):</strong> Extrae parámetros físicos (<code>waist_rise</code>, <code>taper</code>, textura, color Hex) directamente desde una foto común.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M232,56v64L168,56Z" opacity="0.2"/><path d="M232,48H168a8,8,0,0,0-5.66,13.66L188.69,88,136,140.69l-34.34-34.35a8,8,0,0,0-11.32,0l-72,72a8,8,0,0,0,11.32,11.32L96,123.31l34.34,34.35a8,8,0,0,0,11.32,0L200,99.31l26.34,26.35A8,8,0,0,0,240,120V56A8,8,0,0,0,232,48Zm-8,52.69L187.31,64H224Z"/></svg><span><strong>Inflexión 3 — Costo de Devoluciones:</strong> Con un 30%–40% de retornos en pantalones, predecir el calce pasó de lujo a necesidad económica.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Verdad No Consensuada:</strong> El talle ("M" o "42") no alcanza; comparar los <code>cm</code> reales del cuerpo contra los <code>cm</code> de la moldería resuelve el calce.</span></li>
+              <li class="slide-point">
+                <span><strong>Inflexión 1 — Gráficos 3D en el Navegador:</strong> Cualquier celular o PC deforma mallas 3D a 60 FPS sin instalar aplicaciones ni usar servidores de video.</span></li>
+              <li class="slide-point">
+                <span><strong>Inflexión 2 — IA Multimodal (Gemini 2.5 Flash):</strong> Extrae parámetros físicos (<code>waist_rise</code>, <code>taper</code>, textura, color Hex) directamente desde una foto común.</span></li>
+              <li class="slide-point">
+                <span><strong>Inflexión 3 — Costo de Devoluciones:</strong> Con un 30%–40% de retornos en pantalones, predecir el calce pasó de lujo a necesidad económica.</span></li>
+              <li class="slide-point">
+                <span><strong>Verdad No Consensuada:</strong> El talle ("M" o "42") no alcanza; comparar los <code>cm</code> reales del cuerpo contra los <code>cm</code> de la moldería resuelve el calce.</span></li>
             </ul>
             <div class="card-footer-strip strip-amber">Categoría nueva: Hub de Calce Antropométrico 3D</div>
           </div>
 
-          <div class="glass-card highlight">
+          <div class="glass-card">
             <div class="card-header-icon">
               <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></svg></div>
               <div>
@@ -1211,7 +1267,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Ser diferente &gt; Ser mejor · Apalancamiento de datos antropométricos en cm</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Solución Dual <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1223,16 +1279,15 @@
     <section class="slide" data-slide="4">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M194.82,151.43l-55.09,20.3-20.3,55.09a7.92,7.92,0,0,1-14.86,0l-20.3-55.09-55.09-20.3a7.92,7.92,0,0,1,0-14.86l55.09-20.3,20.3-55.09a7.92,7.92,0,0,1,14.86,0l20.3,55.09,55.09,20.3A7.92,7.92,0,0,1,194.82,151.43Z" opacity="0.2"/><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg> ECOSISTEMA B2B2C REAL</span>
-          <span class="slide-num-indicator">04 / 17</span>
+          <span class="slide-num-indicator">04 / 18</span>
         </div>
         <h1 class="slide-title">La Solución TryOn <span class="hl">Hub</span>: Propuesta Dual</h1>
         <p class="slide-sub">Lo que hoy implementa la plataforma punta a punta para compradores finales (B2C) y marcas fabricantes (B2B).</p>
       </div>
 
       <div class="slide-body">
-        <div class="grid-2">
-          <div class="glass-card highlight">
+        <div class="grid-2" style="flex: 1 1 auto; min-height: 0; align-items: stretch;">
+          <div class="glass-card">
             <div class="card-header-icon">
               <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M192,96a64,64,0,1,1-64-64A64,64,0,0,1,192,96Z" opacity="0.2"/><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></div>
               <div>
@@ -1241,9 +1296,12 @@
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Hasta 10 Gemelos Digitales por Cuenta:</strong> Medidas reales en <code>cm</code> (altura, pecho, busto, cintura, abdomen, cadera, muslo, brazo, cuello), piel, pelo, anteojos y reloj.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Probador 3D + Diagnóstico en cm:</strong> En <code>/product/[id]</code> compara talle elegido vs. avatar y reporta holgura/tensión exacta (<code>± cm</code> en cintura y cadera).</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Carrito por Variantes &amp; Checkout:</strong> Líneas independientes por <code>(prenda, talle, color)</code> en <code>/cart</code> y conversión a órdenes con precio congelado.</span></li>
+              <li class="slide-point">
+                <span><strong>Hasta 10 Gemelos Digitales por Cuenta:</strong> Medidas reales en <code>cm</code> (altura, pecho, busto, cintura, abdomen, cadera, muslo, brazo, cuello), piel, pelo, anteojos y reloj.</span></li>
+              <li class="slide-point">
+                <span><strong>Probador 3D + Diagnóstico en cm:</strong> En <code>/product/[id]</code> compara talle elegido vs. avatar y reporta holgura/tensión exacta (<code>± cm</code> en cintura y cadera).</span></li>
+              <li class="slide-point">
+                <span><strong>Carrito por Variantes &amp; Checkout:</strong> Líneas independientes por <code>(prenda, talle, color)</code> en <code>/cart</code> y conversión a órdenes con precio congelado.</span></li>
             </ul>
             <div class="card-footer-strip strip-emerald">
               <span>Diagnóstico Calce:</span>
@@ -1260,9 +1318,12 @@
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>1. Catálogo de Marca:</strong> Buscador, filtro por corte (<em>Recto, Chupín, Mom, Ancho, Oxford, Bermuda, Pollera</em>) y gestión completa (Ver, Duplicar, Editar, Eliminar).</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>2. Estudio 3D Boutique:</strong> Controles de moldería base (Talle M/32/42) en cm, color Hex, textura, desgaste, dobladillos/pinzas y vista 3D en vivo.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>3. Carga Masiva Excel &amp; Observer:</strong> Importación <code>.xlsx/.xls</code> en segundo plano con alertas inmediatas en <code>GET /catalog/notifications</code>.</span></li>
+              <li class="slide-point">
+                <span><strong>1. Catálogo de Marca:</strong> Buscador, filtro por corte (<em>Recto, Chupín, Mom, Ancho, Oxford, Bermuda, Pollera</em>) y gestión completa (Ver, Duplicar, Editar, Eliminar).</span></li>
+              <li class="slide-point">
+                <span><strong>2. Estudio 3D Boutique:</strong> Controles de moldería base (Talle M/32/42) en cm, color Hex, textura, desgaste, dobladillos/pinzas y vista 3D en vivo.</span></li>
+              <li class="slide-point">
+                <span><strong>3. Carga Masiva Excel &amp; Observer:</strong> Importación <code>.xlsx/.xls</code> en segundo plano con alertas inmediatas en <code>GET /catalog/notifications</code>.</span></li>
             </ul>
             <div class="card-footer-strip strip-blue">
               <span>Alta Dual:</span>
@@ -1270,17 +1331,10 @@
             </div>
           </div>
         </div>
-
-        <div class="grid-4">
-          <div class="metric-badge"><span class="metric-val">O(1)</span><span class="metric-lbl">1 Análisis IA por Prenda</span></div>
-          <div class="metric-badge"><span class="metric-val">10</span><span class="metric-lbl">Avatares por Cuenta</span></div>
-          <div class="metric-badge"><span class="metric-val">0 ms</span><span class="metric-lbl">Espera GPU en Servidor</span></div>
-          <div class="metric-badge"><span class="metric-val">5</span><span class="metric-lbl">Módulos de Rutas Web</span></div>
-        </div>
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>A continuación: recorrido paso a paso desde el Usuario B2C y desde la Marca B2B</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Demo Usuario 1/2 <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1292,8 +1346,7 @@
     <section class="slide" data-slide="5">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M192,96a64,64,0,1,1-64-64A64,64,0,0,1,192,96Z" opacity="0.2"/><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> DEMO CLIENTE (B2C) · PASOS 1 Y 2</span>
-          <span class="slide-num-indicator">05 / 17</span>
+          <span class="slide-num-indicator">05 / 18</span>
         </div>
         <h1 class="slide-title">Demo Usuario (1/2): <span class="hl">Marketplace &amp; Gemelo 3D</span></h1>
         <p class="slide-sub">Paso 1: Descubrimiento de catálogo multimarca en <code>/marketplace</code> · Paso 2: Creación del cuerpo real en cm en <code>/avatar</code>.</p>
@@ -1311,16 +1364,13 @@
             </div>
             <ul class="slide-points">
               <li class="slide-point">
-                <span class="step-chip">1</span>
-                <span><strong>Explorar la Tienda (<code>/marketplace</code>):</strong> Búsqueda por título, código o corte (<em>Recto, Chupín, Mom, Ancho, Oxford, Bermuda, Pollera</em>) y grilla adaptable con precios, colores e ingreso al probador 3D.</span>
+                <span><strong>1. Explorar la Tienda (<code>/marketplace</code>):</strong> Búsqueda por título, código o corte (<em>Recto, Chupín, Mom, Ancho, Oxford, Bermuda, Pollera</em>) y grilla adaptable con precios, colores e ingreso al probador 3D.</span>
               </li>
               <li class="slide-point">
-                <span class="step-chip">2</span>
-                <span><strong>Configurar Gemelo Digital (<code>/avatar</code>):</strong> Creación de hasta <strong>10 avatares por cuenta</strong> (propios o familiares). Controles en <code>cm</code> reales: <em>Altura, Pecho, Busto, Cintura, Abdomen, Cadera, Muslo, Brazo y Cuello</em>.</span>
+                <span><strong>2. Configurar Gemelo Digital (<code>/avatar</code>):</strong> Creación de hasta <strong>10 avatares por cuenta</strong> (propios o familiares). Controles en <code>cm</code> reales: <em>Altura, Pecho, Busto, Cintura, Abdomen, Cadera, Muslo, Brazo y Cuello</em>.</span>
               </li>
               <li class="slide-point">
-                <span class="step-chip">2b</span>
-                <span><strong>Aspecto Visual y Accesorios:</strong> Tono de piel, corte y color de pelo, vestimenta base y activación de anteojos y reloj guardados en la base de datos.</span>
+                <span><strong>2b. Aspecto Visual y Accesorios:</strong> Tono de piel, corte y color de pelo, vestimenta base y activación de anteojos y reloj guardados en la base de datos.</span>
               </li>
             </ul>
             <div class="card-footer-strip strip-blue">
@@ -1328,7 +1378,7 @@
             </div>
           </div>
 
-          <div class="glass-card screenshot-card highlight">
+          <div class="glass-card screenshot-card">
             <div class="view-tabs">
               <button type="button" class="view-tab active" onclick="switchTab(5, 'market', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,64l-12.16,66.86A16,16,0,0,1,196.1,144H70.55L56,64Z" opacity="0.2"/><path d="M230.14,58.87A8,8,0,0,0,224,56H62.68L56.6,22.57A8,8,0,0,0,48.73,16H24a8,8,0,0,0,0,16h18L67.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,160,204a28,28,0,1,0,28-28H91.17a8,8,0,0,1-7.87-6.57L80.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,230.14,58.87ZM104,204a12,12,0,1,1-12-12A12,12,0,0,1,104,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,200,204Zm4-74.57A8,8,0,0,1,196.1,136H77.22L65.59,72H214.41Z"/></svg> Paso 1: Tienda</button>
               <button type="button" class="view-tab" onclick="switchTab(5, 'avatar', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M192,96a64,64,0,1,1-64-64A64,64,0,0,1,192,96Z" opacity="0.2"/><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg> Paso 2: Avatar (/avatar)</button>
@@ -1337,39 +1387,18 @@
 
             <div id="slide5-market" class="tab-pane active">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>localhost:3000/marketplace — Captura Real</span>
-                  <span>Paso 1 · Catálogo</span>
-                </div>
-                <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_marketplace.png', 'Paso 1 Usuario — Marketplace Público con Filtros por Corte y Colecciones (/marketplace)')">
-                  <img src="/images/slides/real_marketplace.png" alt="Captura real del Marketplace en /marketplace"/>
-                  <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:13px;height:13px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar captura</span>
-                </button>
+                <img src="/images/slides/real_marketplace.png" alt="Captura real del Marketplace en /marketplace"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
               </div>
             </div>
 
             <div id="slide5-avatar" class="tab-pane">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>localhost:3000/avatar — Captura Real</span>
-                  <span>Paso 2 · Gemelo 3D cm</span>
-                </div>
-                <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_avatar_editor.png', 'Paso 2 Usuario — Editor Antropométrico Multi-Avatar en Centímetros (/avatar)')">
-                  <img src="/images/slides/real_avatar_editor.png" alt="Captura real del Editor de Avatar 3D en /avatar"/>
-                  <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:13px;height:13px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar captura</span>
-                </button>
+                <img src="/images/slides/real_avatar_editor.png" alt="Captura real del Editor de Avatar 3D en /avatar"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
               </div>
             </div>
 
             <div id="slide5-video" class="tab-pane">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>Recorrido Animado B2C (Tienda → Avatar → Calce → Compra)</span>
-                  <span>Clip MP4</span>
-                </div>
                 <video src="/videos/slides/demo_b2c.mp4" autoplay loop muted playsinline controls style="width:100%; height:100%; flex:1 1 0; min-height:0; object-fit:cover; background:#eef3f9; display:block;"></video>
               </div>
             </div>
@@ -1378,7 +1407,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Alterna las pestañas Paso 1 / Paso 2 para ver ambas pantallas reales de la app</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Demo Usuario 2/2 <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1390,8 +1419,7 @@
     <section class="slide" data-slide="6">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M247.11,78.77l-19.27,36.81a8.44,8.44,0,0,1-7.5,4.42H192V40l51.78,28.25A7.81,7.81,0,0,1,247.11,78.77Zm-238.22,0,19.27,36.81a8.44,8.44,0,0,0,7.5,4.42H64V40L12.22,68.25A7.81,7.81,0,0,0,8.89,78.77Z" opacity="0.2"/><path d="M247.59,61.22,195.83,33A8,8,0,0,0,192,32H160a8,8,0,0,0-8,8,24,24,0,0,1-48,0,8,8,0,0,0-8-8H64a8,8,0,0,0-3.84,1L8.41,61.22A15.76,15.76,0,0,0,1.82,82.48l19.27,36.81A16.37,16.37,0,0,0,35.67,128H56v80a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16V128h20.34a16.37,16.37,0,0,0,14.58-8.71l19.27-36.81A15.76,15.76,0,0,0,247.59,61.22ZM35.67,112a.62.62,0,0,1-.41-.13L16.09,75.26,56,53.48V112ZM184,208H72V48h16.8a40,40,0,0,0,78.38,0H184Zm36.75-96.14a.55.55,0,0,1-.41.14H200V53.48l39.92,21.78Z"/></svg> DEMO CLIENTE (B2C) · PASOS 3 Y 4</span>
-          <span class="slide-num-indicator">06 / 17</span>
+          <span class="slide-num-indicator">06 / 18</span>
         </div>
         <h1 class="slide-title">Demo Usuario (2/2): <span class="hl">Probador 3D &amp; Checkout</span></h1>
         <p class="slide-sub">Paso 3: Prueba virtual con diagnóstico <code>± cm</code> en <code>/product/1</code> · Paso 4: Carrito por variantes y orden en <code>/cart</code>.</p>
@@ -1399,57 +1427,35 @@
 
       <div class="slide-body">
         <div class="grid-2" style="grid-template-columns: 1.12fr 0.88fr;">
-          <div class="glass-card screenshot-card highlight">
+          <div class="glass-card screenshot-card">
             <div class="view-tabs">
-              <button type="button" class="view-tab active" onclick="switchTab(6, 'compare', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M229.66,90.34,90.34,229.66a8,8,0,0,1-11.31,0L26.34,177a8,8,0,0,1,0-11.31L165.66,26.34a8,8,0,0,1,11.31,0L229.66,79A8,8,0,0,1,229.66,90.34Z" opacity="0.2"/><path d="M235.32,73.37,182.63,20.69a16,16,0,0,0-22.63,0L20.68,160a16,16,0,0,0,0,22.63l52.69,52.68a16,16,0,0,0,22.63,0L235.32,96A16,16,0,0,0,235.32,73.37ZM84.68,224,32,171.31l32-32,26.34,26.35a8,8,0,0,0,11.32-11.32L75.31,128,96,107.31l26.34,26.35a8,8,0,0,0,11.32-11.32L107.31,96,128,75.31l26.34,26.35a8,8,0,0,0,11.32-11.32L139.31,64l32-32L224,84.69Z"/></svg> Comparativa Calce (-5 cm vs Ideal)</button>
+              <button type="button" class="view-tab active" onclick="switchTab(6, 'tight', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg> Talle Chico (-5 cm)</button>
+              <button type="button" class="view-tab" onclick="switchTab(6, 'fit', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg> Calce Ideal (0 cm)</button>
               <button type="button" class="view-tab" onclick="switchTab(6, 'tryon', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M128,129.09V232a8,8,0,0,1-3.84-1l-88-48.16a8,8,0,0,1-4.16-7V80.2a8,8,0,0,1,.7-3.27Z" opacity="0.2"/><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32h0l80.34,44L128,120,47.66,76ZM40,90l80,43.78v85.79L40,175.82Zm96,129.57V133.82L216,90v85.78Z"/></svg> Paso 3: Probador 3D</button>
               <button type="button" class="view-tab" onclick="switchTab(6, 'cart', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,64l-12.16,66.86A16,16,0,0,1,196.1,144H70.55L56,64Z" opacity="0.2"/><path d="M230.14,58.87A8,8,0,0,0,224,56H62.68L56.6,22.57A8,8,0,0,0,48.73,16H24a8,8,0,0,0,0,16h18L67.56,172.29a24,24,0,0,0,5.33,11.27,28,28,0,1,0,44.4,8.44h45.42A27.75,27.75,0,0,0,160,204a28,28,0,1,0,28-28H91.17a8,8,0,0,1-7.87-6.57L80.13,152h116a24,24,0,0,0,23.61-19.71l12.16-66.86A8,8,0,0,0,230.14,58.87ZM104,204a12,12,0,1,1-12-12A12,12,0,0,1,104,204Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,200,204Zm4-74.57A8,8,0,0,1,196.1,136H77.22L65.59,72H214.41Z"/></svg> Paso 4: Carrito (/cart)</button>
             </div>
 
-            <div id="slide6-compare" class="tab-pane active">
-              <div class="split-compare">
-                <div class="compare-tile">
-                  <div class="compare-head tight"><span>Talle Chico (30)</span><span>-5 cm cintura</span></div>
-                  <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_tryon_3d.png', 'Comparativa Antes: Talle Chico (-5 cm cintura) en /product/1')">
-                    <img src="/images/slides/real_tryon_3d.png" alt="Talle ajustado -5 cm en /product/1"/>
-                    <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:12px;height:12px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar</span>
-                  </button>
-                </div>
-                <div class="compare-tile">
-                  <div class="compare-head ideal"><span>Talle Óptimo (32)</span><span>Calce Ideal (0 cm)</span></div>
-                  <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_tryon_3d_fit.png', 'Comparativa Después: Calce Recomendado (0 cm cintura) en /product/1')">
-                    <img src="/images/slides/real_tryon_3d_fit.png" alt="Talle ideal 0 cm en /product/1"/>
-                    <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:12px;height:12px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar</span>
-                  </button>
-                </div>
+            <div id="slide6-tight" class="tab-pane active">
+              <div class="app-frame">
+                <img src="/images/slides/real_tryon_3d.png" alt="Talle Chico (-5 cm cintura) en /product/1"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
+              </div>
+            </div>
+
+            <div id="slide6-fit" class="tab-pane">
+              <div class="app-frame">
+                <img src="/images/slides/real_tryon_3d_fit.png" alt="Talle Óptimo Calce Ideal (0 cm) en /product/1"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
               </div>
             </div>
 
             <div id="slide6-tryon" class="tab-pane">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>localhost:3000/product/1 — Captura Real</span>
-                  <span>Paso 3 · Calce ±cm</span>
-                </div>
-                <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_tryon_3d.png', 'Paso 3 Usuario — Probador Virtual 3D con Selector de Avatar y Diagnóstico Antropométrico en /product/1')">
-                  <img src="/images/slides/real_tryon_3d.png" alt="Captura real del Probador 3D en /product/1"/>
-                  <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:13px;height:13px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar captura</span>
-                </button>
+                <img src="/images/slides/real_tryon_3d.png" alt="Captura real del Probador 3D en /product/1"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
               </div>
             </div>
 
             <div id="slide6-cart" class="tab-pane">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>localhost:3000/cart — Captura Real</span>
-                  <span>Paso 4 · Checkout</span>
-                </div>
-                <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_cart.png', 'Paso 4 Usuario — Carrito Persistente con Variantes (Talle/Color) y Resumen de Compra (/cart)')">
-                  <img src="/images/slides/real_cart.png" alt="Captura real del Carrito y Checkout en /cart"/>
-                  <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:13px;height:13px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar captura</span>
-                </button>
+                <img src="/images/slides/real_cart.png" alt="Captura real del Carrito y Checkout en /cart"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
               </div>
             </div>
           </div>
@@ -1464,16 +1470,13 @@
             </div>
             <ul class="slide-points">
               <li class="slide-point">
-                <span class="step-chip emerald">3</span>
-                <span><strong>Probador 3D Multi-Avatar (<code>/product/1</code>):</strong> Elegí entre tus avatares guardados, rotá el modelo 360° y cambiá talle (<code>28</code>..<code>36</code>) y color. Si falta cintura o cadera, muestra tensión exacta en cm (ej. <em>Talla Chica -5 cm</em>).</span>
+                <span><strong>3. Probador 3D Multi-Avatar (<code>/product/1</code>):</strong> Elegí entre tus avatares guardados, rotá el modelo 360° y cambiá talle (<code>28</code>..<code>36</code>) y color. Si falta cintura o cadera, muestra tensión exacta en cm (ej. <em>Talla Chica -5 cm</em>).</span>
               </li>
               <li class="slide-point">
-                <span class="step-chip emerald">3b</span>
-                <span><strong>Diagnóstico Ponderado en Vivo:</strong> <code>calculateFitDiagnostic</code> pondera <code>55% Cintura · 35% Cadera · 10% Muslo</code> al instante en el navegador, sin consumir GPU del servidor.</span>
+                <span><strong>3b. Diagnóstico Ponderado en Vivo:</strong> <code>calculateFitDiagnostic</code> pondera <code>55% Cintura · 35% Cadera · 10% Muslo</code> al instante en el navegador, sin consumir GPU del servidor.</span>
               </li>
               <li class="slide-point">
-                <span class="step-chip emerald">4</span>
-                <span><strong>Carrito y Compra (<code>/cart</code>):</strong> Agrupa ítems por <code>(prenda, talle, color)</code> (hasta 99 u.), ajusta cantidades y al confirmar crea la orden congelando el precio vigente de cada prenda.</span>
+                <span><strong>4. Carrito y Compra (<code>/cart</code>):</strong> Agrupa ítems por <code>(prenda, talle, color)</code> (hasta 99 u.), ajusta cantidades y al confirmar crea la orden congelando el precio vigente de cada prenda.</span>
               </li>
             </ul>
             <div class="card-footer-strip strip-emerald">
@@ -1484,7 +1487,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Recorrido B2C completo · A continuación: experiencia B2B para Marcas</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Demo Marca 1/2 <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1496,8 +1499,7 @@
     <section class="slide" data-slide="7">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,96v16a32,32,0,0,1-64,0V96H96v16a32,32,0,0,1-64,0V96L46.34,45.8A8,8,0,0,1,54,40H202a8,8,0,0,1,7.69,5.8Z" opacity="0.2"/><path d="M231.69,93.81,217.35,43.6A16.07,16.07,0,0,0,202,32H54A16.07,16.07,0,0,0,38.65,43.6L24.31,93.81A7.94,7.94,0,0,0,24,96v16a40,40,0,0,0,16,32v72a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V144a40,40,0,0,0,16-32V96A7.94,7.94,0,0,0,231.69,93.81ZM54,48H202l11.42,40H42.61Zm98,56v8a24,24,0,0,1-48,0v-8ZM51.06,132.2A24,24,0,0,1,40,112v-8H88v8a24,24,0,0,1-35.12,21.26A7.88,7.88,0,0,0,51.06,132.2ZM200,208H56V151.2a40.57,40.57,0,0,0,8,.8,40,40,0,0,0,32-16,40,40,0,0,0,64,0,40,40,0,0,0,32,16,40.57,40.57,0,0,0,8-.8Zm16-96a24,24,0,0,1-11.07,20.2,8.08,8.08,0,0,0-1.8,1.05A24,24,0,0,1,168,112v-8h48Z"/></svg> DEMO MARCA (B2B) · PASOS 1 Y 2</span>
-          <span class="slide-num-indicator">07 / 17</span>
+          <span class="slide-num-indicator">07 / 18</span>
         </div>
         <h1 class="slide-title">Demo Marca (1/2): <span class="hl">Catálogo &amp; Estudio 3D Boutique</span></h1>
         <p class="slide-sub">Paso 1: Administración CRUD en Pestaña 1 · Paso 2: Moldería técnica en cm y previsualización WebGL en Pestaña 2.</p>
@@ -1505,7 +1507,7 @@
 
       <div class="slide-body">
         <div class="grid-2" style="grid-template-columns: 1.12fr 0.88fr;">
-          <div class="glass-card screenshot-card highlight">
+          <div class="glass-card screenshot-card">
             <div class="view-tabs">
               <button type="button" class="view-tab active" onclick="switchTab(7, 'studio', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M128,129.09V232a8,8,0,0,1-3.84-1l-88-48.16a8,8,0,0,1-4.16-7V80.2a8,8,0,0,1,.7-3.27Z" opacity="0.2"/><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32h0l80.34,44L128,120,47.66,76ZM40,90l80,43.78v85.79L40,175.82Zm96,129.57V133.82L216,90v85.78Z"/></svg> Paso 2: Estudio 3D Boutique</button>
               <button type="button" class="view-tab" onclick="switchTab(7, 'catalog', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,64V192H88V64Z" opacity="0.2"/><path d="M80,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H88A8,8,0,0,1,80,64Zm136,56H88a8,8,0,1,0,0,16H216a8,8,0,0,0,0-16Zm0,64H88a8,8,0,1,0,0,16H216a8,8,0,0,0,0-16ZM44,52A12,12,0,1,0,56,64,12,12,0,0,0,44,52Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,116Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,180Z"/></svg> Paso 1: Catálogo de Marca</button>
@@ -1513,29 +1515,13 @@
 
             <div id="slide7-studio" class="tab-pane active">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>localhost:3000/brand/dashboard — Pestaña 2 Real</span>
-                  <span>Entorno Boutique 3D</span>
-                </div>
-                <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_brand_studio.png', 'Paso 2 Marca — Estudio 3D Boutique con Sliders de Moldería Base en cm y Variantes de Color')">
-                  <img src="/images/slides/real_brand_studio.png" alt="Captura real del Estudio 3D en Dashboard de Marca"/>
-                  <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:13px;height:13px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar captura</span>
-                </button>
+                <img src="/images/slides/real_brand_studio.png" alt="Captura real del Estudio 3D en Dashboard de Marca"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
               </div>
             </div>
 
             <div id="slide7-catalog" class="tab-pane">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>localhost:3000/brand/dashboard — Pestaña 1 Real</span>
-                  <span>Gestión CRUD</span>
-                </div>
-                <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_brand_catalog.png', 'Paso 1 Marca — Catálogo Tabular de Marca con Moldería en Centímetros y Acciones CRUD')">
-                  <img src="/images/slides/real_brand_catalog.png" alt="Captura real del Catálogo de Marca en /brand/dashboard"/>
-                  <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:13px;height:13px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar captura</span>
-                </button>
+                <img src="/images/slides/real_brand_catalog.png" alt="Captura real del Catálogo de Marca en /brand/dashboard"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
               </div>
             </div>
           </div>
@@ -1550,16 +1536,13 @@
             </div>
             <ul class="slide-points">
               <li class="slide-point">
-                <span class="step-chip purple">1</span>
-                <span><strong>Catálogo Completo (Pestaña 1):</strong> Buscar por título o código, filtrar por corte y revisar medidas en cm. Acciones en 1 clic: <strong>Ver</strong> en tienda, <strong>Duplicar</strong> variante, <strong>Editar</strong> (con re-análisis 3D opcional) o <strong>Eliminar</strong>.</span>
+                <span><strong>1. Catálogo Completo (Pestaña 1):</strong> Buscar por título o código, filtrar por corte y revisar medidas en cm. Acciones en 1 clic: <strong>Ver</strong> en tienda, <strong>Duplicar</strong> variante, <strong>Editar</strong> (con re-análisis 3D opcional) o <strong>Eliminar</strong>.</span>
               </li>
               <li class="slide-point">
-                <span class="step-chip purple">2</span>
-                <span><strong>Estudio 3D Paramétrico (Pestaña 2):</strong> Subir foto para análisis con <code>Gemini Vision</code> <strong>o</strong> ajustar manualmente moldería base (Talle M/32/42): cintura, cadera, muslo, entrepierna, botamanga y altura de tiro en <code>cm</code>.</span>
+                <span><strong>2. Estudio 3D Paramétrico (Pestaña 2):</strong> Subir foto para análisis con <code>Gemini Vision</code> <strong>o</strong> ajustar manualmente moldería base (Talle M/32/42): cintura, cadera, muslo, entrepierna, botamanga y altura de tiro en <code>cm</code>.</span>
               </li>
               <li class="slide-point">
-                <span class="step-chip purple">2b</span>
-                <span><strong>Acabado Textil en Vivo:</strong> Paleta de colores Hex, textura denim o sarga, elasticidad, desgaste (%), dobladillo y pinzas visibles al instante en el visor Boutique 3D.</span>
+                <span><strong>2b. Acabado Textil en Vivo:</strong> Paleta de colores Hex, textura denim o sarga, elasticidad, desgaste (%), dobladillo y pinzas visibles al instante en el visor Boutique 3D.</span>
               </li>
             </ul>
             <div class="card-footer-strip strip-purple">
@@ -1570,7 +1553,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Alterna entre Estudio 3D y Catálogo reales o amplía con un clic</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Demo Marca 2/2 <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1582,8 +1565,7 @@
     <section class="slide" data-slide="8">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M208,88H152V32Z" opacity="0.2"/><path d="M156,208a8,8,0,0,1-8,8H120a8,8,0,0,1-8-8V152a8,8,0,0,1,16,0v48h20A8,8,0,0,1,156,208ZM92.65,145.49a8,8,0,0,0-11.16,1.86L68,166.24,54.51,147.35a8,8,0,1,0-13,9.3L58.17,180,41.49,203.35a8,8,0,0,0,13,9.3L68,193.76l13.49,18.89a8,8,0,0,0,13-9.3L77.83,180l16.68-23.35A8,8,0,0,0,92.65,145.49Zm98.94,25.82c-4-1.16-8.14-2.35-10.45-3.84-1.25-.82-1.23-1-1.12-1.9a4.54,4.54,0,0,1,2-3.67c4.6-3.12,15.34-1.73,19.82-.56a8,8,0,0,0,4.07-15.48c-2.11-.55-21-5.22-32.83,2.76a20.58,20.58,0,0,0-8.95,14.94c-2,15.89,13.65,20.42,23,23.12,12.06,3.49,13.12,4.92,12.78,7.59-.31,2.41-1.26,3.33-2.15,3.93-4.6,3.06-15.16,1.56-19.54.35A8,8,0,0,0,173.93,214a60.63,60.63,0,0,0,15.19,2c5.82,0,12.3-1,17.49-4.46a20.81,20.81,0,0,0,9.18-15.23C218,179,201.48,174.17,191.59,171.31ZM40,112V40A16,16,0,0,1,56,24h96a8,8,0,0,1,5.66,2.34l56,56A8,8,0,0,1,216,88v24a8,8,0,1,1-16,0V96H152a8,8,0,0,1-8-8V40H56v72a8,8,0,0,1-16,0ZM160,80h28.68L160,51.31Z"/></svg> DEMO MARCA (B2B) · PASOS 3 Y 4</span>
-          <span class="slide-num-indicator">08 / 17</span>
+          <span class="slide-num-indicator">08 / 18</span>
         </div>
         <h1 class="slide-title">Demo Marca (2/2): <span class="hl">Excel Masivo &amp; Monitor Observer</span></h1>
         <p class="slide-sub">Paso 3: Ingesta asíncrona <code>.xlsx/.xls</code> en Pestaña 3 · Paso 4: Alertas Push y métricas acumuladas en vivo.</p>
@@ -1601,16 +1583,13 @@
             </div>
             <ul class="slide-points">
               <li class="slide-point">
-                <span class="step-chip">3</span>
-                <span><strong>Carga de Planilla Excel (<code>POST /catalog/upload</code>):</strong> <code>validators.py</code> valida el archivo y sus columnas (<code>SKU, Name, Fit, Size, Color, Price</code>). Registra el lote y responde <strong><code>202 Accepted</code></strong> sin trabar la pantalla.</span>
+                <span><strong>3. Carga de Planilla Excel (<code>POST /catalog/upload</code>):</strong> <code>validators.py</code> valida el archivo y sus columnas (<code>SKU, Name, Fit, Size, Color, Price</code>). Registra el lote y responde <strong><code>202 Accepted</code></strong> sin trabar la pantalla.</span>
               </li>
               <li class="slide-point">
-                <span class="step-chip">3b</span>
-                <span><strong>Fábrica + Caché MD5:</strong> <code>StrategyFactory.create_bulk_catalog()</code> agrega memoria caché (<code>CachingStrategyDecorator</code>) para no re-analizar fotos repetidas en el Excel.</span>
+                <span><strong>3b. Fábrica + Caché MD5:</strong> <code>StrategyFactory.create_bulk_catalog()</code> agrega memoria caché (<code>CachingStrategyDecorator</code>) para no re-analizar fotos repetidas en el Excel.</span>
               </li>
               <li class="slide-point">
-                <span class="step-chip">4</span>
-                <span><strong>Monitor de Alertas en Vivo (<code>GET /catalog/notifications</code>):</strong> <code>JobSubjectMixin</code> avisa cada cambio de estado (<code>SUBIDO → PROCESANDO → LISTO/ERROR</code>) a los 3 observadores.</span>
+                <span><strong>4. Monitor de Alertas en Vivo (<code>GET /catalog/notifications</code>):</strong> <code>JobSubjectMixin</code> avisa cada cambio de estado (<code>SUBIDO → PROCESANDO → LISTO/ERROR</code>) a los 3 observadores.</span>
               </li>
             </ul>
             <div class="card-footer-strip strip-amber">
@@ -1618,7 +1597,7 @@
             </div>
           </div>
 
-          <div class="glass-card screenshot-card highlight">
+          <div class="glass-card screenshot-card">
             <div class="view-tabs">
               <button type="button" class="view-tab active" onclick="switchTab(8, 'excel', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M208,88H152V32Z" opacity="0.2"/><path d="M156,208a8,8,0,0,1-8,8H120a8,8,0,0,1-8-8V152a8,8,0,0,1,16,0v48h20A8,8,0,0,1,156,208ZM92.65,145.49a8,8,0,0,0-11.16,1.86L68,166.24,54.51,147.35a8,8,0,1,0-13,9.3L58.17,180,41.49,203.35a8,8,0,0,0,13,9.3L68,193.76l13.49,18.89a8,8,0,0,0,13-9.3L77.83,180l16.68-23.35A8,8,0,0,0,92.65,145.49Zm98.94,25.82c-4-1.16-8.14-2.35-10.45-3.84-1.25-.82-1.23-1-1.12-1.9a4.54,4.54,0,0,1,2-3.67c4.6-3.12,15.34-1.73,19.82-.56a8,8,0,0,0,4.07-15.48c-2.11-.55-21-5.22-32.83,2.76a20.58,20.58,0,0,0-8.95,14.94c-2,15.89,13.65,20.42,23,23.12,12.06,3.49,13.12,4.92,12.78,7.59-.31,2.41-1.26,3.33-2.15,3.93-4.6,3.06-15.16,1.56-19.54.35A8,8,0,0,0,173.93,214a60.63,60.63,0,0,0,15.19,2c5.82,0,12.3-1,17.49-4.46a20.81,20.81,0,0,0,9.18-15.23C218,179,201.48,174.17,191.59,171.31ZM40,112V40A16,16,0,0,1,56,24h96a8,8,0,0,1,5.66,2.34l56,56A8,8,0,0,1,216,88v24a8,8,0,1,1-16,0V96H152a8,8,0,0,1-8-8V40H56v72a8,8,0,0,1-16,0ZM160,80h28.68L160,51.31Z"/></svg> Excel y Alertas en Vivo</button>
               <button type="button" class="view-tab" onclick="switchTab(8, 'videob2b', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M184,120v61.65a8,8,0,0,1-2.34,5.65l-34.35,34.35a8,8,0,0,1-13.57-4.53L128,176ZM136,72H74.35a8,8,0,0,0-5.65,2.34L34.35,108.69a8,8,0,0,0,4.53,13.57L80,128ZM40,216c37.65,0,50.69-19.69,54.56-28.18L68.18,161.44C59.69,165.31,40,178.35,40,216Z" opacity="0.2"/><path d="M223.85,47.12a16,16,0,0,0-15-15c-12.58-.75-44.73.4-71.41,27.07L132.69,64H74.36A15.91,15.91,0,0,0,63,68.68L28.7,103a16,16,0,0,0,9.07,27.16l38.47,5.37,44.21,44.21,5.37,38.49a15.94,15.94,0,0,0,10.78,12.92,16.11,16.11,0,0,0,5.1.83A15.91,15.91,0,0,0,153,227.3L187.32,193A15.91,15.91,0,0,0,192,181.64V123.31l4.77-4.77C223.45,91.86,224.6,59.71,223.85,47.12ZM74.36,80h42.33L77.16,119.52,40,114.34Zm74.41-9.45a76.65,76.65,0,0,1,59.11-22.47,76.46,76.46,0,0,1-22.42,59.16L128,164.68,91.32,128ZM176,181.64,141.67,216l-5.19-37.17L176,139.31Zm-74.16,9.5C97.34,201,82.29,224,40,224a8,8,0,0,1-8-8c0-42.29,23-57.34,32.86-61.85a8,8,0,0,1,6.64,14.56c-6.43,2.93-20.62,12.36-23.12,38.91,26.55-2.5,36-16.69,38.91-23.12a8,8,0,1,1,14.56,6.64Z"/></svg> Video Flujo Marca B2B</button>
@@ -1626,25 +1605,12 @@
 
             <div id="slide8-excel" class="tab-pane active">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>localhost:3000/brand/dashboard — Pestaña 3 Real</span>
-                  <span>Excel + Monitor Observer</span>
-                </div>
-                <button type="button" class="screenshot-btn" onclick="openLightbox('/images/slides/real_brand_excel.png', 'Pasos 3 y 4 Marca — Carga Masiva Excel y Monitor de Eventos Observer en Tiempo Real (/brand/dashboard)')">
-                  <img src="/images/slides/real_brand_excel.png" alt="Captura real de Carga Masiva Excel y Monitor Observer en /brand/dashboard"/>
-                  <span class="zoom-hint"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:13px;height:13px;" aria-hidden="true"><path d="M208,48V208H48V48Z" opacity="0.2"/><path d="M216,48V96a8,8,0,0,1-16,0V67.31l-42.34,42.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM98.34,146.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l42.35-42.34a8,8,0,0,0-11.32-11.32ZM208,152a8,8,0,0,0-8,8v28.69l-42.34-42.35a8,8,0,0,0-11.32,11.32L188.69,200H160a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V160A8,8,0,0,0,208,152ZM67.31,56H96a8,8,0,0,0,0-16H48a8,8,0,0,0-8,8V96a8,8,0,0,0,16,0V67.31l42.34,42.35a8,8,0,0,0,11.32-11.32Z"/></svg> Ampliar captura</span>
-                </button>
+                <img src="/images/slides/real_brand_excel.png" alt="Captura real de Carga Masiva Excel y Monitor Observer en /brand/dashboard"/ onclick="openLightbox(this.src, this.alt)" style="cursor: zoom-in;"/>
               </div>
             </div>
 
             <div id="slide8-videob2b" class="tab-pane">
               <div class="app-frame">
-                <div class="app-frame-bar">
-                  <div class="traffic-dots"><span style="background:#ef4444;"></span><span style="background:#f59e0b;"></span><span style="background:#22c55e;"></span></div>
-                  <span>Recorrido Animado Marca B2B (Catálogo → Estudio 3D → Excel)</span>
-                  <span>Clip MP4</span>
-                </div>
                 <video src="/videos/slides/demo_b2b.mp4" autoplay loop muted playsinline controls style="width:100%; height:100%; flex:1 1 0; min-height:0; object-fit:cover; background:#eef3f9; display:block;"></video>
               </div>
             </div>
@@ -1653,7 +1619,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Validación de Observer Push y Batch Upload verificada en <code>test_catalog.py</code> y <code>test_patterns.py</code></span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Arquitectura &amp; ERD <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1665,8 +1631,7 @@
     <section class="slide" data-slide="9">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,56V200a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V56a8,8,0,0,1,8-8H216A8,8,0,0,1,224,56Z" opacity="0.2"/><path d="M128,128a8,8,0,0,1-3,6.25l-40,32a8,8,0,1,1-10-12.5L107.19,128,75,102.25a8,8,0,1,1,10-12.5l40,32A8,8,0,0,1,128,128Zm48,24H136a8,8,0,0,0,0,16h40a8,8,0,0,0,0-16Zm56-96V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z"/></svg> ARQUITECTURA &amp; MODELO DE DATOS</span>
-          <span class="slide-num-indicator">09 / 17</span>
+          <span class="slide-num-indicator">09 / 18</span>
         </div>
         <h1 class="slide-title">Arquitectura Limpia y <span class="hl">Modelo de 13 Tablas</span></h1>
         <p class="slide-sub">Capas estrictas en FastAPI + 5 Route Groups Next.js 16 + esquema relacional completo de <code>diagrama_entidad_relacion.md</code>.</p>
@@ -1699,9 +1664,12 @@
           <div class="glass-card">
             <h3 class="card-title">Modularización Frontend &amp; Backend</h3>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>5 Grupos de Rutas (App Router):</strong> <code>(auth)</code>, <code>(brand)</code>, <code>(info)</code>, <code>(legal)</code> y <code>(shop)</code> mantienen ordenado el código sin cambiar las URLs públicas.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>5 Módulos API REST:</strong> <code>/auth</code>, <code>/users</code>, <code>/catalog</code>, <code>/tryon</code> y <code>/commerce</code> con manejo global de errores (<code>409</code>, <code>422</code>, <code>403</code>, <code>500</code>).</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Inicio Automático Seguro:</strong> <code>upgrade_schema(engine)</code> actualiza tablas y soporta hasta <code>0..10</code> avatares al arrancar el servidor.</span></li>
+              <li class="slide-point">
+                <span><strong>5 Grupos de Rutas (App Router):</strong> <code>(auth)</code>, <code>(brand)</code>, <code>(info)</code>, <code>(legal)</code> y <code>(shop)</code> mantienen ordenado el código sin cambiar las URLs públicas.</span></li>
+              <li class="slide-point">
+                <span><strong>5 Módulos API REST:</strong> <code>/auth</code>, <code>/users</code>, <code>/catalog</code>, <code>/tryon</code> y <code>/commerce</code> con manejo global de errores (<code>409</code>, <code>422</code>, <code>403</code>, <code>500</code>).</span></li>
+              <li class="slide-point">
+                <span><strong>Inicio Automático Seguro:</strong> <code>upgrade_schema(engine)</code> actualiza tablas y soporta hasta <code>0..10</code> avatares al arrancar el servidor.</span></li>
             </ul>
             <div class="card-footer-strip strip-blue">27 rutas REST documentadas en /docs (OpenAPI)</div>
           </div>
@@ -1779,7 +1747,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Arquitectura modular por capas; cero SQL crudo dentro de routers HTTP</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Diagramas de Secuencia UML <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1791,15 +1759,14 @@
     <section class="slide" data-slide="10">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M240,128l-48,40H64L16,128,64,88H192Z" opacity="0.2"/><path d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.3Zm176,27.7-48-40a8,8,0,1,0-10.24,12.3L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"/></svg> COMPORTAMIENTO UML · DIAGRAMAS DE SECUENCIA</span>
-          <span class="slide-num-indicator">10 / 17</span>
+          <span class="slide-num-indicator">10 / 18</span>
         </div>
         <h1 class="slide-title">Diagramas de <span class="hl">Secuencia UML</span> Clave</h1>
         <p class="slide-sub">Flujos verificados en <code>docs/diagrama_secuencia.md</code>: alterná entre Alta/Rollback, Excel+Observer y Try-On/Checkout.</p>
       </div>
 
       <div class="slide-body">
-        <div class="glass-card highlight" style="flex: 1 1 auto; min-height: 0; padding: 14px 18px; gap: 12px;">
+        <div class="glass-card" style="flex: 1 1 auto; min-height: 0; padding: 14px 18px; gap: 12px;">
           <div class="view-tabs">
             <button type="button" class="view-tab active" onclick="switchTab(10, 'seq1', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M194.82,151.43l-55.09,20.3-20.3,55.09a7.92,7.92,0,0,1-14.86,0l-20.3-55.09-55.09-20.3a7.92,7.92,0,0,1,0-14.86l55.09-20.3,20.3-55.09a7.92,7.92,0,0,1,14.86,0l20.3,55.09,55.09,20.3A7.92,7.92,0,0,1,194.82,151.43Z" opacity="0.2"/><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg> 1. Alta/Edición + IA vs Paramétrica</button>
             <button type="button" class="view-tab" onclick="switchTab(10, 'seq4', this)"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M208,192H48a8,8,0,0,1-6.88-12C47.71,168.6,56,147.81,56,112a72,72,0,0,1,144,0c0,35.82,8.3,56.6,14.9,68A8,8,0,0,1,208,192Z" opacity="0.2"/><path d="M224,71.1a8,8,0,0,1-10.78-3.42,94.13,94.13,0,0,0-33.46-36.91,8,8,0,1,1,8.54-13.54,111.46,111.46,0,0,1,39.12,43.09A8,8,0,0,1,224,71.1ZM35.71,72a8,8,0,0,0,7.1-4.32A94.13,94.13,0,0,1,76.27,30.77a8,8,0,1,0-8.54-13.54A111.46,111.46,0,0,0,28.61,60.32,8,8,0,0,0,35.71,72Zm186.1,103.94A16,16,0,0,1,208,200H167.2a40,40,0,0,1-78.4,0H48a16,16,0,0,1-13.79-24.06C43.22,160.39,48,138.28,48,112a80,80,0,0,1,160,0C208,138.27,212.78,160.38,221.81,175.94ZM150.62,200H105.38a24,24,0,0,0,45.24,0ZM208,184c-10.64-18.27-16-42.49-16-72a64,64,0,0,0-128,0c0,29.52-5.38,53.74-16,72Z"/></svg> 2. Carga Masiva Excel + Decorator + Observer</button>
@@ -1914,7 +1881,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Todos los flujos interactúan con endpoints RESTful reales verificados en Pytest</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Patrones GoF, SOLID &amp; Estados <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -1926,8 +1893,7 @@
     <section class="slide" data-slide="11">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M204,168a28,28,0,0,0,12-2.69V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V165.31a28,28,0,1,1,0-50.62V72a8,8,0,0,1,8-8h46.69a28,28,0,1,1,50.61,0H208a8,8,0,0,1,8,8v42.69A28,28,0,1,0,204,168Z" opacity="0.2"/><path d="M220.27,158.54a8,8,0,0,0-7.7-.46,20,20,0,1,1,0-36.16A8,8,0,0,0,224,114.69V72a16,16,0,0,0-16-16H171.78a35.36,35.36,0,0,0,.22-4,36.15,36.15,0,0,0-11.36-26.25,36,36,0,0,0-60.55,23.63,36.56,36.56,0,0,0,.14,6.62H64A16,16,0,0,0,48,72v32.22a35.36,35.36,0,0,0-4-.22,36.12,36.12,0,0,0-26.24,11.36,35.7,35.7,0,0,0-9.69,27,36.08,36.08,0,0,0,33.31,33.6,36.56,36.56,0,0,0,6.62-.14V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V165.31A8,8,0,0,0,220.27,158.54ZM208,208H64V165.31a8,8,0,0,0-11.43-7.23,20,20,0,1,1,0-36.16A8,8,0,0,0,64,114.69V72h46.69a8,8,0,0,0,7.23-11.43,20,20,0,1,1,36.16,0A8,8,0,0,0,161.31,72H208v32.23a35.68,35.68,0,0,0-6.62-.14A36,36,0,0,0,204,176a35.36,35.36,0,0,0,4-.22Z"/></svg> PATRONES GOF · SOLID · DIAGRAMAS DE ESTADO</span>
-          <span class="slide-num-indicator">11 / 17</span>
+          <span class="slide-num-indicator">11 / 18</span>
         </div>
         <h1 class="slide-title">Patrones <span class="hl">GoF</span>, Principios <span class="hl">SOLID</span> y Estados</h1>
         <p class="slide-sub">5 patrones aplicados en el servidor + principios SOLID (<code>patrones_solid.md</code>) + ciclos de vida (<code>diagrama_clases.md</code>).</p>
@@ -1964,10 +1930,14 @@
           <div class="glass-card" style="padding: 14px 18px; gap: 8px;">
             <h3 class="card-title">Mapeo Verificado de los 5 Principios SOLID</h3>
             <ul class="slide-points" style="gap: 6px;">
-              <li class="slide-point" style="padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>S · SRP:</strong> <code>validators.py</code>, DTOs y 5 Repositories con responsabilidad aislada.</span></li>
-              <li class="slide-point" style="padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>O · OCP:</strong> Nuevos decorators o estrategias IA se apilan sin modificar routers ni Gemini.</span></li>
-              <li class="slide-point" style="padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>L · LSP:</strong> <code>MockTryOnStrategy</code> y decorators sustituyen transparentemente a <code>VirtualTryOnStrategy</code>.</span></li>
-              <li class="slide-point" style="padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>I · ISP / D · DIP:</strong> Contratos mínimos (<code>IJobObserver</code>) inyectados vía FastAPI <code>Depends()</code>.</span></li>
+              <li class="slide-point" style="padding: 7px 11px;">
+                <span><strong>S · SRP:</strong> <code>validators.py</code>, DTOs y 5 Repositories con responsabilidad aislada.</span></li>
+              <li class="slide-point" style="padding: 7px 11px;">
+                <span><strong>O · OCP:</strong> Nuevos decorators o estrategias IA se apilan sin modificar routers ni Gemini.</span></li>
+              <li class="slide-point" style="padding: 7px 11px;">
+                <span><strong>L · LSP:</strong> <code>MockTryOnStrategy</code> y decorators sustituyen transparentemente a <code>VirtualTryOnStrategy</code>.</span></li>
+              <li class="slide-point" style="padding: 7px 11px;">
+                <span><strong>I · ISP / D · DIP:</strong> Contratos mínimos (<code>IJobObserver</code>) inyectados vía FastAPI <code>Depends()</code>.</span></li>
             </ul>
           </div>
 
@@ -2009,7 +1979,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Arquitectura validada en <code>docs/patrones_solid.md</code> y <code>docs/diagrama_clases.md</code></span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Motor 3D Procedural <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -2021,8 +1991,7 @@
     <section class="slide" data-slide="12">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M128,129.09V232a8,8,0,0,1-3.84-1l-88-48.16a8,8,0,0,1-4.16-7V80.2a8,8,0,0,1,.7-3.27Z" opacity="0.2"/><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32h0l80.34,44L128,120,47.66,76ZM40,90l80,43.78v85.79L40,175.82Zm96,129.57V133.82L216,90v85.78Z"/></svg> COMPUTACIÓN GRÁFICA &amp; ANTROPOMETRÍA</span>
-          <span class="slide-num-indicator">12 / 17</span>
+          <span class="slide-num-indicator">12 / 18</span>
         </div>
         <h1 class="slide-title">Motor 3D Procedural: <span class="hl">LoftGeometry &amp; Calce</span></h1>
         <p class="slide-sub">Lofting continuo Catmull-Rom C<sup>1</sup> (<code>loftGeometry.ts</code>) conducido por centímetros reales del cuerpo y la moldería.</p>
@@ -2030,7 +1999,7 @@
 
       <div class="slide-body">
         <div class="grid-2">
-          <div class="glass-card highlight">
+          <div class="glass-card">
             <div class="card-header-icon">
               <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M128,129.09V232a8,8,0,0,1-3.84-1l-88-48.16a8,8,0,0,1-4.16-7V80.2a8,8,0,0,1,.7-3.27Z" opacity="0.2"/><path d="M223.68,66.15,135.68,18h0a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32h0l80.34,44L128,120,47.66,76ZM40,90l80,43.78v85.79L40,175.82Zm96,129.57V133.82L216,90v85.78Z"/></svg></div>
               <div>
@@ -2039,10 +2008,14 @@
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Superficie Continua (<code>LoftGeometry</code>):</strong> Anillos anatómicos interpolados en <code>loftGeometry.ts</code> que comparten forma entre maniquí y prenda sin uniones rotas.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>9 Medidas en Centímetros Reales:</strong> Altura, pecho, busto, cintura, abdomen, cadera, muslo, brazo y cuello, más tono de piel, pelo y accesorios.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Diagnóstico <code>calculateFitDiagnostic</code>:</strong> Pondera <strong>55% Cintura · 35% Cadera · 10% Muslo</strong> y muestra en 3D y texto dónde ajusta o sobra tela.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Materiales y Acabados Reales:</strong> Color Hex dinámico, 4 texturas textiles base, desgaste porcentual (%), pinzas frontales y dobladillo en el navegador.</span></li>
+              <li class="slide-point">
+                <span><strong>Superficie Continua (<code>LoftGeometry</code>):</strong> Anillos anatómicos interpolados en <code>loftGeometry.ts</code> que comparten forma entre maniquí y prenda sin uniones rotas.</span></li>
+              <li class="slide-point">
+                <span><strong>9 Medidas en Centímetros Reales:</strong> Altura, pecho, busto, cintura, abdomen, cadera, muslo, brazo y cuello, más tono de piel, pelo y accesorios.</span></li>
+              <li class="slide-point">
+                <span><strong>Diagnóstico <code>calculateFitDiagnostic</code>:</strong> Pondera <strong>55% Cintura · 35% Cadera · 10% Muslo</strong> y muestra en 3D y texto dónde ajusta o sobra tela.</span></li>
+              <li class="slide-point">
+                <span><strong>Materiales y Acabados Reales:</strong> Color Hex dinámico, 4 texturas textiles base, desgaste porcentual (%), pinzas frontales y dobladillo en el navegador.</span></li>
             </ul>
             <div class="card-footer-strip strip-blue">Three.js 0.185 · React Three Fiber 9.7 · @react-three/drei 10.7</div>
           </div>
@@ -2093,7 +2066,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Código fuente modular en <code>frontend/src/components/avatar/</code> y <code>frontend/src/lib/avatars.ts</code></span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Persistencia &amp; Rollbacks <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -2105,8 +2078,7 @@
     <section class="slide" data-slide="13">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,80c0,26.51-39.4,48-88,48S40,106.51,40,80s39.4-48,88-48S216,53.49,216,80Z" opacity="0.2"/><path d="M128,24C74.17,24,32,48.6,32,80v96c0,31.4,42.17,56,96,56s96-24.6,96-56V80C224,48.6,181.83,24,128,24Zm80,104c0,9.62-7.88,19.43-21.61,26.92C170.93,163.35,150.19,168,128,168s-42.93-4.65-58.39-13.08C55.88,147.43,48,137.62,48,128V111.36c17.06,15,46.23,24.64,80,24.64s62.94-9.68,80-24.64ZM69.61,53.08C85.07,44.65,105.81,40,128,40s42.93,4.65,58.39,13.08C200.12,60.57,208,70.38,208,80s-7.88,19.43-21.61,26.92C170.93,115.35,150.19,120,128,120s-42.93-4.65-58.39-13.08C55.88,99.43,48,89.62,48,80S55.88,60.57,69.61,53.08ZM186.39,202.92C170.93,211.35,150.19,216,128,216s-42.93-4.65-58.39-13.08C55.88,195.43,48,185.62,48,176V159.36c17.06,15,46.23,24.64,80,24.64s62.94-9.68,80-24.64V176C208,185.62,200.12,195.43,186.39,202.92Z"/></svg> INTEGRIDAD TRANSACCIONAL</span>
-          <span class="slide-num-indicator">13 / 17</span>
+          <span class="slide-num-indicator">13 / 18</span>
         </div>
         <h1 class="slide-title">Persistencia Relacional, <span class="hl">Atomicidad</span> e Inmutabilidad</h1>
         <p class="slide-sub">Diferenciales frente a un CRUD estándar: transacciones todo-o-nada ante fallos externos y aislamiento del historial contable.</p>
@@ -2123,9 +2095,12 @@
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Atomicidad ante Fallo Externo:</strong> El alta/edición con IA ejecuta <code>db.flush()</code> e invoca Gemini en <code>run_in_threadpool</code>; si lanza <code>AIServiceError</code>, revierte con <code>db.rollback()</code> sin dejar prendas huérfanas.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Inmutabilidad por Snapshot en Órdenes:</strong> Al confirmar el checkout se congelan precio y variante <code>(talle, color)</code> en <code>OrderItem</code>; ediciones o bajas futuras (<code>SET NULL</code>) no alteran compras cerradas.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Desacoplamiento ORM y Carga Eager:</strong> Los repositorios encapsulan SQLAlchemy 2.0 y precargan relaciones con <code>joinedload</code>, evitando consultas N+1 y manteniendo los routers libres de SQL.</span></li>
+              <li class="slide-point">
+                <span><strong>Atomicidad ante Fallo Externo:</strong> El alta/edición con IA ejecuta <code>db.flush()</code> e invoca Gemini en <code>run_in_threadpool</code>; si lanza <code>AIServiceError</code>, revierte con <code>db.rollback()</code> sin dejar prendas huérfanas.</span></li>
+              <li class="slide-point">
+                <span><strong>Inmutabilidad por Snapshot en Órdenes:</strong> Al confirmar el checkout se congelan precio y variante <code>(talle, color)</code> en <code>OrderItem</code>; ediciones o bajas futuras (<code>SET NULL</code>) no alteran compras cerradas.</span></li>
+              <li class="slide-point">
+                <span><strong>Desacoplamiento ORM y Carga Eager:</strong> Los repositorios encapsulan SQLAlchemy 2.0 y precargan relaciones con <code>joinedload</code>, evitando consultas N+1 y manteniendo los routers libres de SQL.</span></li>
             </ul>
             <div class="card-footer-strip strip-emerald">Motor Dual: SQLite local + PostgreSQL (psycopg2) sin cambiar dominio</div>
           </div>
@@ -2155,15 +2130,15 @@
         </div>
 
         <div class="grid-4">
-          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">13 Tablas Desacopladas</strong><p style="font-size: 0.8rem; color: var(--text-muted);">Separa catálogo comercial (<code>Garment</code>), gemelo 3D (<code>GarmentAsset</code>) e historial (<code>OrderItem</code>).</p></div>
-          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Ciclo de Vida Diferenciado</strong><p style="font-size: 0.8rem; color: var(--text-muted);"><code>delete_with_relations()</code> limpia carritos activos pero preserva órdenes (<code>SET NULL</code>).</p></div>
-          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Variantes por Línea</strong><p style="font-size: 0.8rem; color: var(--text-muted);">Consolidación en carrito por clave compuesta <code>(prenda, talle, color)</code> con tope 99 u.</p></div>
-          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 0.9rem;">Evolución de Esquema</strong><p style="font-size: 0.8rem; color: var(--text-muted);"><code>schema_upgrades.py</code> adapta el modelo 1→N multi-avatar al iniciar sin perder datos.</p></div>
+          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 1.02rem;">13 Tablas Desacopladas</strong><p style="font-size: 1.0rem; color: var(--text-muted);">Separa catálogo comercial (<code>Garment</code>), gemelo 3D (<code>GarmentAsset</code>) e historial (<code>OrderItem</code>).</p></div>
+          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 1.02rem;">Ciclo de Vida Diferenciado</strong><p style="font-size: 1.0rem; color: var(--text-muted);"><code>delete_with_relations()</code> limpia carritos activos pero preserva órdenes (<code>SET NULL</code>).</p></div>
+          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 1.02rem;">Variantes por Línea</strong><p style="font-size: 1.0rem; color: var(--text-muted);">Consolidación en carrito por clave compuesta <code>(prenda, talle, color)</code> con tope 99 u.</p></div>
+          <div class="glass-card" style="padding: 11px 15px; gap: 4px;"><strong style="color: var(--primary); font-size: 1.02rem;">Evolución de Esquema</strong><p style="font-size: 1.0rem; color: var(--text-muted);"><code>schema_upgrades.py</code> adapta el modelo 1→N multi-avatar al iniciar sin perder datos.</p></div>
         </div>
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Invariantes transaccionales verificadas en <code>test_commerce.py</code> y <code>test_catalog.py</code></span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Seguridad & RBAC <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -2175,8 +2150,7 @@
     <section class="slide" data-slide="14">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></svg> SEGURIDAD, RBAC & FRONTERAS</span>
-          <span class="slide-num-indicator">14 / 17</span>
+          <span class="slide-num-indicator">14 / 18</span>
         </div>
         <h1 class="slide-title">Seguridad de Dominio: <span class="hl">RBAC, Ownership</span> y Fronteras</h1>
         <p class="slide-sub">Aislamiento entre marcas y compradores, autorización declarativa por dependencia y validación binaria de entradas.</p>
@@ -2227,12 +2201,12 @@
           </div>
         </div>
 
-        <div class="glass-card highlight" style="padding: 15px 22px; flex: 0 0 auto;">
+        <div class="glass-card" style="padding: 15px 22px; flex: 0 0 auto;">
           <div style="display: flex; align-items: center; gap: 14px;">
             <div class="icon-box" style="width: 44px; height: 44px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M216,56v56c0,96-88,120-88,120S40,208,40,112V56a8,8,0,0,1,8-8H208A8,8,0,0,1,216,56Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></svg></div>
             <div>
               <h4 style="font-size: 1rem; font-weight: 800; color: var(--primary); margin-bottom: 3px;">Recuperación de Contraseña de Un Solo Uso (<code>/recuperar</code>)</h4>
-              <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.45;">
+              <p style="font-size: 1.0rem; color: var(--text-muted); line-height: 1.45;">
                 Evita enumeración de usuarios, no sirve para autenticar rutas de la API y vence a los <strong>30 minutos</strong>. Al ir ligado a la huella SHA-256 (<code>pwf</code>) de la clave actual, se invalida automáticamente apenas se completa el cambio.
               </p>
             </div>
@@ -2241,7 +2215,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Validado en <code>test_auth_users.py</code>, <code>test_catalog.py</code> y <code>test_extra.py</code></span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Requerimientos & Verificación <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -2253,8 +2227,7 @@
     <section class="slide" data-slide="15">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M208,216H48a8,8,0,0,1-6.86-12.12l30.48-50.8h0c13.23-2.48,32-1.41,56.37,10.92,32.25,16.33,54.75,12.91,67.5,7.65h0l19.34,32.23A8,8,0,0,1,208,216Z" opacity="0.2"/><path d="M221.69,199.77,160,96.92V40h8a8,8,0,0,0,0-16H88a8,8,0,0,0,0,16h8V96.92L34.31,199.77A16,16,0,0,0,48,224H208a16,16,0,0,0,13.72-24.23ZM110.86,103.25A7.93,7.93,0,0,0,112,99.14V40h32V99.14a7.93,7.93,0,0,0,1.14,4.11L183.36,167c-12,2.37-29.07,1.37-51.75-10.11-15.91-8.05-31.05-12.32-45.22-12.81ZM48,208l28.54-47.58c14.25-1.73,30.31,1.85,47.82,10.72,19,9.61,35,12.88,48,12.88a69.89,69.89,0,0,0,19.55-2.7L208,208Z"/></svg> TRAZABILIDAD & VERIFICACIÓN</span>
-          <span class="slide-num-indicator">15 / 17</span>
+          <span class="slide-num-indicator">15 / 18</span>
         </div>
         <h1 class="slide-title">Trazabilidad de Diseño y <span class="hl">122 Pruebas al 100%</span></h1>
         <p class="slide-sub">Testabilidad habilitada por sustitución polimórfica (LSP/DIP) y trazabilidad directa con RF, RNF e historias INVEST.</p>
@@ -2262,7 +2235,7 @@
 
       <div class="slide-body">
         <div class="grid-2">
-          <div class="glass-card highlight">
+          <div class="glass-card">
             <div style="display: flex; align-items: baseline; gap: 12px;">
               <span class="metric-val" style="font-size: 2.5rem;">122 / 122</span>
               <span style="font-weight: 800; color: #059669; font-size: 1.05rem;">APROBADAS (100%)</span>
@@ -2272,23 +2245,23 @@
             </p>
             <div style="display: flex; flex-direction: column; gap: 9px; flex: 1 1 auto; justify-content: center;">
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_extra.py — Validaciones binarias, archivos y casos borde</span><span>41 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.94rem; font-weight: 700; margin-bottom: 3px;"><span>test_extra.py — Validaciones binarias, archivos y casos borde</span><span>41 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: var(--primary); border-radius: 9999px;"></div></div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_patterns.py — Contratos Decorator (MD5), Observer Push y Factory</span><span>20 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.94rem; font-weight: 700; margin-bottom: 3px;"><span>test_patterns.py — Contratos Decorator (MD5), Observer Push y Factory</span><span>20 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: var(--primary); border-radius: 9999px;"></div></div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_commerce.py — Carrito por variante, snapshot pricing y CORS</span><span>18 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.94rem; font-weight: 700; margin-bottom: 3px;"><span>test_commerce.py — Carrito por variante, snapshot pricing y CORS</span><span>18 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: #0ea5e9; border-radius: 9999px;"></div></div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>test_catalog.py — Lotes Excel, rollback IA, ownership y alertas</span><span>13 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.94rem; font-weight: 700; margin-bottom: 3px;"><span>test_catalog.py — Lotes Excel, rollback IA, ownership y alertas</span><span>13 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: #0ea5e9; border-radius: 9999px;"></div></div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 3px;"><span>Avatares (9) · Autenticación (8) · IA Simulada (8) · Try-On/Main (5)</span><span>30 pruebas</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.94rem; font-weight: 700; margin-bottom: 3px;"><span>Avatares (9) · Autenticación (8) · IA Simulada (8) · Try-On/Main (5)</span><span>30 pruebas</span></div>
                 <div style="height: 6px; background: rgba(148,163,184,0.22); border-radius: 9999px;"><div style="height: 100%; width: 100%; background: #475569; border-radius: 9999px;"></div></div>
               </div>
             </div>
@@ -2303,9 +2276,12 @@
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>RQ1–RQ6 y 27 Endpoints RESTful:</strong> Cada requerimiento funcional mapea a recursos sustantivos con verbos HTTP semánticos y códigos de estado explícitos.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Atributos de Calidad RNF1–RNF5:</strong> Cómputo distribuido a 60 FPS, atomicidad ACID, aislamiento multi-tenant, prevención N+1 con <code>joinedload</code> y CI en GitHub Actions.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>3 Casos de Uso y 6 Historias INVEST (HU-01..HU-06):</strong> Criterios de aceptación verificados punto por punto mediante pruebas de integración automatizadas.</span></li>
+              <li class="slide-point">
+                <span><strong>RQ1–RQ6 y 27 Endpoints RESTful:</strong> Cada requerimiento funcional mapea a recursos sustantivos con verbos HTTP semánticos y códigos de estado explícitos.</span></li>
+              <li class="slide-point">
+                <span><strong>Atributos de Calidad RNF1–RNF5:</strong> Cómputo distribuido a 60 FPS, atomicidad ACID, aislamiento multi-tenant, prevención N+1 con <code>joinedload</code> y CI en GitHub Actions.</span></li>
+              <li class="slide-point">
+                <span><strong>3 Casos de Uso y 6 Historias INVEST (HU-01..HU-06):</strong> Criterios de aceptación verificados punto por punto mediante pruebas de integración automatizadas.</span></li>
             </ul>
             <div class="card-footer-strip strip-blue">Integración Continua Automatizada · <code>.github/workflows/main.yml</code></div>
           </div>
@@ -2313,7 +2289,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Arquitectura desacoplada verificable sin dependencias externas</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Monetización & Escalabilidad <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -2325,8 +2301,7 @@
     <section class="slide" data-slide="16">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M224,118.31V200a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V118.31h0A191.14,191.14,0,0,0,128,144,191.08,191.08,0,0,0,224,118.31Z" opacity="0.2"/><path d="M104,112a8,8,0,0,1,8-8h32a8,8,0,0,1,0,16H112A8,8,0,0,1,104,112ZM232,72V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V72A16,16,0,0,1,40,56H80V48a24,24,0,0,1,24-24h48a24,24,0,0,1,24,24v8h40A16,16,0,0,1,232,72ZM96,56h64V48a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8ZM40,72v41.62A184.07,184.07,0,0,0,128,136a184,184,0,0,0,88-22.39V72ZM216,200V131.63A200.25,200.25,0,0,1,128,152a200.19,200.19,0,0,1-88-20.36V200H216Z"/></svg> MODELO DE NEGOCIO & ARQUITECTURA</span>
-          <span class="slide-num-indicator">16 / 17</span>
+          <span class="slide-num-indicator">16 / 18</span>
         </div>
         <h1 class="slide-title">Monetización <span class="hl">Híbrida B2B2C</span> y Escalabilidad</h1>
         <p class="slide-sub">Esquema de ingresos de <code>docs/modelo_de_negocios.md</code> y cómo el bajo acoplamiento permite escalar sin reescribir el dominio.</p>
@@ -2342,7 +2317,7 @@
                 <p class="card-desc">Ingreso recurrente según catálogo</p>
               </div>
             </div>
-            <div style="font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.72; background: rgba(255,255,255,0.88); padding: 11px 13px; border-radius: 14px; border: 1px solid var(--glass-border-outer);">
+            <div style="font-family: var(--font-mono); font-size: 0.94rem; line-height: 1.72; background: rgba(255,255,255,0.88); padding: 11px 13px; border-radius: 14px; border: 1px solid var(--glass-border-outer);">
               • <strong>Starter:</strong> USD $49/mes (50 SKUs + 100 IA)<br/>
               • <strong>Growth:</strong> USD $199/mes (500 SKUs + Excel)<br/>
               • <strong>Enterprise:</strong> USD $799+/mes (API + Soporte)
@@ -2361,7 +2336,7 @@
                 <p class="card-desc">Ingresos variables alineados a venta</p>
               </div>
             </div>
-            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(59,130,246,0.22); border-radius: 14px; padding: 11px 13px; font-size: 0.84rem; line-height: 1.62;">
+            <div style="background: rgba(37,99,235,0.06); border: 1px solid rgba(59,130,246,0.22); border-radius: 14px; padding: 11px 13px; font-size: 0.94rem; line-height: 1.62;">
               • <strong>Success Fee:</strong> 5% – 8% sobre GMV vendido<br/>
               • <strong>Créditos IA Extra:</strong> $0.15/SKU (costo ~$0.002)<br/>
               • <strong>Margen Bruto IA:</strong> > 95%
@@ -2372,7 +2347,7 @@
             <div class="card-footer-strip strip-emerald">Go-To-Market: Nicho Denim D2C (15–30 marcas)</div>
           </div>
 
-          <div class="glass-card highlight">
+          <div class="glass-card">
             <div class="card-header-icon">
               <div class="icon-box purple"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M224,80l-96,56L32,80l96-56Z" opacity="0.2"/><path d="M230.91,172A8,8,0,0,1,228,182.91l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,36,169.09l92,53.65,92-53.65A8,8,0,0,1,230.91,172ZM220,121.09l-92,53.65L36,121.09A8,8,0,0,0,28,134.91l96,56a8,8,0,0,0,8.06,0l96-56A8,8,0,1,0,220,121.09ZM24,80a8,8,0,0,1,4-6.91l96-56a8,8,0,0,1,8.06,0l96,56a8,8,0,0,1,0,13.82l-96,56a8,8,0,0,1-8.06,0l-96-56A8,8,0,0,1,24,80Zm23.88,0L128,126.74,208.12,80,128,33.26Z"/></svg></div>
               <div>
@@ -2381,9 +2356,12 @@
               </div>
             </div>
             <ul class="slide-points" style="gap: 7px;">
-              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Costo Marginal $0 por Prueba:</strong> IA <code>O(1)</code> al publicar (con caché MD5); el visor WebGL corre en el cliente sin gasto GPU en servidor.</span></li>
-              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Núcleo 3D Aislado:</strong> <code>LoftGeometry</code> y medidas en <code>cm</code> no dependen de planes, comisiones ni pasarelas de cobro.</span></li>
-              <li class="slide-point" style="font-size: 0.83rem; padding: 7px 11px;"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:16px;height:16px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Extensión por Capas (OCP/DIP):</strong> Cupos por plan, <em>Success Fee</em> o webhooks externos se suman en servicios sin tocar el dominio.</span></li>
+              <li class="slide-point" style="font-size: 0.95rem; padding: 9px 13px;">
+                <span><strong>Costo Marginal $0 por Prueba:</strong> IA <code>O(1)</code> al publicar (con caché MD5); el visor WebGL corre en el cliente sin gasto GPU en servidor.</span></li>
+              <li class="slide-point" style="font-size: 0.95rem; padding: 9px 13px;">
+                <span><strong>Núcleo 3D Aislado:</strong> <code>LoftGeometry</code> y medidas en <code>cm</code> no dependen de planes, comisiones ni pasarelas de cobro.</span></li>
+              <li class="slide-point" style="font-size: 0.95rem; padding: 9px 13px;">
+                <span><strong>Extensión por Capas (OCP/DIP):</strong> Cupos por plan, <em>Success Fee</em> o webhooks externos se suman en servicios sin tocar el dominio.</span></li>
             </ul>
             <div class="card-footer-strip strip-purple">Economía unitaria sostenida por bajo acoplamiento</div>
           </div>
@@ -2391,7 +2369,7 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>Alineación directa entre modelo comercial B2B2C y arquitectura desacoplada</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
           <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Cierre Técnico <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
@@ -2403,8 +2381,7 @@
     <section class="slide" data-slide="17">
       <div class="slide-header-group">
         <div class="slide-meta">
-          <span class="badge-tag"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M184,120v61.65a8,8,0,0,1-2.34,5.65l-34.35,34.35a8,8,0,0,1-13.57-4.53L128,176ZM136,72H74.35a8,8,0,0,0-5.65,2.34L34.35,108.69a8,8,0,0,0,4.53,13.57L80,128ZM40,216c37.65,0,50.69-19.69,54.56-28.18L68.18,161.44C59.69,165.31,40,178.35,40,216Z" opacity="0.2"/><path d="M223.85,47.12a16,16,0,0,0-15-15c-12.58-.75-44.73.4-71.41,27.07L132.69,64H74.36A15.91,15.91,0,0,0,63,68.68L28.7,103a16,16,0,0,0,9.07,27.16l38.47,5.37,44.21,44.21,5.37,38.49a15.94,15.94,0,0,0,10.78,12.92,16.11,16.11,0,0,0,5.1.83A15.91,15.91,0,0,0,153,227.3L187.32,193A15.91,15.91,0,0,0,192,181.64V123.31l4.77-4.77C223.45,91.86,224.6,59.71,223.85,47.12ZM74.36,80h42.33L77.16,119.52,40,114.34Zm74.41-9.45a76.65,76.65,0,0,1,59.11-22.47,76.46,76.46,0,0,1-22.42,59.16L128,164.68,91.32,128ZM176,181.64,141.67,216l-5.19-37.17L176,139.31Zm-74.16,9.5C97.34,201,82.29,224,40,224a8,8,0,0,1-8-8c0-42.29,23-57.34,32.86-61.85a8,8,0,0,1,6.64,14.56c-6.43,2.93-20.62,12.36-23.12,38.91,26.55-2.5,36-16.69,38.91-23.12a8,8,0,1,1,14.56,6.64Z"/></svg> SÍNTESIS TÉCNICA & EVOLUCIÓN</span>
-          <span class="slide-num-indicator">17 / 17</span>
+          <span class="slide-num-indicator">17 / 18</span>
         </div>
         <h1 class="slide-title">Cierre Conceptual: <span class="hl">MVP Actual</span> vs. Evolución Futura</h1>
         <p class="slide-sub">Delimitación explícita entre lo construido y verificado en el repositorio y la hoja de ruta hacia producción.</p>
@@ -2412,7 +2389,7 @@
 
       <div class="slide-body">
         <div class="grid-2">
-          <div class="glass-card highlight">
+          <div class="glass-card">
             <div class="card-header-icon">
               <div class="icon-box"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg></div>
               <div>
@@ -2421,9 +2398,12 @@
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Calce Antropométrico en <code>cm</code>:</strong> Hasta 10 avatares por cuenta, malla continua C<sup>1</sup> (<code>LoftGeometry</code> a 60 FPS en WebGL) y diagnóstico <code>55% cintura · 35% cadera · 10% muslo</code>.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Arquitectura Limpia + SOLID + 5 Patrones GoF:</strong> Capas desacopladas (<code>Routers → Services → Repositories</code>) con Factory Method, Strategy, Decorator (Logs + Caché MD5) y Observer Push.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Transacciones y Seguridad:</strong> Rollback atómico ante fallos de IA, carrito por variantes, <em>snapshot pricing</em> en órdenes, JWT stateless, RBAC + ownership y reset de clave de un solo uso.</span></li>
+              <li class="slide-point">
+                <span><strong>Calce Antropométrico en <code>cm</code>:</strong> Hasta 10 avatares por cuenta, malla continua C<sup>1</sup> (<code>LoftGeometry</code> a 60 FPS en WebGL) y diagnóstico <code>55% cintura · 35% cadera · 10% muslo</code>.</span></li>
+              <li class="slide-point">
+                <span><strong>Arquitectura Limpia + SOLID + 5 Patrones GoF:</strong> Capas desacopladas (<code>Routers → Services → Repositories</code>) con Factory Method, Strategy, Decorator (Logs + Caché MD5) y Observer Push.</span></li>
+              <li class="slide-point">
+                <span><strong>Transacciones y Seguridad:</strong> Rollback atómico ante fallos de IA, carrito por variantes, <em>snapshot pricing</em> en órdenes, JWT stateless, RBAC + ownership y reset de clave de un solo uso.</span></li>
             </ul>
             <div class="card-footer-strip strip-blue">Verificado: 13 Tablas · 27 Endpoints · 122 Tests Pytest OK · 0 Errores TS</div>
           </div>
@@ -2437,9 +2417,12 @@
               </div>
             </div>
             <ul class="slide-points">
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Infraestructura Cloud y Colas:</strong> Migrar <code>BackgroundTasks</code> y caché/alertas en memoria hacia <strong>Redis + Celery</strong>, archivos en <strong>S3/R2</strong> y migraciones versionadas con <strong>Alembic</strong>.</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Pagos Reales y Liquidación B2B:</strong> Integración con <strong>MercadoPago / Stripe</strong>, control de stock por talle y liquidación de comisiones (5%–8%).</span></li>
-              <li class="slide-point"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:18px;height:18px;" aria-hidden="true"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128Z" opacity="0.2"/><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/></svg><span><strong>Expansión Textil e Integraciones:</strong> Prendas superiores en 3D, inferencia de medidas en <code>cm</code> desde fotografía e integración con Tiendanube / Shopify.</span></li>
+              <li class="slide-point">
+                <span><strong>Infraestructura Cloud y Colas:</strong> Migrar <code>BackgroundTasks</code> y caché/alertas en memoria hacia <strong>Redis + Celery</strong>, archivos en <strong>S3/R2</strong> y migraciones versionadas con <strong>Alembic</strong>.</span></li>
+              <li class="slide-point">
+                <span><strong>Pagos Reales y Liquidación B2B:</strong> Integración con <strong>MercadoPago / Stripe</strong>, control de stock por talle y liquidación de comisiones (5%–8%).</span></li>
+              <li class="slide-point">
+                <span><strong>Expansión Textil e Integraciones:</strong> Prendas superiores en 3D, inferencia de medidas en <code>cm</code> desde fotografía e integración con Tiendanube / Shopify.</span></li>
             </ul>
             <div class="card-footer-strip strip-purple">Extensibilidad preparada sobre los contratos actuales</div>
           </div>
@@ -2447,10 +2430,56 @@
       </div>
 
       <div class="slide-footer">
-        <div class="footer-hints"><span>TryOn Hub · Programación II — Muchas gracias · Espacio abierto para preguntas</span></div>
+        <div class="footer-hints"></div>
         <div class="nav-btns">
           <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
-          <button type="button" class="btn-nav btn-restart" style="background: var(--primary-light); color: var(--primary); border-color: var(--primary-border);"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,128a88,88,0,1,1-88-88A88,88,0,0,1,216,128Z" opacity="0.2"/><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg> Volver al Inicio</button>
+          <button type="button" class="btn-nav primary-cta btn-next">Siguiente: Cierre Comercial <svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M176,128,96,208V48Z" opacity="0.2"/><path d="M181.66,122.34l-80-80A8,8,0,0,0,88,48V208a8,8,0,0,0,13.66,5.66l80-80A8,8,0,0,0,181.66,122.34ZM104,188.69V67.31L164.69,128Z"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+  
+    <!-- SLIDE 18: CIERRE COMERCIAL & MUCHAS GRACIAS -->
+    <section class="slide" data-slide="18">
+      <div class="slide-header-group" style="border:none; padding-bottom:0; margin-bottom:0;">
+        <div class="slide-meta">
+          <span class="slide-num-indicator">18 / 18</span>
+        </div>
+      </div>
+
+      <div class="slide-body" style="flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center;">
+        <div class="glass-card" style="width: 100%; max-width: 960px; align-items: center; justify-content: center; text-align: center; padding: clamp(36px, 5.5vh, 64px) clamp(32px, 4vw, 56px); border-radius: 28px; background: rgba(255, 255, 255, 0.82); box-shadow: inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95), 0 20px 50px -15px rgba(15, 23, 42, 0.10);">
+          <div style="font-size: 0.84rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--primary); margin-bottom: 12px;">
+            Proyecto Final · Programación II
+          </div>
+          
+          <h1 style="font-size: clamp(3.2rem, 5.2vw, 5.2rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.08; color: var(--text-main); margin-bottom: 18px;">
+            ¡Muchas Gracias por su <span class="hl">Tiempo</span>!
+          </h1>
+          
+          <p style="font-size: clamp(1.15rem, 1.4vw, 1.38rem); color: var(--text-muted); max-width: 720px; line-height: 1.6; margin-bottom: 34px;">
+            El fin de las devoluciones por talle en e-commerce. Bienvenidos al estándar del gemelo digital paramétrico.
+          </p>
+
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 36px; border-radius: 18px; background: rgba(255, 255, 255, 0.88); border: 1px solid var(--glass-border-outer); box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.06); width: 100%; max-width: 680px;">
+            <div style="font-size: clamp(1.04rem, 1.2vw, 1.22rem); font-weight: 800; color: var(--text-main);">
+              Tomás Carambia · Facundo Latini · Lucio Lourido · Tomás Nadal
+            </div>
+            <div style="font-size: 0.92rem; color: var(--text-soft); font-weight: 600;">
+              Universidad Nacional de San Martín (UNSAM) · Escuela de Ciencia y Tecnología
+            </div>
+            <div style="font-size: 0.86rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.09em; margin-top: 4px;">
+              Espacio Abierto para Preguntas &amp; Demo en Vivo
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div class="footer-hints"></div>
+        <div class="nav-btns">
+          <button type="button" class="btn-nav btn-prev"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M160,48V208L80,128Z" opacity="0.2"/><path d="M163.06,40.61a8,8,0,0,0-8.72,1.73l-80,80a8,8,0,0,0,0,11.32l80,80A8,8,0,0,0,168,208V48A8,8,0,0,0,163.06,40.61ZM152,188.69,91.31,128,152,67.31Z"/></svg> Anterior</button>
+          <button type="button" class="btn-nav btn-restart" onclick="goToSlide(1)" style="background: var(--primary-light); color: var(--primary); border-color: var(--primary-border);"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;" aria-hidden="true"><path d="M216,128a88,88,0,1,1-88-88A88,88,0,0,1,216,128Z" opacity="0.2"/><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg> Volver al Inicio</button>
         </div>
       </div>
     </section>
@@ -2502,11 +2531,12 @@
       14: "Seguridad integral: contraseñas cifradas con Bcrypt, sesiones JWT firmadas, control de acceso por 3 roles + verificación de propietario y recuperación de clave de un solo uso con huella pwf.",
       15: "Trazabilidad con requerimientos (RQ1-RQ6, RNF1-RNF5, historias INVEST) y suite completa ejecutada con 122 pruebas aprobadas al 100% + TypeScript con 0 errores.",
       16: "Modelo de negocio híbrido (Planes SaaS + comisión 5%-8% + analítica de demanda en cm) y brecha transparente entre prototipo actual y arquitectura final en la nube en 4 etapas.",
-      17: "Cierre y paso a demo en vivo: mostrar credenciales seed (cliente@tryon.com y brand@tryon.com, clave 123456) y botones directos a la aplicación real y Swagger."
+      17: "Cierre conceptual de arquitectura y roadmap hacia producción.",
+      18: "Cierre comercial y agradecimiento: invitar a los oyentes a sumarse como marcas pioneras en el piloto, probar el probador 3D y abrir el espacio de preguntas."
     };
 
     let currentSlide = 1;
-    const totalSlides = 17;
+    const totalSlides = 18;
     const slides = document.querySelectorAll('.slide');
     const progressFill = document.getElementById('progress-fill');
     const thumbDots = document.querySelectorAll('.thumb-dot');
@@ -2606,6 +2636,14 @@
     }
     function closeLightbox() { lightbox.classList.remove('open'); }
 
+    document.querySelectorAll('.app-frame').forEach(frame => {
+      frame.style.cursor = 'zoom-in';
+      frame.addEventListener('click', () => {
+        const img = frame.querySelector('img');
+        if (img) openLightbox(img.src, img.alt || 'Vista de la aplicación');
+      });
+    });
+
     document.querySelectorAll('.diagram-panel').forEach(panel => {
       panel.setAttribute('title', 'Clic para ampliar diagrama en pantalla completa');
       panel.addEventListener('click', () => openDiagramLightbox(panel));
@@ -2638,20 +2676,43 @@
 
     const drawerToggleBtn = document.getElementById('btn-drawer-toggle');
     const thumbDrawer = document.getElementById('thumb-drawer');
-    drawerToggleBtn.addEventListener('click', () => thumbDrawer.classList.toggle('open'));
+    if (drawerToggleBtn) {
+      drawerToggleBtn.addEventListener('click', () => thumbDrawer.classList.toggle('open'));
+    }
     document.addEventListener('click', (e) => {
-      if (!thumbDrawer.contains(e.target) && !drawerToggleBtn.contains(e.target)) {
+      if (!thumbDrawer.contains(e.target) && (!drawerToggleBtn || !drawerToggleBtn.contains(e.target))) {
         thumbDrawer.classList.remove('open');
       }
     });
 
     function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else if (document.exitFullscreen) {
-        document.exitFullscreen();
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
       }
     }
+
+    function syncFullscreenState() {
+      const isFull = !!document.fullscreenElement || !!document.webkitFullscreenElement;
+      document.body.classList.toggle('is-fullscreen', isFull);
+      const fsBtn = document.getElementById('btn-fullscreen');
+      if (fsBtn) {
+        const span = fsBtn.querySelector('span');
+        if (span) span.textContent = isFull ? 'Salir Pantalla Completa (F)' : 'Pantalla Completa';
+      }
+    }
+
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenState);
     document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
 
     const urlParamSlide = parseInt(
